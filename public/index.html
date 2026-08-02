@@ -6,7 +6,7 @@
   <title>Acheei - Encontre Profissionais de Confiança</title>
   <meta name="description" content="Encontre os melhores profissionais perto de você. Eletricistas, pedreiros, encanadores e muito mais.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF0000' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E" type="image/svg+xml">
 </head>
 <body>
   <header class="header">
@@ -18,10 +18,10 @@
         <a href="/">Início</a>
         <a href="#categorias">Categorias</a>
         <a href="cliente.html" class="btn btn-primary">
-          <span>👤</span> Área do Cliente
+          <span data-icon="user"></span> Área do Cliente
         </a>
         <a href="profissional.html" class="btn btn-outline">
-          <span>🔨</span> Área do Profissional
+          <span data-icon="hard-hat"></span> Área do Profissional
         </a>
       </div>
       <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
@@ -38,7 +38,7 @@
   <!-- Mobile Menu Panel -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="menu-header">
-      <div class="menu-icon">🔨</div>
+      <div class="menu-icon" data-icon="hard-hat"></div>
       <div>
         <h3>Acheei</h3>
         <p>Navegação</p>
@@ -46,30 +46,30 @@
     </div>
     <div class="menu-items">
       <a href="/" class="menu-item">
-        <span class="item-icon">🏠</span>
+        <span class="item-icon" data-icon="home"></span>
         <span class="item-text">Início</span>
-        <span class="item-arrow">›</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
       <a href="#categorias" class="menu-item" onclick="fecharMenuMobile()">
-        <span class="item-icon">📂</span>
+        <span class="item-icon" data-icon="grid"></span>
         <span class="item-text">Categorias</span>
-        <span class="item-arrow">›</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
       <div class="menu-divider"></div>
       <a href="cliente.html" class="menu-item">
-        <span class="item-icon">👤</span>
+        <span class="item-icon" data-icon="user"></span>
         <span class="item-text">Área do Cliente</span>
-        <span class="item-arrow">›</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
       <a href="profissional.html" class="menu-item">
-        <span class="item-icon">🔨</span>
+        <span class="item-icon" data-icon="hard-hat"></span>
         <span class="item-text">Área do Profissional</span>
-        <span class="item-arrow">›</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
       <a href="cadastro.html" class="menu-item">
-        <span class="item-icon">📝</span>
+        <span class="item-icon" data-icon="edit"></span>
         <span class="item-text">Cadastre-se como Profissional</span>
-        <span class="item-arrow">›</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
     </div>
     <div class="menu-footer">
@@ -111,7 +111,7 @@
           <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
         </select>
       </div>
-      <button type="submit" class="btn-search">🔍 Buscar</button>
+      <button type="submit" class="btn-search"><span data-icon="search"></span> Buscar</button>
     </form>
   </section>
 
@@ -122,51 +122,51 @@
     </div>
     <div class="categories-grid" id="categoriesGrid">
       <div class="category-card" data-categoria="Eletricista">
-        <span class="icon">⚡</span>
+        <span class="icon" data-icon="zap"></span>
         <span class="name">Eletricista</span>
       </div>
       <div class="category-card" data-categoria="Pedreiro">
-        <span class="icon">🧱</span>
+        <span class="icon" data-icon="hammer"></span>
         <span class="name">Pedreiro</span>
       </div>
       <div class="category-card" data-categoria="Encanador">
-        <span class="icon">🔧</span>
+        <span class="icon" data-icon="wrench"></span>
         <span class="name">Encanador</span>
       </div>
       <div class="category-card" data-categoria="Pintor">
-        <span class="icon">🎨</span>
+        <span class="icon" data-icon="brush"></span>
         <span class="name">Pintor</span>
       </div>
       <div class="category-card" data-categoria="Marceneiro">
-        <span class="icon">🪚</span>
+        <span class="icon" data-icon="tools"></span>
         <span class="name">Marceneiro</span>
       </div>
       <div class="category-card" data-categoria="Jardineiro">
-        <span class="icon">🌿</span>
+        <span class="icon" data-icon="leaf"></span>
         <span class="name">Jardineiro</span>
       </div>
       <div class="category-card" data-categoria="Diarista">
-        <span class="icon">🧹</span>
+        <span class="icon" data-icon="sparkles"></span>
         <span class="name">Diarista</span>
       </div>
       <div class="category-card" data-categoria="Mecânico">
-        <span class="icon">🔩</span>
+        <span class="icon" data-icon="settings"></span>
         <span class="name">Mecânico</span>
       </div>
       <div class="category-card" data-categoria="Chaveiro">
-        <span class="icon">🔑</span>
+        <span class="icon" data-icon="key"></span>
         <span class="name">Chaveiro</span>
       </div>
       <div class="category-card" data-categoria="Técnico em TI">
-        <span class="icon">💻</span>
+        <span class="icon" data-icon="laptop"></span>
         <span class="name">Técnico em TI</span>
       </div>
       <div class="category-card" data-categoria="Personal Trainer">
-        <span class="icon">💪</span>
+        <span class="icon" data-icon="dumbbell"></span>
         <span class="name">Personal Trainer</span>
       </div>
       <div class="category-card" data-categoria="Fotógrafo">
-        <span class="icon">📸</span>
+        <span class="icon" data-icon="camera"></span>
         <span class="name">Fotógrafo</span>
       </div>
     </div>
@@ -185,7 +185,7 @@
   </div>
 
   <div id="emptyState" class="empty-state" style="display: none;">
-    <span class="icon">🔍</span>
+    <span class="icon" data-icon="search"></span>
     <h3>Nenhum profissional encontrado</h3>
     <p>Tente ajustar sua busca ou selecionar outra categoria de serviço.</p>
   </div>
@@ -204,7 +204,7 @@
         </div>
         <input type="hidden" id="modalProfissionalId">
         <div style="background:var(--gray-bg);padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--gray-medium);">
-          📝 Crie sua conta ou faça login para acompanhar seus orçamentos
+          Crie sua conta ou faça login para acompanhar seus orçamentos
         </div>
         <div class="form-group">
           <label for="clienteNome">Seu Nome</label>
@@ -228,7 +228,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary"><span>📤</span> Enviar Solicitação</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="send"></span> Enviar Solicitação</button>
         </div>
       </form>
     </div>
@@ -262,6 +262,7 @@
     </div>
   </footer>
 
+  <script src="js/icons.js"></script>
   <script src="js/main.js"></script>
   <script>
     // Mobile Menu Toggle

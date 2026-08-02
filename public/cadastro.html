@@ -6,7 +6,7 @@
   <title>Acheei - Cadastro Profissional</title>
   <meta name="description" content="Cadastre-se como profissional na Acheei e encontre novos clientes.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF0000' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E" type="image/svg+xml">
   <style>
     .cadastro-container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
     .cadastro-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
@@ -68,7 +68,7 @@
       <div class="nav-links">
         <a href="/">Inicio</a>
         <a href="/#categorias">Categorias</a>
-        <a href="cadastro.html" class="btn btn-primary"><span>🔨</span> Cadastre-se como Profissional</a>
+        <a href="cadastro.html" class="btn btn-primary"><span data-icon="hard-hat"></span> Cadastre-se como Profissional</a>
       </div>
     </nav>
   </header>
@@ -185,7 +185,7 @@
             <label>Foto de Perfil</label>
             <div class="photo-upload" id="fotoPerfilUpload">
               <img class="photo-preview" id="fotoPerfilPreview" alt="Preview">
-              <span class="upload-icon">📸</span>
+              <span class="upload-icon" data-icon="camera"></span>
               <p>Clique para adicionar sua foto de perfil</p>
               <input type="file" id="foto_perfil" accept="image/*">
             </div>
@@ -227,19 +227,19 @@
             <div class="fotos-grid">
               <div class="foto-upload-item" data-index="0">
                 <input type="file" accept="image/*" class="foto-servico-input">
-                <span class="upload-icon">📷</span>
+                <span class="upload-icon" data-icon="camera"></span>
                 <p>Foto 1</p>
                 <button type="button" class="remove-foto">&times;</button>
               </div>
               <div class="foto-upload-item" data-index="1">
                 <input type="file" accept="image/*" class="foto-servico-input">
-                <span class="upload-icon">📷</span>
+                <span class="upload-icon" data-icon="camera"></span>
                 <p>Foto 2</p>
                 <button type="button" class="remove-foto">&times;</button>
               </div>
               <div class="foto-upload-item" data-index="2">
                 <input type="file" accept="image/*" class="foto-servico-input">
-                <span class="upload-icon">📷</span>
+                <span class="upload-icon" data-icon="camera"></span>
                 <p>Foto 3</p>
                 <button type="button" class="remove-foto">&times;</button>
               </div>
@@ -255,7 +255,7 @@
       </form>
 
       <div class="success-screen" id="successScreen">
-        <span class="success-icon">🎉</span>
+        <span class="success-icon" data-icon="check-circle"></span>
         <h2>Cadastro Realizado!</h2>
         <p>Seu perfil foi enviado para analise do administrador.</p>
         <p>Assim que aprovado, voce aparecera nas buscas dos clientes.</p>
@@ -264,6 +264,7 @@
     </div>
   </div>
 
+  <script src="js/icons.js"></script>
   <script src="js/cadastro.js"></script>
 </body>
 </html>

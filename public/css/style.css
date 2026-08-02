@@ -34,6 +34,30 @@
   box-sizing: border-box;
 }
 
+/* ==================== Ícones SVG ==================== */
+.icon-svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.icon-svg.lg {
+  width: 24px;
+  height: 24px;
+}
+
+.icon-svg.xl {
+  width: 40px;
+  height: 40px;
+}
+
 html {
   scroll-behavior: smooth;
 }

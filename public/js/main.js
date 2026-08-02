@@ -92,9 +92,9 @@ function exibirResultados(profissionais, total) {
     const card = document.createElement('div');
     card.className = 'profissional-card';
 
-    const fotoPerfil = prof.foto_perfil 
+const fotoPerfil = prof.foto_perfil 
       ? `<img src="${prof.foto_perfil}" alt="${prof.nome_perfil}" class="profile-photo">`
-      : `<div class="profile-photo-placeholder">👤</div>`;
+      : `<div class="profile-photo-placeholder"><span data-icon="user"></span></div>`;
 
     let fotosHtml = '';
     if (prof.fotos_servicos && prof.fotos_servicos.length > 0) {
@@ -103,13 +103,13 @@ function exibirResultados(profissionais, total) {
       ).join('');
       // Preencher até 3 slots
       for (let i = prof.fotos_servicos.length; i < 3; i++) {
-        fotosHtml += `<div class="foto-placeholder">📷</div>`;
+        fotosHtml += `<div class="foto-placeholder"><span data-icon="camera"></span></div>`;
       }
     } else {
       fotosHtml = `
-        <div class="foto-placeholder">📷</div>
-        <div class="foto-placeholder">📷</div>
-        <div class="foto-placeholder">📷</div>
+        <div class="foto-placeholder"><span data-icon="camera"></span></div>
+        <div class="foto-placeholder"><span data-icon="camera"></span></div>
+        <div class="foto-placeholder"><span data-icon="camera"></span></div>
       `;
     }
 
@@ -119,7 +119,7 @@ function exibirResultados(profissionais, total) {
         <div class="card-info">
           <h4>${prof.nome_perfil}</h4>
           <p class="profissao">${prof.profissao}</p>
-          <p class="localizacao">📍 ${prof.cidade}/${prof.estado}</p>
+          <p class="localizacao"><span data-icon="map-pin"></span> ${prof.cidade}/${prof.estado}</p>
         </div>
       </div>
       <div class="card-body">
@@ -129,7 +129,7 @@ function exibirResultados(profissionais, total) {
       </div>
       <div class="card-footer">
         <button class="btn btn-primary" onclick="abrirModalSolicitacao(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}')">
-          📋 Solicitar Serviço
+          <span data-icon="send"></span> Solicitar Serviço
         </button>
       </div>
     `;
@@ -274,15 +274,15 @@ async function enviarSolicitacao(event) {
           clienteToken = loginResult.data.token;
           localStorage.setItem('acheei_cliente_token', clienteToken);
         } else {
-          showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error');
+showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error');
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span>📤</span> Enviar Solicitação';
+          submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
           return;
         }
       } else {
         showToast(cadastroResult.message || 'Erro ao criar conta', 'error');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>📤</span> Enviar Solicitação';
+        submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
         return;
       }
     }
@@ -314,9 +314,9 @@ async function enviarSolicitacao(event) {
   } catch (error) {
     console.error('Erro ao enviar solicitação:', error);
     showToast('Erro ao conectar com o servidor', 'error');
-  } finally {
+} finally {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = '<span>📤</span> Enviar Solicitação';
+    submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
   }
 }
 
