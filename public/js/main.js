@@ -232,16 +232,71 @@ async function enviarSolicitacao(event) {
   const form = event.target;
   const submitBtn = form.querySelector('button[type="submit"]');
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
+  submitBtn.innerHTML = '<span class="spinner"></span> Criando conta...';
 
-  const data = {
-    cliente_nome: document.getElementById('clienteNome').value.trim(),
-    cliente_telefone: document.getElementById('clienteTelefone').value.trim(),
-    descricao: document.getElementById('descricao').value.trim(),
-    profissional_id: parseInt(document.getElementById('modalProfissionalId').value)
-  };
+  const nome = document.getElementById('clienteNome').value.trim();
+  const email = document.getElementById('clienteEmail').value.trim();
+  const senha = document.getElementById('clienteSenha').value;
+  const telefone = document.getElementById('clienteTelefone').value.trim();
+  const descricao = document.getElementById('descricao').value.trim();
+  const profissional_id = parseInt(document.getElementById('modalProfissionalId').value);
 
   try {
+    // 1. Tenta cadastrar o cliente
+    submitBtn.innerHTML = '<span class="spinner"></span> Criando sua conta...';
+    let cadastroResponse = await fetch(`${API_BASE}/clientes/cadastro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, senha, telefone })
+    });
+    let cadastroResult = await cadastroResponse.json();
+    let clienteId = null;
+    let clienteToken = null;
+
+    if (cadastroResult.success) {
+      // Cadastro novo
+      clienteId = cadastroResult.data.cliente.id;
+      clienteToken = cadastroResult.data.token;
+      // Salvar token do cliente
+      localStorage.setItem('acheei_cliente_token', clienteToken);
+    } else {
+      // Se email já existe, tenta login
+      if (cadastroResult.message && cadastroResult.message.includes('já está cadastrado')) {
+        submitBtn.innerHTML = '<span class="spinner"></span> Fazendo login...';
+        let loginResponse = await fetch(`${API_BASE}/clientes/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha })
+        });
+        let loginResult = await loginResponse.json();
+        if (loginResult.success) {
+          clienteId = loginResult.data.cliente.id;
+          clienteToken = loginResult.data.token;
+          localStorage.setItem('acheei_cliente_token', clienteToken);
+        } else {
+          showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>📤</span> Enviar Solicitação';
+          return;
+        }
+      } else {
+        showToast(cadastroResult.message || 'Erro ao criar conta', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>📤</span> Enviar Solicitação';
+        return;
+      }
+    }
+
+    // 2. Enviar solicitação vinculada ao cliente
+    submitBtn.innerHTML = '<span class="spinner"></span> Enviando solicitação...';
+    const data = {
+      cliente_nome: nome,
+      cliente_telefone: telefone,
+      descricao: descricao,
+      profissional_id: profissional_id,
+      cliente_id: clienteId
+    };
+
     const response = await fetch(`${API_BASE}/solicitacoes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -251,7 +306,7 @@ async function enviarSolicitacao(event) {
     const result = await response.json();
 
     if (result.success) {
-      showToast(result.message, 'success');
+      showToast('Solicitação enviada! Acesse a Área do Cliente para acompanhar.', 'success');
       fecharModal();
     } else {
       showToast(result.message, 'error');

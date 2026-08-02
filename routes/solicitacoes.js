@@ -10,11 +10,11 @@ module.exports = function(db, dbConnected) {
   // POST /api/solicitacoes
   // Cliente solicita serviço a um profissional
   // ============================================
-  router.post('/', (req, res) => {
+router.post('/', (req, res) => {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
     }
-    const { cliente_nome, cliente_telefone, descricao, profissional_id } = req.body;
+    const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id } = req.body;
 
     if (!cliente_nome || !cliente_telefone || !descricao || !profissional_id) {
       return res.status(400).json({
@@ -43,8 +43,8 @@ module.exports = function(db, dbConnected) {
         }
 
         db.query(
-          'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, status_pagamento) VALUES (?, ?, ?, ?, ?)',
-          [cliente_nome.trim(), cliente_telefone.trim(), descricao.trim(), profissional_id, 'pendente'],
+          'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, status_pagamento) VALUES (?, ?, ?, ?, ?, ?)',
+          [cliente_nome.trim(), cliente_telefone.trim(), descricao.trim(), profissional_id, cliente_id || null, 'pendente'],
           (err, result) => {
             if (err) {
               console.error('Erro ao criar solicitação:', err);
