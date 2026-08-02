@@ -12,7 +12,10 @@ Corrigir as páginas que estão sem formatação CSS (causa: HTML malformado com
 - [x] 6. Adicionar estilos de autocomplete e error-message ao `public/css/style.css`
 - [x] 7. Corrigir HTML gerado em `public/js/painel.js` (`verDetalhes` e `renderizarSolicitacoes`)
 - [x] 8. Testar as 3 páginas renderizando com CSS completo (status 200 confirmado)
+- [x] 9. Criar script SQL das tabelas (`database/schema.sql`) compatível com FreeSQLDatabase
+- [x] 10. Enviar projeto para o GitHub (https://github.com/AuzaServices/Acheei.git)
 
 ## Concluído
-Todas as páginas agora carregam o CSS corretamente.
+Todas as páginas agora carregam o CSS corretamente. O projeto foi enviado para o GitHub com sucesso.
+
 
