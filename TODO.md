@@ -1,21 +1,15 @@
-# TODO - Correção do CSS / Estrutura HTML
+# TODO - Área do Profissional
 
-## Objetivo
-Corrigir as páginas que estão sem formatação CSS (causa: HTML malformado com tags não fechadas).
-
-## Passos
-- [x] 1. Analisar os arquivos HTML, CSS e JS do projeto
-- [x] 2. Aprovar plano com o usuário
-- [x] 3. Reescrever `public/index.html` com estrutura HTML válida e caminhos relativos
-- [x] 4. Reescrever `public/cadastro.html` com estrutura válida, adicionar `cpfError`/`dataError` e caminhos relativos
-- [x] 5. Reescrever `public/painel.html` com estrutura válida e caminhos relativos
-- [x] 6. Adicionar estilos de autocomplete e error-message ao `public/css/style.css`
-- [x] 7. Corrigir HTML gerado em `public/js/painel.js` (`verDetalhes` e `renderizarSolicitacoes`)
-- [x] 8. Testar as 3 páginas renderizando com CSS completo (status 200 confirmado)
-- [x] 9. Criar script SQL das tabelas (`database/schema.sql`) compatível com FreeSQLDatabase
-- [x] 10. Enviar projeto para o GitHub (https://github.com/AuzaServices/Acheei.git)
-
-## Concluído
-Todas as páginas agora carregam o CSS corretamente. O projeto foi enviado para o GitHub com sucesso.
-
-
+## Concluído ✅
+- [x] 1. Atualizar schema.sql e server.js com novas colunas/tabelas (email, senha, status_pagamento, orcamentos, mensagens)
+- [x] 2. Atualizar `routes/profissionais.js` - email+senha no cadastro, login JWT, GET /me
+- [x] 3. Atualizar `routes/solicitacoes.js` - status_pagamento, PUT /:id/pagar
+- [x] 4. Criar `routes/orcamentos.js` - CRUD
+- [x] 5. Criar `routes/mensagens.js` - chat
+- [x] 6. Atualizar `server.js` - registrar novas rotas, ALTER TABLE
+- [x] 7. Atualizar `public/js/cadastro.js` - email+senha, validação
+- [x] 8. Atualizar `public/cadastro.html` - campos email+senha
+- [x] 9. Atualizar `public/index.html` - botão "Área do Profissional"
+- [x] 10. Criar `public/profissional.html` - página completa
+- [x] 11. Criar `public/js/profissional.js` - toda a lógica
+- [x] 12. Testar servidor - rodando em http://localhost:3000

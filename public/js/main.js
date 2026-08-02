@@ -160,14 +160,18 @@ function setupAutocomplete() {
   const list = document.getElementById('autocompleteList');
 
   input.addEventListener('input', function() {
-    const value = this.value.toLowerCase();
+    const value = this.value.toLowerCase().trim();
     list.innerHTML = '';
+    list.classList.remove('has-items');
 
     if (value.length < 1) return;
 
+    // Filtrar por iniciais (ex: digitar "Dia" mostra "Diarista")
     const matches = categoriasCache.filter(cat => 
-      cat.toLowerCase().includes(value)
-    ).slice(0, 6);
+      cat.toLowerCase().startsWith(value)
+    ).slice(0, 8);
+
+    if (matches.length === 0) return;
 
     matches.forEach(match => {
       const item = document.createElement('div');
@@ -176,14 +180,28 @@ function setupAutocomplete() {
       item.addEventListener('click', () => {
         input.value = match;
         list.innerHTML = '';
+        list.classList.remove('has-items');
+        // Disparar busca automaticamente
+        document.getElementById('searchForm').dispatchEvent(new Event('submit'));
       });
       list.appendChild(item);
     });
+    list.classList.add('has-items');
   });
 
+  // Fechar ao clicar fora
   document.addEventListener('click', function(e) {
-    if (e.target !== input) {
+    if (e.target !== input && e.target !== list && !list.contains(e.target)) {
       list.innerHTML = '';
+      list.classList.remove('has-items');
+    }
+  });
+
+  // Fechar com Escape
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      list.innerHTML = '';
+      list.classList.remove('has-items');
     }
   });
 }

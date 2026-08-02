@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS profissionais (
   profissao VARCHAR(100) NOT NULL,
   fotos_servicos LONGTEXT,
   status_aprovacao ENUM('pendente', 'aprovado', 'reprovado') DEFAULT 'pendente',
-  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  email VARCHAR(100) UNIQUE,
+  senha VARCHAR(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================
@@ -35,7 +37,37 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
   descricao TEXT NOT NULL,
   profissional_id INT NOT NULL,
   data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status_pagamento ENUM('pendente', 'pago') DEFAULT 'pendente',
   FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- Tabela: orcamentos
+-- ============================================
+CREATE TABLE IF NOT EXISTS orcamentos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  profissional_id INT NOT NULL,
+  solicitacao_id INT,
+  cliente_nome VARCHAR(100) NOT NULL,
+  descricao TEXT NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  status ENUM('pendente', 'aprovado', 'recusado') DEFAULT 'pendente',
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE,
+  FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- Tabela: mensagens (chat)
+-- ============================================
+CREATE TABLE IF NOT EXISTS mensagens (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  solicitacao_id INT NOT NULL,
+  remetente VARCHAR(50) NOT NULL,
+  texto TEXT NOT NULL,
+  lida BOOLEAN DEFAULT FALSE,
+  data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================
@@ -50,9 +82,7 @@ CREATE TABLE IF NOT EXISTS admin (
 -- ============================================
 -- Inserir administrador padrão
 -- Usuario: admin | Senha: admin123
--- (Se a tabela já tiver o admin, este INSERT não duplica)
 -- ============================================
 INSERT INTO admin (usuario, senha) VALUES 
 ('admin', '$2b$10$8K1p/a0dL1LXMIgoEDFrwOfMQkfAjkMBcGm6qOVqYKAFB1f5UqK8q')
 ON DUPLICATE KEY UPDATE usuario = usuario;
-

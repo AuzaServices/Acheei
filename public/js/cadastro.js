@@ -159,10 +159,19 @@ function validateStep(step) {
   if (step === 1) {
     const cpf = document.getElementById('cpf');
     const data = document.getElementById('data_nascimento');
+    const email = document.getElementById('email');
+    const senha = document.getElementById('senha');
+    const senhaConfirm = document.getElementById('senha_confirmar');
 
     // Clear errors
     cpf.classList.remove('error');
     document.getElementById('cpfError').classList.remove('show');
+    email.classList.remove('error');
+    document.getElementById('emailError').classList.remove('show');
+    senha.classList.remove('error');
+    document.getElementById('senhaError').classList.remove('show');
+    senhaConfirm.classList.remove('error');
+    document.getElementById('senhaConfirmError').classList.remove('show');
 
     if (!validarCPF(cpf.value)) {
       cpf.classList.add('error');
@@ -187,6 +196,27 @@ function validateStep(step) {
         document.getElementById('dataError').classList.add('show');
         valid = false;
       }
+    }
+
+    // Validar email
+    if (!email.value.trim() || !email.value.includes('@') || !email.value.includes('.')) {
+      email.classList.add('error');
+      document.getElementById('emailError').classList.add('show');
+      valid = false;
+    }
+
+    // Validar senha
+    if (!senha.value || senha.value.length < 6) {
+      senha.classList.add('error');
+      document.getElementById('senhaError').classList.add('show');
+      valid = false;
+    }
+
+    // Validar confirmação de senha
+    if (senha.value !== senhaConfirm.value) {
+      senhaConfirm.classList.add('error');
+      document.getElementById('senhaConfirmError').classList.add('show');
+      valid = false;
     }
   }
 

@@ -4,11 +4,11 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'acheei_secret_key_2024_admin';
 
 module.exports = function(db, dbConnected) {
-
-// Dados mockados para quando MySQL nao estiver disponivel
-  var mockProfissionais = [];
 
   // ============================================
   // GET /api/profissionais
@@ -16,13 +16,13 @@ module.exports = function(db, dbConnected) {
   // ============================================
   router.get('/', function(req, res) {
     if (!dbConnected()) {
-      return res.json({ success: true, data: mockProfissionais, total: mockProfissionais.length });
+      return res.json({ success: true, data: [], total: 0 });
     }
     var cidade = req.query.cidade;
     var estado = req.query.estado;
     var profissao = req.query.profissao;
     
-    var sql = "SELECT * FROM profissionais WHERE status_aprovacao = 'aprovado'";
+    var sql = 'SELECT * FROM profissionais WHERE status_aprovacao = "aprovado"';
     var params = [];
 
     if (cidade) { sql += ' AND cidade LIKE ?'; params.push('%' + cidade + '%'); }
@@ -57,53 +57,144 @@ module.exports = function(db, dbConnected) {
   // ============================================
   router.get('/todas', (req, res) => {
     if (!dbConnected()) {
-      return res.json({ success: true, data: [], message: 'Banco de dados indisponível' });
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
     db.query('SELECT * FROM profissionais ORDER BY data_cadastro DESC', (err, results) => {
       if (err) {
         console.error('Erro ao buscar profissionais:', err);
-        return res.status(500).json({
-          success: false,
-          message: 'Erro ao buscar profissionais'
-        });
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissionais' });
       }
-
       const profissionais = results.map(prof => ({
         ...prof,
         fotos_servicos: prof.fotos_servicos ? JSON.parse(prof.fotos_servicos) : []
       }));
-
-      res.json({
-        success: true,
-        data: profissionais
-      });
+      res.json({ success: true, data: profissionais });
     });
   });
 
   // ============================================
   // GET /api/profissionais/categorias
-  // Listar categorias únicas (para autocomplete)
+  // Listar categorias (para autocomplete)
   // ============================================
   router.get('/categorias', (req, res) => {
+    var categoriasFixas = [
+      'Eletricista', 'Pedreiro', 'Encanador', 'Pintor', 'Marceneiro',
+      'Jardineiro', 'Diarista', 'Mecânico', 'Chaveiro', 'Técnico em TI',
+      'Personal Trainer', 'Fotógrafo', 'Cozinheiro', 'Motorista',
+      'Babá', 'Cuidador de Idosos', 'Segurança', 'Advogado',
+      'Contador', 'Arquiteto', 'Designer de Interiores', 'Professor Particular',
+      'Cabeleireiro', 'Manicure', 'Massagista', 'Técnico em Ar Condicionado'
+    ];
     if (!dbConnected()) {
-      return res.json({ success: true, data: [] });
+      return res.json({ success: true, data: categoriasFixas });
     }
     db.query(
-      "SELECT DISTINCT profissao FROM profissionais WHERE status_aprovacao = 'aprovado' ORDER BY profissao",
+      'SELECT DISTINCT profissao FROM profissionais WHERE status_aprovacao = "aprovado" ORDER BY profissao',
       (err, results) => {
         if (err) {
-          console.error('Erro ao buscar categorias:', err);
-          return res.status(500).json({
-            success: false,
-            message: 'Erro ao buscar categorias'
-          });
+          return res.json({ success: true, data: categoriasFixas });
         }
-        res.json({
-          success: true,
-          data: results.map(r => r.profissao)
-        });
+        var dbCategorias = results.map(r => r.profissao);
+        var todas = [...new Set([...categoriasFixas, ...dbCategorias])].sort();
+        res.json({ success: true, data: todas });
       }
     );
+  });
+
+  // ============================================
+  // POST /api/profissionais/login
+  // Login do profissional (retorna JWT)
+  // ============================================
+  router.post('/login', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const { email, senha } = req.body;
+    if (!email || !senha) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
+    }
+    db.query('SELECT * FROM profissionais WHERE email = ?', [email], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao autenticar' });
+      }
+      if (results.length === 0) {
+        return res.status(401).json({ success: false, message: 'Email ou senha inválidos' });
+      }
+      const prof = results[0];
+      if (prof.status_aprovacao !== 'aprovado') {
+        return res.status(401).json({ success: false, message: 'Seu cadastro ainda não foi aprovado pelo administrador' });
+      }
+      try {
+        const senhaValida = await bcrypt.compare(senha, prof.senha);
+        if (!senhaValida) {
+          return res.status(401).json({ success: false, message: 'Email ou senha inválidos' });
+        }
+        const token = jwt.sign(
+          { id: prof.id, email: prof.email, nome_perfil: prof.nome_perfil },
+          JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        res.json({
+          success: true,
+          message: 'Login realizado com sucesso',
+          data: {
+            token,
+            profissional: {
+              id: prof.id,
+              nome_perfil: prof.nome_perfil,
+              email: prof.email,
+              foto_perfil: prof.foto_perfil,
+              profissao: prof.profissao,
+              cidade: prof.cidade,
+              estado: prof.estado
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Erro ao verificar senha:', err);
+        res.status(500).json({ success: false, message: 'Erro ao verificar senha' });
+      }
+    });
+  });
+
+  // ============================================
+  // GET /api/profissionais/me
+  // Dados do profissional logado (via token)
+  // ============================================
+  router.get('/me', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      db.query('SELECT * FROM profissionais WHERE id = ?', [decoded.id], (err, results) => {
+        if (err || results.length === 0) {
+          return res.status(401).json({ success: false, message: 'Profissional não encontrado' });
+        }
+        const prof = results[0];
+        res.json({
+          success: true,
+          data: {
+            id: prof.id,
+            nome_perfil: prof.nome_perfil,
+            email: prof.email,
+            foto_perfil: prof.foto_perfil,
+            profissao: prof.profissao,
+            cidade: prof.cidade,
+            estado: prof.estado,
+            status_aprovacao: prof.status_aprovacao
+          }
+        });
+      });
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
   });
 
   // ============================================
@@ -114,109 +205,94 @@ module.exports = function(db, dbConnected) {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-    db.query(
-      'SELECT * FROM profissionais WHERE id = ?',
-      [req.params.id],
-      (err, results) => {
-        if (err) {
-          return res.status(500).json({
-            success: false,
-            message: 'Erro ao buscar profissional'
-          });
-        }
-        if (results.length === 0) {
-          return res.status(404).json({
-            success: false,
-            message: 'Profissional não encontrado'
-          });
-        }
-
-        const profissional = {
-          ...results[0],
-          fotos_servicos: results[0].fotos_servicos ? JSON.parse(results[0].fotos_servicos) : []
-        };
-
-        res.json({
-          success: true,
-          data: profissional
-        });
+    db.query('SELECT * FROM profissionais WHERE id = ?', [req.params.id], (err, results) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
       }
-    );
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+      const profissional = {
+        ...results[0],
+        fotos_servicos: results[0].fotos_servicos ? JSON.parse(results[0].fotos_servicos) : []
+      };
+      res.json({ success: true, data: profissional });
+    });
   });
 
   // ============================================
   // POST /api/profissionais
-  // Cadastro de profissional (3 etapas)
+  // Cadastro de profissional (com email+senha)
   // ============================================
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     if (!dbConnected()) {
-      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
     const {
-      cpf,
-      data_nascimento,
-      endereco,
-      numero,
-      bairro,
-      cidade,
-      estado,
-      cep,
-      nome_perfil,
-      foto_perfil,
-      profissao,
-      fotos_servicos
+      cpf, data_nascimento, endereco, numero, bairro, cidade, estado,
+      cep, nome_perfil, foto_perfil, profissao, fotos_servicos,
+      email, senha
     } = req.body;
 
-    // Validações básicas
     if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !cep || !nome_perfil || !profissao) {
-      return res.status(400).json({
-        success: false,
-        message: 'Todos os campos obrigatórios devem ser preenchidos'
-      });
+      return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos' });
+    }
+
+    if (!email || !senha) {
+      return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios para criar sua conta' });
+    }
+
+    if (senha.length < 6) {
+      return res.status(400).json({ success: false, message: 'A senha deve ter pelo menos 6 caracteres' });
     }
 
     // Verificar se CPF já existe
     db.query('SELECT id FROM profissionais WHERE cpf = ?', [cpf], (err, results) => {
       if (err) {
-        return res.status(500).json({
-          success: false,
-          message: 'Erro ao verificar CPF'
-        });
+        return res.status(500).json({ success: false, message: 'Erro ao verificar CPF' });
       }
       if (results.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'CPF já cadastrado no sistema'
-        });
+        return res.status(400).json({ success: false, message: 'CPF já cadastrado no sistema' });
       }
 
-      // Inserir profissional
-      const fotosServicosStr = fotos_servicos ? JSON.stringify(fotos_servicos) : '[]';
+      // Verificar se email já existe
+      db.query('SELECT id FROM profissionais WHERE email = ?', [email], (err, results) => {
+        if (err) {
+          return res.status(500).json({ success: false, message: 'Erro ao verificar email' });
+        }
+        if (results.length > 0) {
+          return res.status(400).json({ success: false, message: 'Email já cadastrado no sistema' });
+        }
 
-      db.query(
-        `INSERT INTO profissionais 
-        (cpf, data_nascimento, endereco, numero, bairro, cidade, estado, cep, nome_perfil, foto_perfil, profissao, fotos_servicos, status_aprovacao) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')`,
-        [cpf, data_nascimento, endereco, numero || '', bairro, cidade, estado.toUpperCase(), cep, nome_perfil, foto_perfil || '', profissao, fotosServicosStr],
-        (err, result) => {
+        // Hash da senha
+        bcrypt.hash(senha, 10, (err, senhaHash) => {
           if (err) {
-            console.error('Erro ao cadastrar profissional:', err);
-            return res.status(500).json({
-              success: false,
-              message: 'Erro ao cadastrar profissional'
-            });
+            return res.status(500).json({ success: false, message: 'Erro ao processar senha' });
           }
 
-          res.status(201).json({
-            success: true,
-            message: 'Cadastro realizado com sucesso! Seu perfil será analisado pelo administrador.',
-            data: { id: result.insertId }
-          });
-        }
-      );
+          const fotosServicosStr = fotos_servicos ? JSON.stringify(fotos_servicos) : '[]';
+
+          db.query(
+            `INSERT INTO profissionais 
+            (cpf, data_nascimento, endereco, numero, bairro, cidade, estado, cep, nome_perfil, foto_perfil, profissao, fotos_servicos, status_aprovacao, email, senha) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?)`,
+            [cpf, data_nascimento, endereco, numero || '', bairro, cidade, estado.toUpperCase(), cep, nome_perfil, foto_perfil || '', profissao, fotosServicosStr, email, senhaHash],
+            (err, result) => {
+              if (err) {
+                console.error('Erro ao cadastrar profissional:', err);
+                return res.status(500).json({ success: false, message: 'Erro ao cadastrar profissional' });
+              }
+              res.status(201).json({
+                success: true,
+                message: 'Cadastro realizado com sucesso! Seu perfil será analisado pelo administrador.',
+                data: { id: result.insertId }
+              });
+            }
+          );
+        });
+      });
     });
   });
 
   return router;
 };
-

@@ -63,12 +63,18 @@ db.connect(function(err) {
   } else {
     dbConnected = true;
     console.log('Conectado ao MySQL com sucesso!');
-    // Criar tabelas (usar aspas simples e LONGTEXT - banco remoto FreeSQLDatabase)
+// Criar tabelas (usar aspas simples e LONGTEXT - banco remoto FreeSQLDatabase)
     db.query("CREATE TABLE IF NOT EXISTS profissionais (id INT AUTO_INCREMENT PRIMARY KEY, cpf VARCHAR(14) NOT NULL UNIQUE, data_nascimento DATE NOT NULL, endereco VARCHAR(255) NOT NULL, numero VARCHAR(20), bairro VARCHAR(100) NOT NULL, cidade VARCHAR(100) NOT NULL, estado VARCHAR(2) NOT NULL, cep VARCHAR(9) NOT NULL, nome_perfil VARCHAR(100) NOT NULL, foto_perfil VARCHAR(255), profissao VARCHAR(100) NOT NULL, fotos_servicos LONGTEXT, status_aprovacao ENUM('pendente','aprovado','reprovado') DEFAULT 'pendente', data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     db.query('CREATE TABLE IF NOT EXISTS solicitacoes (id INT AUTO_INCREMENT PRIMARY KEY, cliente_nome VARCHAR(100) NOT NULL, cliente_telefone VARCHAR(20) NOT NULL, descricao TEXT NOT NULL, profissional_id INT NOT NULL, data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
-    db.query('CREATE TABLE IF NOT EXISTS admin (id INT AUTO_INCREMENT PRIMARY KEY, usuario VARCHAR(50) NOT NULL UNIQUE, senha VARCHAR(255) NOT NULL)', function(err) {
-      if (!err) criarAdminPadrao();
-    });
+    db.query('CREATE TABLE IF NOT EXISTS admin (id INT AUTO_INCREMENT PRIMARY KEY, usuario VARCHAR(50) NOT NULL UNIQUE, senha VARCHAR(255) NOT NULL)');
+    db.query('CREATE TABLE IF NOT EXISTS orcamentos (id INT AUTO_INCREMENT PRIMARY KEY, profissional_id INT NOT NULL, solicitacao_id INT, cliente_nome VARCHAR(100) NOT NULL, descricao TEXT NOT NULL, valor DECIMAL(10,2) NOT NULL, status ENUM("pendente","aprovado","recusado") DEFAULT "pendente", data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE SET NULL)');
+    db.query('CREATE TABLE IF NOT EXISTS mensagens (id INT AUTO_INCREMENT PRIMARY KEY, solicitacao_id INT NOT NULL, remetente VARCHAR(50) NOT NULL, texto TEXT NOT NULL, lida BOOLEAN DEFAULT FALSE, data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE)');
+    // Adicionar colunas novas se não existirem (compatibilidade)
+    db.query("ALTER TABLE profissionais ADD COLUMN email VARCHAR(100) UNIQUE AFTER data_cadastro", function(err) { if (err) { /* coluna já existe */ } });
+    db.query("ALTER TABLE profissionais ADD COLUMN senha VARCHAR(255) AFTER email", function(err) { if (err) { /* coluna já existe */ } });
+    db.query("ALTER TABLE solicitacoes ADD COLUMN status_pagamento ENUM('pendente','pago') DEFAULT 'pendente' AFTER data_solicitacao", function(err) { if (err) { /* coluna já existe */ } });
+    // Criar admin padrão
+    criarAdminPadrao();
   }
 });
 
@@ -76,6 +82,8 @@ db.connect(function(err) {
 app.use('/api/profissionais', require('./routes/profissionais')(db, () => dbConnected));
 app.use('/api/solicitacoes', require('./routes/solicitacoes')(db, () => dbConnected));
 app.use('/api/admin', require('./routes/admin')(db, () => dbConnected));
+app.use('/api/orcamentos', require('./routes/orcamentos')(db, () => dbConnected));
+app.use('/api/mensagens', require('./routes/mensagens')(db, () => dbConnected));
 app.use('/api/upload', require('./routes/upload')());
 
 // Rota de fallback

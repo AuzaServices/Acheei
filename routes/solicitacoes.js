@@ -16,7 +16,6 @@ module.exports = function(db, dbConnected) {
     }
     const { cliente_nome, cliente_telefone, descricao, profissional_id } = req.body;
 
-    // Validações
     if (!cliente_nome || !cliente_telefone || !descricao || !profissional_id) {
       return res.status(400).json({
         success: false,
@@ -31,39 +30,26 @@ module.exports = function(db, dbConnected) {
       });
     }
 
-    // Verificar se o profissional existe e está aprovado
     db.query(
       "SELECT id, nome_perfil, profissao FROM profissionais WHERE id = ? AND status_aprovacao = 'aprovado'",
       [profissional_id],
       (err, profResults) => {
         if (err) {
           console.error('Erro ao verificar profissional:', err);
-          return res.status(500).json({
-            success: false,
-            message: 'Erro ao verificar profissional'
-          });
+          return res.status(500).json({ success: false, message: 'Erro ao verificar profissional' });
         }
-
         if (profResults.length === 0) {
-          return res.status(404).json({
-            success: false,
-            message: 'Profissional não encontrado ou não está disponível'
-          });
+          return res.status(404).json({ success: false, message: 'Profissional não encontrado ou não está disponível' });
         }
 
-        // Inserir solicitação
         db.query(
-          'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id) VALUES (?, ?, ?, ?)',
-          [cliente_nome.trim(), cliente_telefone.trim(), descricao.trim(), profissional_id],
+          'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, status_pagamento) VALUES (?, ?, ?, ?, ?)',
+          [cliente_nome.trim(), cliente_telefone.trim(), descricao.trim(), profissional_id, 'pendente'],
           (err, result) => {
             if (err) {
               console.error('Erro ao criar solicitação:', err);
-              return res.status(500).json({
-                success: false,
-                message: 'Erro ao enviar solicitação'
-              });
+              return res.status(500).json({ success: false, message: 'Erro ao enviar solicitação' });
             }
-
             res.status(201).json({
               success: true,
               message: `Solicitação enviada com sucesso para ${profResults[0].nome_perfil}!`,
@@ -81,7 +67,7 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // GET /api/solicitacoes/profissional/:id
-  // Listar solicitações de um profissional
+  // Listar solicitações de um profissional (com status de pagamento)
   // ============================================
   router.get('/profissional/:id', (req, res) => {
     if (!dbConnected()) {
@@ -93,16 +79,36 @@ module.exports = function(db, dbConnected) {
       (err, results) => {
         if (err) {
           console.error('Erro ao buscar solicitações:', err);
-          return res.status(500).json({
-            success: false,
-            message: 'Erro ao buscar solicitações'
-          });
+          return res.status(500).json({ success: false, message: 'Erro ao buscar solicitações' });
         }
+        res.json({ success: true, data: results, total: results.length });
+      }
+    );
+  });
 
+  // ============================================
+  // PUT /api/solicitacoes/:id/pagar
+  // Marcar solicitação como paga (R$14,99)
+  // ============================================
+  router.put('/:id/pagar', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query(
+      'UPDATE solicitacoes SET status_pagamento = "pago" WHERE id = ?',
+      [req.params.id],
+      (err, result) => {
+        if (err) {
+          console.error('Erro ao processar pagamento:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao processar pagamento' });
+        }
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
+        }
         res.json({
           success: true,
-          data: results,
-          total: results.length
+          message: 'Pagamento realizado com sucesso! O chat com o cliente foi liberado.',
+          data: { id: parseInt(req.params.id), status_pagamento: 'pago' }
         });
       }
     );
@@ -124,21 +130,12 @@ module.exports = function(db, dbConnected) {
       (err, results) => {
         if (err) {
           console.error('Erro ao buscar solicitações:', err);
-          return res.status(500).json({
-            success: false,
-            message: 'Erro ao buscar solicitações'
-          });
+          return res.status(500).json({ success: false, message: 'Erro ao buscar solicitações' });
         }
-
-        res.json({
-          success: true,
-          data: results,
-          total: results.length
-        });
+        res.json({ success: true, data: results, total: results.length });
       }
     );
   });
 
   return router;
 };
-

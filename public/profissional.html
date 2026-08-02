@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acheei - Área do Profissional</title>
+  <meta name="description" content="Área do profissional Acheei - Gerencie solicitações, orçamentos e converse com clientes.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <style>
+    .prof-body { background: #f0f0f0; }
+    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
+    .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
+    .login-card .logo { text-align: center; margin-bottom: 30px; }
+    .login-card .logo h1 { font-size: 32px; color: var(--red-primary); font-weight: 800; }
+    .login-card .logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
+    .login-card .form-group { margin-bottom: 20px; }
+    .login-card .form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; }
+    .login-card .form-group input { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 15px; transition: var(--transition); }
+    .login-card .form-group input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); }
+    .login-card .btn { width: 100%; justify-content: center; padding: 14px; font-size: 16px; }
+    .login-error { color: #dc3545; font-size: 14px; text-align: center; margin-top: 12px; display: none; }
+    .dashboard { display: none; min-height: 100vh; }
+    .dashboard-header { background: var(--white); box-shadow: var(--shadow-sm); padding: 0 20px; position: sticky; top: 0; z-index: 100; }
+    .dashboard-nav { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .dashboard-nav .logo { font-size: 22px; font-weight: 800; color: var(--red-primary); }
+    .dashboard-nav .logo span { color: var(--black-primary); }
+    .dashboard-nav .admin-info { display: flex; align-items: center; gap: 16px; }
+    .dashboard-nav .admin-info .prof-info { display: flex; align-items: center; gap: 10px; }
+    .dashboard-nav .admin-info .prof-info .foto-mini { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--red-primary); }
+    .dashboard-nav .admin-info .prof-info .foto-mini-placeholder { width: 36px; height: 36px; border-radius: 50%; background: var(--gray-lighter); display: inline-flex; align-items: center; justify-content: center; font-size: 18px; }
+    .dashboard-nav .admin-info span { color: var(--gray-dark); font-size: 14px; font-weight: 600; }
+    .dashboard-nav .admin-info .btn { padding: 8px 16px; font-size: 13px; }
+    .dashboard-content { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+    .dashboard-tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--white); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); flex-wrap: wrap; }
+    .dashboard-tab { flex: 1; min-width: 120px; padding: 14px 16px; text-align: center; font-weight: 600; font-size: 13px; color: var(--gray-medium); cursor: pointer; transition: var(--transition); border: none; background: none; border-bottom: 3px solid transparent; }
+    .dashboard-tab:hover { color: var(--red-primary); background: rgba(255,0,0,0.03); }
+    .dashboard-tab.active { color: var(--red-primary); border-bottom-color: var(--red-primary); }
+    .dashboard-tab .count { display: inline-block; background: var(--gray-lighter); color: var(--gray-dark); padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 4px; }
+    .dashboard-tab.active .count { background: rgba(255,0,0,0.1); color: var(--red-primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .section-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .section-card .section-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-lighter); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .section-card .section-header h3 { font-size: 18px; font-weight: 700; }
+    .section-card .section-body { padding: 20px 24px; }
+    .solicitacao-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1px solid var(--gray-lighter); }
+    .solicitacao-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+    .solicitacao-card .card-header h4 { font-size: 15px; font-weight: 700; }
+    .solicitacao-card .card-header .date { font-size: 12px; color: var(--gray-medium); }
+    .solicitacao-card .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .solicitacao-card .info-grid .item .label { font-size: 11px; color: var(--gray-medium); font-weight: 600; text-transform: uppercase; }
+    .solicitacao-card .info-grid .item .value { font-size: 14px; color: var(--black-primary); }
+    .solicitacao-card .descricao { font-size: 14px; color: var(--gray-dark); margin-bottom: 12px; padding: 12px; background: var(--white); border-radius: var(--radius-sm); }
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge.pendente { background: #fff3cd; color: #856404; }
+    .badge.pago { background: #d4edda; color: #155724; }
+    .orcamento-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1px solid var(--gray-lighter); }
+    .orcamento-card .orc-header { display: flex; justify-content: space-between; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+    .orcamento-card .orc-header .cliente { font-weight: 700; font-size: 15px; }
+    .orcamento-card .orc-header .valor { font-size: 20px; font-weight: 800; color: var(--red-primary); }
+    .orcamento-card .orc-body { font-size: 14px; color: var(--gray-dark); margin-bottom: 8px; }
+    .orcamento-card .orc-footer { display: flex; gap: 8px; }
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .calc-grid .calc-item { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; }
+    .calc-grid .calc-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+    .calc-grid .calc-item .form-group { margin-bottom: 8px; }
+    .calc-grid .calc-item .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-medium); margin-bottom: 4px; }
+    .calc-grid .calc-item .form-group input { width: 100%; padding: 8px 12px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; transition: var(--transition); }
+    .calc-grid .calc-item .form-group input:focus { outline: none; border-color: var(--red-primary); }
+    .calc-result { margin-top: 8px; padding: 10px; background: var(--white); border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--black-primary); text-align: center; }
+    .ferramentas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ferramenta-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 20px; text-align: center; cursor: pointer; transition: var(--transition); border: 2px solid transparent; }
+    .ferramenta-card:hover { border-color: var(--red-primary); transform: translateY(-2px); }
+    .ferramenta-card .icon { font-size: 36px; display: block; margin-bottom: 8px; }
+    .ferramenta-card .name { font-size: 14px; font-weight: 600; }
+    .ferramenta-card .desc { font-size: 12px; color: var(--gray-medium); margin-top: 4px; }
+    .chat-container { background: var(--gray-bg); border-radius: var(--radius-md); min-height: 400px; display: flex; flex-direction: column; }
+    .chat-container .chat-header { padding: 16px; border-bottom: 1px solid var(--gray-lighter); font-weight: 700; font-size: 15px; background: var(--white); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+    .chat-container .chat-messages { flex: 1; padding: 16px; overflow-y: auto; max-height: 400px; }
+    .chat-container .chat-messages .msg { margin-bottom: 12px; max-width: 80%; }
+    .chat-container .chat-messages .msg .bubble { padding: 10px 14px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.4; }
+    .chat-container .chat-messages .msg.cliente { text-align: left; }
+    .chat-container .chat-messages .msg.cliente .bubble { background: var(--white); border: 1px solid var(--gray-lighter); display: inline-block; }
+    .chat-container .chat-messages .msg.profissional { text-align: right; margin-left: auto; }
+    .chat-container .chat-messages .msg.profissional .bubble { background: var(--red-primary); color: var(--white); display: inline-block; }
+    .chat-container .chat-messages .msg .time { font-size: 10px; color: var(--gray-light); margin-top: 2px; }
+    .chat-container .chat-input { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--gray-lighter); background: var(--white); border-radius: 0 0 var(--radius-md) var(--radius-md); }
+    .chat-container .chat-input input { flex: 1; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; transition: var(--transition); }
+    .chat-container .chat-input input:focus { outline: none; border-color: var(--red-primary); }
+    .chat-container .chat-input button { padding: 10px 20px; }
+    .chat-select { margin-bottom: 16px; }
+    .chat-select select { width: 100%; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
+    .chat-locked { text-align: center; padding: 40px; }
+    .chat-locked .icon { font-size: 48px; display: block; margin-bottom: 12px; }
+    .chat-locked p { color: var(--gray-medium); font-size: 14px; }
+    @media (max-width: 768px) { .calc-grid, .ferramentas-grid { grid-template-columns: 1fr; } .dashboard-tab { min-width: 80px; font-size: 12px; padding: 12px 8px; } .solicitacao-card .info-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="prof-body">
+
+<!-- TELA DE LOGIN -->
+<div class="login-container" id="loginScreen">
+  <div class="login-card">
+    <div class="logo">
+      <h1>Acheei</h1>
+      <p>Área do Profissional</p>
+    </div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg">Entrar na Área</button>
+      <div class="login-error" id="loginError">E-mail ou senha inválidos</div>
+    </form>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--gray-medium);">
+      Ainda não tem conta? <a href="cadastro.html" style="color:var(--red-primary);font-weight:600;">Cadastre-se</a>
+    </p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <header class="dashboard-header">
+    <div class="dashboard-nav">
+      <div class="logo"><span>Acheei</span> Profissional</div>
+      <div class="admin-info">
+        <div class="prof-info">
+          <div id="profFotoMini"></div>
+          <span id="profNome">Profissional</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard-content">
+    <div class="dashboard-tabs">
+      <button class="dashboard-tab active" onclick="switchTab('solicitacoes', this)">📋 Solicitações <span class="count" id="countSolicitacoes">0</span></button>
+      <button class="dashboard-tab" onclick="switchTab('orcamentos', this)">💰 Orçamentos</button>
+      <button class="dashboard-tab" onclick="switchTab('calculadora', this)">🧮 Calculadora</button>
+      <button class="dashboard-tab" onclick="switchTab('ferramentas', this)">🛠️ Ferramentas</button>
+      <button class="dashboard-tab" onclick="switchTab('chat', this)">💬 Chat</button>
+    </div>
+
+    <!-- ABA SOLICITAÇÕES -->
+    <div class="tab-content active" id="tabSolicitacoes">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Solicitações de Serviço</h3>
+          <span id="solCount" style="font-size:13px;color:var(--gray-medium);">0 solicitações</span>
+        </div>
+        <div class="section-body" id="solicitacoesList">
+          <div class="empty-state"><span class="icon">📋</span><h3>Nenhuma solicitação ainda</h3><p>Quando clientes solicitarem seus serviços, aparecerão aqui.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA ORÇAMENTOS -->
+    <div class="tab-content" id="tabOrcamentos">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Orçamentos</h3>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalOrcamento()">➕ Novo Orçamento</button>
+        </div>
+        <div class="section-body" id="orcamentosList">
+          <div class="empty-state"><span class="icon">💰</span><h3>Nenhum orçamento ainda</h3><p>Crie orçamentos para seus clientes aqui.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA CALCULADORA -->
+    <div class="tab-content" id="tabCalculadora">
+      <div class="section-card">
+        <div class="section-header"><h3>🧮 Calculadora</h3></div>
+        <div class="section-body">
+          <div class="calc-grid">
+            <div class="calc-item">
+              <h4>Soma</h4>
+              <div class="form-group"><input type="number" id="calcSoma1" placeholder="Primeiro valor" value="0"></div>
+              <div class="form-group"><input type="number" id="calcSoma2" placeholder="Segundo valor" value="0"></div>
+              <button class="btn btn-primary btn-sm" onclick="calcular('soma')" style="width:100%;justify-content:center;">Calcular</button>
+              <div class="calc-result" id="resSoma">0</div>
+            </div>
+            <div class="calc-item">
+              <h4>Subtração</h4>
+              <div class="form-group"><input type="number" id="calcSub1" placeholder="Primeiro valor" value="0"></div>
+              <div class="form-group"><input type="number" id="calcSub2" placeholder="Segundo valor" value="0"></div>
+              <button class="btn btn-primary btn-sm" onclick="calcular('subtracao')" style="width:100%;justify-content:center;">Calcular</button>
+              <div class="calc-result" id="resSub">0</div>
+            </div>
+            <div class="calc-item">
+              <h4>Multiplicação</h4>
+              <div class="form-group"><input type="number" id="calcMult1" placeholder="Primeiro valor" value="0"></div>
+              <div class="form-group"><input type="number" id="calcMult2" placeholder="Segundo valor" value="0"></div>
+              <button class="btn btn-primary btn-sm" onclick="calcular('multiplicacao')" style="width:100%;justify-content:center;">Calcular</button>
+              <div class="calc-result" id="resMult">0</div>
+            </div>
+            <div class="calc-item">
+              <h4>Divisão</h4>
+              <div class="form-group"><input type="number" id="calcDiv1" placeholder="Dividendo" value="0"></div>
+              <div class="form-group"><input type="number" id="calcDiv2" placeholder="Divisor" value="1"></div>
+              <button class="btn btn-primary btn-sm" onclick="calcular('divisao')" style="width:100%;justify-content:center;">Calcular</button>
+              <div class="calc-result" id="resDiv">0</div>
+            </div>
+            <div class="calc-item">
+              <h4>Porcentagem</h4>
+              <div class="form-group"><input type="number" id="calcPctValor" placeholder="Valor" value="0"></div>
+              <div class="form-group"><input type="number" id="calcPctPct" placeholder="Porcentagem %" value="0"></div>
+              <button class="btn btn-primary btn-sm" onclick="calcular('porcentagem')" style="width:100%;justify-content:center;">Calcular</button>
+              <div class="calc-result" id="resPct">0</div>
+            </div>
+            <div class="calc-item">
+              <h4>Juros Simples</h4>
+              <div class="form-group"><input type="number" id="calcJurosCapital" placeholder="Capital" value="0"></div>
+              <div class="form-group"><input type="number" id="calcJurosTaxa" placeholder="Taxa % ao mês" value="0"></div>
+              <div class="form-group"><input type="number" id="calcJurosTempo" placeholder="Meses" value="0"></div>
+              <button class="btn btn-primary btn-sm" onclick="calcular('juros')" style="width:100%;justify-content:center;">Calcular</button>
+              <div class="calc-result" id="resJuros">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA FERRAMENTAS -->
+    <div class="tab-content" id="tabFerramentas">
+      <div class="section-card">
+        <div class="section-header"><h3>🛠️ Ferramentas</h3></div>
+        <div class="section-body">
+          <div class="ferramentas-grid">
+            <div class="ferramenta-card" onclick="converterMedida()">
+              <span class="icon">📏</span>
+              <span class="name">Conversor de Medidas</span>
+              <span class="desc">Metros, centímetros, polegadas</span>
+            </div>
+            <div class="ferramenta-card" onclick="converterPeso()">
+              <span class="icon">⚖️</span>
+              <span class="name">Conversor de Peso</span>
+              <span class="desc">Quilos, libras, gramas</span>
+            </div>
+            <div class="ferramenta-card" onclick="converterVolume()">
+              <span class="icon">🧊</span>
+              <span class="name">Conversor de Volume</span>
+              <span class="desc">Litros, metros cúbicos, galões</span>
+            </div>
+            <div class="ferramenta-card" onclick="converterTemperatura()">
+              <span class="icon">🌡️</span>
+              <span class="name">Conversor de Temperatura</span>
+              <span class="desc">Celsius, Fahrenheit, Kelvin</span>
+            </div>
+          </div>
+          <div id="ferramentaResultado" style="display:none;margin-top:16px;padding:16px;background:var(--gray-bg);border-radius:var(--radius-md);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABA CHAT -->
+    <div class="tab-content" id="tabChat">
+      <div class="section-card">
+        <div class="section-header"><h3>💬 Chat com Cliente</h3></div>
+        <div class="section-body">
+          <div class="chat-select">
+            <select id="chatSolicitacaoSelect" onchange="selecionarChat()">
+              <option value="">Selecione uma solicitação para conversar</option>
+            </select>
+          </div>
+          <div class="chat-container" id="chatContainer">
+            <div class="chat-header" id="chatHeader">Selecione uma solicitação acima</div>
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-locked">
+                <span class="icon">💬</span>
+                <p>Selecione uma solicitação para iniciar o chat</p>
+              </div>
+            </div>
+            <div class="chat-input" id="chatInputArea" style="display:none;">
+              <input type="text" id="chatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter')enviarMensagem()">
+              <button class="btn btn-primary" onclick="enviarMensagem()">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO ORÇAMENTO -->
+<div class="modal-overlay" id="orcamentoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Novo Orçamento</h3>
+      <button class="modal-close" onclick="fecharModalOrcamento()">&times;</button>
+    </div>
+    <form id="orcamentoForm" class="modal-body" onsubmit="criarOrcamento(event)">
+      <div class="form-group">
+        <label for="orcCliente">Nome do Cliente</label>
+        <input type="text" id="orcCliente" placeholder="Nome do cliente" required>
+      </div>
+      <div class="form-group">
+        <label for="orcDescricao">Descrição do Serviço</label>
+        <textarea id="orcDescricao" placeholder="Descreva o serviço e os detalhes do orçamento" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="orcValor">Valor (R$)</label>
+        <input type="number" id="orcValor" placeholder="0,00" step="0.01" min="0" required>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="fecharModalOrcamento()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Criar Orçamento</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/profissional.js"></script>
+</body>
+</html>
