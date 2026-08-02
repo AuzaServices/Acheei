@@ -86,6 +86,8 @@ img {
   font-size: 28px;
   font-weight: 800;
   color: var(--red-primary);
+  position: relative;
+  z-index: 1001;
 }
 
 .navbar .logo span {
@@ -127,6 +129,210 @@ img {
 
 .navbar .nav-links a:hover::after {
   width: 100%;
+}
+
+/* ==================== Hamburger Menu ==================== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  position: relative;
+  z-index: 1001;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.hamburger:hover {
+  background: rgba(255,0,0,0.05);
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2.5px;
+  background: var(--black-primary);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hamburger span + span {
+  margin-top: 5px;
+}
+
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg);
+  top: 7.5px;
+}
+
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg);
+  top: -7.5px;
+}
+
+/* Mobile Menu Overlay */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-menu-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile Menu Panel */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 85%;
+  max-width: 340px;
+  height: 100%;
+  background: var(--white);
+  z-index: 999;
+  padding: 90px 24px 30px;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+  overflow-y: auto;
+}
+
+.mobile-menu.active {
+  right: 0;
+}
+
+.mobile-menu .menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--gray-bg);
+}
+
+.mobile-menu .menu-header .menu-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--white);
+}
+
+.mobile-menu .menu-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black-primary);
+}
+
+.mobile-menu .menu-header p {
+  font-size: 13px;
+  color: var(--gray-medium);
+  margin-top: 2px;
+}
+
+.mobile-menu .menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-menu .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--gray-dark);
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.mobile-menu .menu-item:hover {
+  background: var(--gray-bg);
+  color: var(--red-primary);
+}
+
+.mobile-menu .menu-item .item-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--gray-bg);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: var(--transition);
+}
+
+.mobile-menu .menu-item:hover .item-icon {
+  background: rgba(255,0,0,0.1);
+}
+
+.mobile-menu .menu-item .item-text {
+  flex: 1;
+}
+
+.mobile-menu .menu-item .item-arrow {
+  color: var(--gray-lighter);
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.mobile-menu .menu-item:hover .item-arrow {
+  color: var(--red-primary);
+  transform: translateX(4px);
+}
+
+.mobile-menu .menu-divider {
+  height: 1px;
+  background: var(--gray-lighter);
+  margin: 12px 0;
+}
+
+.mobile-menu .menu-footer {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid var(--gray-bg);
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-light);
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar .nav-links {
+    display: none;
+  }
 }
 
 .btn {

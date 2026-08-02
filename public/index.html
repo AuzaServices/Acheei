@@ -14,7 +14,7 @@
       <a href="/" class="logo">
         <span>Acheei</span>
       </a>
-<div class="nav-links">
+      <div class="nav-links">
         <a href="/">Início</a>
         <a href="#categorias">Categorias</a>
         <a href="cliente.html" class="btn btn-primary">
@@ -24,8 +24,58 @@
           <span>🔨</span> Área do Profissional
         </a>
       </div>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </nav>
   </header>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="menuOverlay"></div>
+
+  <!-- Mobile Menu Panel -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="menu-header">
+      <div class="menu-icon">🔨</div>
+      <div>
+        <h3>Acheei</h3>
+        <p>Navegação</p>
+      </div>
+    </div>
+    <div class="menu-items">
+      <a href="/" class="menu-item">
+        <span class="item-icon">🏠</span>
+        <span class="item-text">Início</span>
+        <span class="item-arrow">›</span>
+      </a>
+      <a href="#categorias" class="menu-item" onclick="fecharMenuMobile()">
+        <span class="item-icon">📂</span>
+        <span class="item-text">Categorias</span>
+        <span class="item-arrow">›</span>
+      </a>
+      <div class="menu-divider"></div>
+      <a href="cliente.html" class="menu-item">
+        <span class="item-icon">👤</span>
+        <span class="item-text">Área do Cliente</span>
+        <span class="item-arrow">›</span>
+      </a>
+      <a href="profissional.html" class="menu-item">
+        <span class="item-icon">🔨</span>
+        <span class="item-text">Área do Profissional</span>
+        <span class="item-arrow">›</span>
+      </a>
+      <a href="cadastro.html" class="menu-item">
+        <span class="item-icon">📝</span>
+        <span class="item-text">Cadastre-se como Profissional</span>
+        <span class="item-arrow">›</span>
+      </a>
+    </div>
+    <div class="menu-footer">
+      <p>&copy; 2024 Acheei. Todos os direitos reservados.</p>
+    </div>
+  </div>
 
   <section class="hero">
     <div class="hero-content">
@@ -152,7 +202,7 @@
           <p id="modalProfissionalNome" style="font-weight: 700; font-size: 18px;"></p>
           <p id="modalProfissionalProfissao" style="color: var(--red-primary); font-weight: 600;"></p>
         </div>
-<input type="hidden" id="modalProfissionalId">
+        <input type="hidden" id="modalProfissionalId">
         <div style="background:var(--gray-bg);padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--gray-medium);">
           📝 Crie sua conta ou faça login para acompanhar seus orçamentos
         </div>
@@ -213,6 +263,30 @@
   </footer>
 
   <script src="js/main.js"></script>
+  <script>
+    // Mobile Menu Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      var hamburger = document.getElementById('hamburgerBtn');
+      var menu = document.getElementById('mobileMenu');
+      var overlay = document.getElementById('menuOverlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', toggleMenu);
+    });
+
+    function fecharMenuMobile() {
+      document.getElementById('hamburgerBtn').classList.remove('active');
+      document.getElementById('mobileMenu').classList.remove('active');
+      document.getElementById('menuOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  </script>
 </body>
 </html>
-
