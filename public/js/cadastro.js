@@ -388,7 +388,7 @@ async function submitForm(event) {
 
     submitBtn.innerHTML = '<span class="spinner"></span> Cadastrando...';
 
-    const data = {
+const data = {
       cpf: document.getElementById('cpf').value,
       data_nascimento: document.getElementById('data_nascimento').value,
       endereco: document.getElementById('endereco').value.trim(),
@@ -400,7 +400,9 @@ async function submitForm(event) {
       nome_perfil: document.getElementById('nome_perfil').value.trim(),
       foto_perfil: fotoPerfilUrl,
       profissao: document.getElementById('profissao').value.trim(),
-      fotos_servicos: fotosServicosUrls
+      fotos_servicos: fotosServicosUrls,
+      email: document.getElementById('email').value.trim(),
+      senha: document.getElementById('senha').value
     };
 
     const response = await fetch(`${API_BASE}/profissionais`, {
