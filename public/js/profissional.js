@@ -209,12 +209,65 @@ function renderizarSolicitacoes() {
   }
 }
 
+// ============================================
+// Pagamento via Mercado Pago (Checkout Pro)
+// ============================================
 async function pagarSolicitacao(id) {
-  if (!confirm('Deseja pagar R$14,99 para liberar o chat com este cliente?')) return;
-  var result = await apiRequest(API_BASE + '/solicitacoes/' + id + '/pagar', { method: 'PUT' });
-  if (result && result.success) {
-    showToast('✅ Pagamento realizado! Chat liberado.', 'success');
-    await carregarSolicitacoes();
+  if (!profissional) {
+    showToast('Faça login primeiro', 'error');
+    return;
+  }
+
+  // Busca a solicitação para obter dados do cliente
+  var sol = null;
+  for (var i = 0; i < solicitacoesData.length; i++) {
+    if (solicitacoesData[i].id == id) { sol = solicitacoesData[i]; break; }
+  }
+  if (!sol) {
+    showToast('Solicitação não encontrada', 'error');
+    return;
+  }
+
+  var btn = event && event.target ? event.target : null;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Redirecionando...';
+  }
+
+  showToast('Criando pagamento... aguarde', 'info');
+
+  try {
+    var result = await apiRequest(API_BASE + '/pagamento/preferencia', {
+      method: 'POST',
+      body: JSON.stringify({
+        solicitacao_id: id,
+        profissional_id: profissional.id,
+        cliente_nome: sol.cliente_nome,
+        cliente_telefone: sol.cliente_telefone,
+        descricao: sol.descricao,
+        payer_email: profissional.email || undefined
+      })
+    });
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '💳 Pagar R$14,99';
+    }
+
+    if (result && result.success && result.data && result.data.init_point) {
+      // Redireciona para o checkout do Mercado Pago
+      window.location.href = result.data.init_point;
+    } else {
+      var msg = (result && result.message) ? result.message : 'Erro ao criar pagamento';
+      showToast(msg, 'error');
+    }
+  } catch (error) {
+    console.error('Erro ao pagar:', error);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '💳 Pagar R$14,99';
+    }
+    showToast('Erro ao processar pagamento', 'error');
   }
 }
 
@@ -520,6 +573,44 @@ async function verificarToken() {
 }
 
 // ============================================
+// Retorno do Mercado Pago (Checkout Pro)
+// Verifica se o usuário voltou de um pagamento
+// ============================================
+function verificarRetornoPagamento() {
+  var params = new URLSearchParams(window.location.search);
+  var status = params.get('status');
+  var solicitacaoId = params.get('solicitacao_id');
+
+  if (!status || !solicitacaoId) return;
+
+  // Remove os parâmetros da URL sem recarregar
+  if (window.history.replaceState) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  if (status === 'success') {
+    showToast('✅ Pagamento realizado com sucesso! Verificando...', 'info');
+
+    // Tenta verificar o pagamento no backend
+    setTimeout(async function() {
+      var result = await apiRequest(API_BASE + '/pagamento/verificar/' + solicitacaoId, { method: 'POST' });
+      if (result && result.success && result.data && result.data.status_pagamento === 'pago') {
+        showToast('✅ Chat liberado! Agora você pode conversar com o cliente.', 'success');
+        await carregarSolicitacoes();
+      } else if (result && result.success && result.data && result.data.status_pagamento === 'pendente') {
+        showToast('Pagamento ainda não confirmado. Use o botão "Confirmar" manualmente se necessário.', 'warning');
+      } else {
+        showToast('Pagamento recebido! Use a rota de confirmação manual se necessário.', 'info');
+      }
+    }, 2000);
+  } else if (status === 'pending') {
+    showToast('Pagamento pendente. Complete o pagamento para liberar o chat.', 'warning');
+  } else if (status === 'failure') {
+    showToast('Pagamento cancelado ou não aprovado. Tente novamente.', 'error');
+  }
+}
+
+// ============================================
 // Initialize
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
@@ -531,4 +622,5 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === this) fecharModalOrcamento();
   });
   verificarToken();
+  verificarRetornoPagamento();
 });

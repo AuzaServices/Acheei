@@ -1,21 +1,22 @@
-# TODO - Correção do CSS / Estrutura HTML
+# TODO - Integração Mercado Pago (Checkout Pro)
 
 ## Objetivo
-Corrigir as páginas que estavam sem formatação CSS (causa: HTML malformado com tags não fechadas e caminhos absolutos de CSS/JS).
+Substituir pagamento simulado por pagamento real via Mercado Pago Checkout Pro.
 
-## Concluído ✅
-- [x] 1. Analisar os arquivos HTML, CSS e JS do projeto
-- [x] 2. Aprovar plano com o usuário
-- [x] 3. Reescrever `public/index.html` com estrutura HTML válida e caminhos relativos
-- [x] 4. Reescrever `public/cadastro.html` com estrutura válida, adicionar `cpfError`/`dataError` e caminhos relativos
-- [x] 5. Reescrever `public/painel.html` com estrutura válida e caminhos relativos
-- [x] 6. Adicionar estilos de autocomplete e error-message ao `public/css/style.css`
-- [x] 7. Corrigir HTML gerado em `public/js/painel.js` (`verDetalhes` e `renderizarSolicitacoes`)
-- [x] 8. Adicionar `icons.js` a todos os HTMLs e garantir data-icon funcionando
-- [x] 9. Testar as páginas renderizando com CSS completo (servidor rodando em http://localhost:3000)
+## Passos Concluídos
+- [x] 1. Instalar SDK `mercadopago` via npm
+- [x] 2. Criar `config/mercadopago.js` (configuração SDK + helpers)
+- [x] 3. Criar `routes/pagamento.js` (preferencia, webhook, verificar, confirmar)
+- [x] 4. Registrar rota `/api/pagamento` no `server.js`
+- [x] 5. Adicionar coluna `preference_id` na tabela `solicitacoes`
+- [x] 6. Atualizar `database/schema.sql` com coluna `preference_id`
+- [x] 7. Atualizar `public/js/profissional.js`:
+       - Substituir `PUT /solicitacoes/:id/pagar` por `POST /api/pagamento/preferencia`
+       - Redirecionar profissional ao Checkout Pro do Mercado Pago
+       - `verificarRetornoPagamento()` para processar retorno do checkout
+       - Passar `solicitacao_id` nos back_urls
 
-## Observações
-- O projeto agora tem também as áreas de Profissional (`profissional.html`/`js/profissional.js`), Cliente (`cliente.html`/`js/cliente.js`), chat, orçamentos e pagamentos.
-- Todos os HTMLs referenciam `css/style.css` com caminho relativo e incluem `js/icons.js`.
-</content>
-
+## Pendente (usuário precisa fazer)
+- [ ] 8. Adicionar `MERCADO_PAGO_ACCESS_TOKEN=TEST-...` no arquivo `.env`
+- [ ] 9. Reiniciar o servidor (Ctrl+C no terminal atual e rodar `node server.js` de novo)
+</｜DSML｜content>

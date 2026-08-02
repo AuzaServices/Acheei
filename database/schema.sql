@@ -36,8 +36,10 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
   cliente_telefone VARCHAR(20) NOT NULL,
   descricao TEXT NOT NULL,
   profissional_id INT NOT NULL,
+  cliente_id INT,
   data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   status_pagamento ENUM('pendente', 'pago') DEFAULT 'pendente',
+  preference_id VARCHAR(100),
   FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

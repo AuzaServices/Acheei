@@ -75,6 +75,7 @@ db.query('CREATE TABLE IF NOT EXISTS orcamentos (id INT AUTO_INCREMENT PRIMARY K
     db.query("ALTER TABLE profissionais ADD COLUMN senha VARCHAR(255) AFTER email", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE solicitacoes ADD COLUMN status_pagamento ENUM('pendente','pago') DEFAULT 'pendente' AFTER data_solicitacao", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE solicitacoes ADD COLUMN cliente_id INT AFTER profissional_id", function(err) { if (err) { /* coluna já existe */ } });
+    db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
     // Criar admin padrão
     criarAdminPadrao();
   }
@@ -88,6 +89,7 @@ app.use('/api/orcamentos', require('./routes/orcamentos')(db, () => dbConnected)
 app.use('/api/mensagens', require('./routes/mensagens')(db, () => dbConnected));
 app.use('/api/upload', require('./routes/upload')());
 app.use('/api/clientes', require('./routes/clientes')(db, () => dbConnected));
+app.use('/api/pagamento', require('./routes/pagamento')(db, () => dbConnected));
 
 // Rota de fallback
 app.get('*', function(req, res, next) {
