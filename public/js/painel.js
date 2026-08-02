@@ -172,7 +172,7 @@ function gerarAcoes(prof) {
     return '<button class="btn btn-danger btn-sm" onclick="reprovarProfissional(' + prof.id + ')">❌ Reprovar</button>';
   }
   if (prof.status_aprovacao === 'reprovado') {
-    return '<button class="btn btn-success btn-sm" onclick="aprovarProfissional(' + prof.id + ')">✅ Aprovar</button>';
+    return '<button class="btn btn-success btn-sm" onclick="aprovarProfissional(' + prof.id + ')">✅ Aprovar</button><button class="btn btn-danger btn-sm" onclick="deletarProfissional(' + prof.id + ')" style="background:#6c757d;border-color:#6c757d;">🗑️ Deletar</button>';
   }
   return '';
 }
@@ -191,6 +191,18 @@ async function reprovarProfissional(id) {
   var result = await apiRequest(API_BASE + '/admin/reprovar/' + id, { method: 'PUT' });
   if (result && result.success) {
     showToast('Profissional reprovado!', 'info');
+    await carregarProfissionais();
+  }
+}
+
+async function deletarProfissional(id) {
+  if (!confirm('⚠️ TEM CERTEZA? Esta ação irá DELETAR PERMANENTEMENTE este profissional, TODAS as suas fotos (Cloudinary) e solicitações relacionadas. Esta ação não pode ser desfeita!')) return;
+  if (!confirm('Confirmação final: deseja realmente excluir permanentemente este registro?')) return;
+  var result = await apiRequest(API_BASE + '/admin/deletar/' + id, { method: 'DELETE' });
+  if (result && result.success) {
+    var msg = 'Profissional deletado permanentemente!';
+    if (result.erros && result.erros.length > 0) msg += ' (Alguns erros: ' + result.erros.join(', ') + ')';
+    showToast(msg, 'success');
     await carregarProfissionais();
   }
 }

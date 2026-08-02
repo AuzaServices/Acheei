@@ -5,6 +5,14 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: 'dzwkr47ib',
+  api_key: '553561859359519',
+  api_secret: 'IYJBytc-xlGnFW87Taguno77LDw',
+  secure: true
+});
 
 // Middleware de autenticação
 function authMiddleware(req, res, next) {
@@ -188,6 +196,81 @@ module.exports = function(db, dbConnected) {
         });
       }
     );
+  });
+
+// ============================================
+  // DELETE /api/admin/deletar/:id
+  // Deletar profissional do banco e Cloudinary
+  // ============================================
+  router.delete('/deletar/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    // Primeiro buscar o profissional para pegar URLs das fotos
+    db.query('SELECT * FROM profissionais WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+
+      const prof = results[0];
+      const erros = [];
+
+      // Extrair public_ids das fotos no Cloudinary
+      const publicIds = [];
+
+      // Foto de perfil
+      if (prof.foto_perfil && prof.foto_perfil.includes('cloudinary')) {
+        const parts = prof.foto_perfil.split('/');
+        const filename = parts[parts.length - 1].split('.')[0];
+        const folder = prof.foto_perfil.includes('/perfis/') ? 'acheei/perfis/' : 'acheei/';
+        publicIds.push(folder + filename);
+      }
+
+      // Fotos de serviços
+      let fotosServicos = [];
+      if (prof.fotos_servicos) {
+        try { fotosServicos = JSON.parse(prof.fotos_servicos); } catch(e) { fotosServicos = []; }
+      }
+      fotosServicos.forEach(fotoUrl => {
+        if (fotoUrl && fotoUrl.includes('cloudinary')) {
+          const parts = fotoUrl.split('/');
+          const filename = parts[parts.length - 1].split('.')[0];
+          const folder = fotoUrl.includes('/servicos/') ? 'acheei/servicos/' : 'acheei/';
+          publicIds.push(folder + filename);
+        }
+      });
+
+      // Deletar imagens do Cloudinary (em paralelo)
+      const deletePromises = publicIds.map(publicId =>
+        cloudinary.uploader.destroy(publicId).catch(e => {
+          erros.push('Cloudinary: ' + e.message);
+        })
+      );
+      await Promise.all(deletePromises);
+
+      // Deletar solicitações relacionadas
+      db.query('DELETE FROM solicitacoes WHERE profissional_id = ?', [req.params.id], (err) => {
+        if (err) console.error('Erro ao deletar solicitacoes:', err);
+      });
+
+      // Deletar profissional do banco
+      db.query('DELETE FROM profissionais WHERE id = ?', [req.params.id], (err, result) => {
+        if (err) {
+          console.error('Erro ao deletar profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao deletar profissional' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Profissional e todas as suas fotos foram deletados permanentemente!',
+          erros: erros.length > 0 ? erros : undefined
+        });
+      });
+    });
   });
 
   // ============================================
