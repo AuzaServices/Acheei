@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acheei - Painel Administrativo</title>
+  <meta name="description" content="Painel administrativo Acheei - Gerenciamento de profissionais">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <style>
+    .admin-body { background: #f0f0f0; }
+    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
+    .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
+    .login-card .logo { text-align: center; margin-bottom: 30px; }
+    .login-card .logo h1 { font-size: 32px; color: var(--red-primary); font-weight: 800; }
+    .login-card .logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
+    .login-card .form-group { margin-bottom: 20px; }
+    .login-card .form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; }
+    .login-card .form-group input { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 15px; transition: var(--transition); }
+    .login-card .form-group input:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); }
+    .login-card .btn { width: 100%; justify-content: center; padding: 14px; font-size: 16px; }
+    .login-error { color: #dc3545; font-size: 14px; text-align: center; margin-top: 12px; display: none; }
+    .dashboard { display: none; min-height: 100vh; }
+    .dashboard-header { background: var(--white); box-shadow: var(--shadow-sm); padding: 0 20px; position: sticky; top: 0; z-index: 100; }
+    .dashboard-nav { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .dashboard-nav .logo { font-size: 22px; font-weight: 800; color: var(--red-primary); }
+    .dashboard-nav .admin-info { display: flex; align-items: center; gap: 16px; }
+    .dashboard-nav .admin-info span { color: var(--gray-medium); font-size: 14px; }
+    .dashboard-nav .admin-info .btn { padding: 8px 16px; font-size: 13px; }
+    .dashboard-content { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+    .dashboard-tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--white); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .dashboard-tab { flex: 1; padding: 16px 24px; text-align: center; font-weight: 600; font-size: 14px; color: var(--gray-medium); cursor: pointer; transition: var(--transition); border: none; background: none; border-bottom: 3px solid transparent; }
+    .dashboard-tab:hover { color: var(--red-primary); background: rgba(255,0,0,0.03); }
+    .dashboard-tab.active { color: var(--red-primary); border-bottom-color: var(--red-primary); }
+    .dashboard-tab .count { display: inline-block; background: var(--gray-lighter); color: var(--gray-dark); padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 6px; }
+    .dashboard-tab.active .count { background: rgba(255,0,0,0.1); color: var(--red-primary); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .admin-table-container { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .admin-table th { background: var(--gray-bg); padding: 16px; text-align: left; font-size: 13px; font-weight: 700; color: var(--gray-dark); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--gray-lighter); }
+    .admin-table td { padding: 16px; border-bottom: 1px solid var(--gray-lighter); font-size: 14px; color: var(--gray-dark); }
+    .admin-table tr:hover td { background: rgba(255,0,0,0.02); }
+    .admin-table .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-badge.pendente { background: #fff3cd; color: #856404; }
+    .status-badge.aprovado { background: #d4edda; color: #155724; }
+    .status-badge.reprovado { background: #f8d7da; color: #721c24; }
+    .admin-table .action-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .admin-table .action-btns .btn { padding: 6px 14px; font-size: 12px; }
+    .admin-table .foto-mini { width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover; }
+    .admin-table .foto-mini-placeholder { width: 40px; height: 40px; border-radius: var(--radius-full); background: var(--gray-lighter); display: inline-flex; align-items: center; justify-content: center; font-size: 18px; }
+    .detalhes-content { max-width: 700px; }
+    .detalhes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .detalhes-item { padding: 12px; background: var(--gray-bg); border-radius: var(--radius-sm); }
+    .detalhes-item .label { font-size: 12px; color: var(--gray-medium); text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px; }
+    .detalhes-item .value { font-size: 15px; font-weight: 600; margin-top: 4px; color: var(--black-primary); }
+    .detalhes-fotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .detalhes-fotos img { width: 100%; height: 150px; object-fit: cover; border-radius: var(--radius-sm); }
+    .solicitacao-card { background: var(--white); border-radius: var(--radius-md); padding: 20px; margin-bottom: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-lighter); }
+    .solicitacao-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .solicitacao-card .card-header h4 { font-size: 16px; font-weight: 700; }
+    .solicitacao-card .card-header .date { font-size: 13px; color: var(--gray-medium); }
+    .solicitacao-card .info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .solicitacao-card .info .item .label { font-size: 12px; color: var(--gray-medium); font-weight: 600; }
+    .solicitacao-card .info .item .value { font-size: 14px; color: var(--black-primary); }
+    @media (max-width: 768px) { .admin-table { font-size: 13px; } .admin-table th, .admin-table td { padding: 12px 8px; } .detalhes-grid { grid-template-columns: 1fr; } .detalhes-fotos { grid-template-columns: 1fr 1fr; } .dashboard-tabs { flex-direction: column; } .solicitacao-card .info { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="admin-body">
+
+<div class="login-container" id="loginScreen">
+  <div class="login-card">
+    <div class="logo">
+      <h1>Acheei</h1>
+      <p>Painel Administrativo</p>
+    </div>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="usuario">Usuario</label>
+        <input type="text" id="usuario" name="usuario" placeholder="Digite seu usuario" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg">Entrar no Painel</button>
+      <div class="login-error" id="loginError">Usuario ou senha invalidos</div>
+    </form>
+  </div>
+</div>
+
+<div class="dashboard" id="dashboard">
+  <header class="dashboard-header">
+    <div class="dashboard-nav">
+      <div class="logo">Acheei Admin</div>
+      <div class="admin-info">
+        <span id="adminName">Admin</span>
+        <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="dashboard-content">
+    <div class="dashboard-tabs">
+      <button class="dashboard-tab active" onclick="switchTab('pendentes', this)">
+        Pendentes <span class="count" id="countPendentes">0</span>
+      </button>
+      <button class="dashboard-tab" onclick="switchTab('aprovados', this)">
+        Aprovados <span class="count" id="countAprovados">0</span>
+      </button>
+      <button class="dashboard-tab" onclick="switchTab('reprovados', this)">
+        Reprovados <span class="count" id="countReprovados">0</span>
+      </button>
+      <button class="dashboard-tab" onclick="switchTab('solicitacoes', this)">
+        Solicitacoes <span class="count" id="countSolicitacoes">0</span>
+      </button>
+    </div>
+
+    <div class="tab-content active" id="tabPendentes">
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Profissao</th>
+              <th>Cidade/UF</th>
+              <th>Status</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody id="pendentesBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabAprovados">
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Profissao</th>
+              <th>Cidade/UF</th>
+              <th>Status</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody id="aprovadosBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabReprovados">
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Profissao</th>
+              <th>Cidade/UF</th>
+              <th>Status</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody id="reprovadosBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabSolicitacoes">
+      <div id="solicitacoesList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detalhesModal">
+  <div class="modal detalhes-content">
+    <div class="modal-header">
+      <h3>Detalhes do Profissional</h3>
+      <button class="modal-close" onclick="fecharDetalhes()">&times;</button>
+    </div>
+    <div class="modal-body" id="detalhesBody"></div>
+  </div>
+</div>
+
+<script src="js/painel.js"></script>
+</body>
+</html>
+

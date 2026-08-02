@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acheei - Encontre Profissionais de Confiança</title>
+  <meta name="description" content="Encontre os melhores profissionais perto de você. Eletricistas, pedreiros, encanadores e muito mais.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+</head>
+<body>
+  <header class="header">
+    <nav class="navbar">
+      <a href="/" class="logo">
+        <span>Acheei</span>
+      </a>
+      <div class="nav-links">
+        <a href="/">Início</a>
+        <a href="#categorias">Categorias</a>
+        <a href="cadastro.html" class="btn btn-primary">
+          <span>🔨</span> Cadastre-se como Profissional
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Encontre o <span class="highlight">Profissional</span> Ideal para seu Serviço</h1>
+      <p>Conectamos você aos melhores profissionais da sua região. Rápido, fácil e sem burocracia.</p>
+      <a href="#busca" class="btn btn-primary btn-lg">Solicitar Serviço Agora</a>
+    </div>
+  </section>
+
+  <section id="busca" class="search-box">
+    <form id="searchForm" class="search-grid">
+      <div class="form-group">
+        <label for="profissao">Qual serviço você precisa?</label>
+        <input type="text" id="profissao" name="profissao" placeholder="Ex: Eletricista, Pedreiro..." autocomplete="off">
+        <div id="autocompleteList" class="autocomplete-items"></div>
+      </div>
+      <div class="form-group">
+        <label for="cidade">Cidade</label>
+        <input type="text" id="cidade" name="cidade" placeholder="Sua cidade">
+      </div>
+      <div class="form-group">
+        <label for="estado">Estado</label>
+        <select id="estado" name="estado">
+          <option value="">Todos</option>
+          <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+          <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+          <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+          <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+          <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+          <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+          <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+          <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+          <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+        </select>
+      </div>
+      <button type="submit" class="btn-search">🔍 Buscar</button>
+    </form>
+  </section>
+
+  <section id="categorias" class="categories">
+    <div class="section-title">
+      <h2>Categorias de Serviços</h2>
+      <p>Escolha a categoria e encontre o profissional ideal para seu projeto</p>
+    </div>
+    <div class="categories-grid" id="categoriesGrid">
+      <div class="category-card" data-categoria="Eletricista">
+        <span class="icon">⚡</span>
+        <span class="name">Eletricista</span>
+      </div>
+      <div class="category-card" data-categoria="Pedreiro">
+        <span class="icon">🧱</span>
+        <span class="name">Pedreiro</span>
+      </div>
+      <div class="category-card" data-categoria="Encanador">
+        <span class="icon">🔧</span>
+        <span class="name">Encanador</span>
+      </div>
+      <div class="category-card" data-categoria="Pintor">
+        <span class="icon">🎨</span>
+        <span class="name">Pintor</span>
+      </div>
+      <div class="category-card" data-categoria="Marceneiro">
+        <span class="icon">🪚</span>
+        <span class="name">Marceneiro</span>
+      </div>
+      <div class="category-card" data-categoria="Jardineiro">
+        <span class="icon">🌿</span>
+        <span class="name">Jardineiro</span>
+      </div>
+      <div class="category-card" data-categoria="Diarista">
+        <span class="icon">🧹</span>
+        <span class="name">Diarista</span>
+      </div>
+      <div class="category-card" data-categoria="Mecânico">
+        <span class="icon">🔩</span>
+        <span class="name">Mecânico</span>
+      </div>
+      <div class="category-card" data-categoria="Chaveiro">
+        <span class="icon">🔑</span>
+        <span class="name">Chaveiro</span>
+      </div>
+      <div class="category-card" data-categoria="Técnico em TI">
+        <span class="icon">💻</span>
+        <span class="name">Técnico em TI</span>
+      </div>
+      <div class="category-card" data-categoria="Personal Trainer">
+        <span class="icon">💪</span>
+        <span class="name">Personal Trainer</span>
+      </div>
+      <div class="category-card" data-categoria="Fotógrafo">
+        <span class="icon">📸</span>
+        <span class="name">Fotógrafo</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultados" class="results-section" style="display: none;">
+    <div class="results-header">
+      <h3>Profissionais Encontrados</h3>
+      <span class="results-count" id="resultsCount">0 resultados</span>
+    </div>
+    <div class="profissionais-grid" id="profissionaisGrid"></div>
+  </section>
+
+  <div id="loadingContainer" class="loading-container" style="display: none;">
+    <div class="spinner-large"></div>
+  </div>
+
+  <div id="emptyState" class="empty-state" style="display: none;">
+    <span class="icon">🔍</span>
+    <h3>Nenhum profissional encontrado</h3>
+    <p>Tente ajustar sua busca ou selecionar outra categoria de serviço.</p>
+  </div>
+
+  <div id="solicitacaoModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Solicitar Serviço</h3>
+        <button class="modal-close" onclick="fecharModal()">&times;</button>
+      </div>
+      <form id="solicitacaoForm" class="modal-body">
+        <div id="modalProfissionalInfo" style="background: var(--gray-bg); padding: 16px; border-radius: var(--radius-sm); margin-bottom: 20px;">
+          <p style="font-size: 14px; color: var(--gray-medium); margin-bottom: 4px;">Solicitando serviço para:</p>
+          <p id="modalProfissionalNome" style="font-weight: 700; font-size: 18px;"></p>
+          <p id="modalProfissionalProfissao" style="color: var(--red-primary); font-weight: 600;"></p>
+        </div>
+        <input type="hidden" id="modalProfissionalId">
+        <div class="form-group">
+          <label for="clienteNome">Seu Nome</label>
+          <input type="text" id="clienteNome" name="cliente_nome" placeholder="Digite seu nome completo" required>
+        </div>
+        <div class="form-group">
+          <label for="clienteTelefone">Seu Telefone</label>
+          <input type="tel" id="clienteTelefone" name="cliente_telefone" placeholder="(11) 99999-9999" required>
+        </div>
+        <div class="form-group">
+          <label for="descricao">Descreva o Serviço</label>
+          <textarea id="descricao" name="descricao" placeholder="Descreva detalhadamente o serviço que precisa..." required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span>📤</span> Enviar Solicitação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>Acheei</h4>
+        <p>Plataforma de intermediação de serviços que conecta clientes aos melhores profissionais da sua região.</p>
+      </div>
+      <div class="footer-section">
+        <h4>Para Profissionais</h4>
+        <ul>
+          <li><a href="cadastro.html">Cadastre-se</a></li>
+          <li><a href="#">Como funciona</a></li>
+          <li><a href="#">Dicas para profissionais</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Para Clientes</h4>
+        <ul>
+          <li><a href="#busca">Buscar profissionais</a></li>
+          <li><a href="#">Como solicitar</a></li>
+          <li><a href="#">Segurança</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Acheei. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
+

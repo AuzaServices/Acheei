@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acheei - Cadastro Profissional</title>
+  <meta name="description" content="Cadastre-se como profissional na Acheei e encontre novos clientes.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <style>
+    .cadastro-container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    .cadastro-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .cadastro-header { background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); color: var(--white); padding: 40px 32px; text-align: center; }
+    .cadastro-header h1 { font-size: 28px; margin-bottom: 8px; }
+    .cadastro-header p { color: rgba(255,255,255,0.8); font-size: 15px; }
+    .progress-container { display: flex; align-items: center; justify-content: center; padding: 32px 40px; background: var(--gray-bg); border-bottom: 1px solid var(--gray-lighter); }
+    .progress-step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--gray-light); }
+    .progress-step .step-number { width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--gray-lighter); color: var(--gray-medium); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; transition: var(--transition); }
+    .progress-step.active .step-number { background: var(--red-primary); color: var(--white); box-shadow: 0 0 0 4px rgba(255,0,0,0.2); }
+    .progress-step.completed .step-number { background: #28a745; color: var(--white); }
+    .progress-step .step-label { display: none; }
+    .progress-step.active .step-label, .progress-step.completed .step-label { display: inline; }
+    .progress-line { width: 60px; height: 2px; background: var(--gray-lighter); margin: 0 12px; }
+    .progress-line.completed { background: #28a745; }
+    .form-step { display: none; padding: 32px; animation: fadeIn 0.3s ease; }
+    .form-step.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .form-step h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--black-primary); }
+    .form-step .step-description { color: var(--gray-medium); font-size: 14px; margin-bottom: 24px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-step .form-group { margin-bottom: 20px; }
+    .form-step .form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; }
+    .form-step .form-group label .required { color: var(--red-primary); }
+    .form-step .form-group input, .form-step .form-group select { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 15px; transition: var(--transition); background: var(--white); }
+    .form-step .form-group input:focus, .form-step .form-group select:focus { outline: none; border-color: var(--red-primary); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); }
+    .form-step .form-group input.error, .form-step .form-group select.error { border-color: #dc3545; }
+    .error-message { display: none; color: #dc3545; font-size: 12px; margin-top: 4px; font-weight: 500; }
+    .error-message.show { display: block; }
+    .photo-upload { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; border: 2px dashed var(--gray-lighter); border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); background: var(--gray-bg); }
+    .photo-upload:hover { border-color: var(--red-primary); background: rgba(255,0,0,0.03); }
+    .photo-upload .upload-icon { font-size: 40px; color: var(--gray-light); }
+    .photo-upload p { font-size: 14px; color: var(--gray-medium); }
+    .photo-upload input[type="file"] { display: none; }
+    .photo-preview { width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--red-primary); display: none; }
+    .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .foto-upload-item { aspect-ratio: 1; border: 2px dashed var(--gray-lighter); border-radius: var(--radius-md); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); background: var(--gray-bg); position: relative; overflow: hidden; }
+    .foto-upload-item:hover { border-color: var(--red-primary); }
+    .foto-upload-item .upload-icon { font-size: 28px; color: var(--gray-light); }
+    .foto-upload-item p { font-size: 11px; color: var(--gray-medium); margin-top: 4px; }
+    .foto-upload-item input[type="file"] { display: none; }
+    .foto-upload-item img { position: absolute; width: 100%; height: 100%; object-fit: cover; }
+    .foto-upload-item .remove-foto { display: none; position: absolute; top: 6px; right: 6px; background: rgba(220,53,69,0.9); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1; z-index: 2; }
+    .foto-upload-item.has-image .remove-foto { display: flex; align-items: center; justify-content: center; }
+    .form-navigation { display: flex; justify-content: space-between; gap: 16px; padding: 24px 32px; border-top: 1px solid var(--gray-lighter); }
+    .form-navigation .btn { min-width: 140px; justify-content: center; }
+    .success-screen { display: none; text-align: center; padding: 60px 32px; }
+    .success-screen.show { display: block; animation: fadeIn 0.5s ease; }
+    .success-screen .success-icon { font-size: 80px; margin-bottom: 20px; display: block; }
+    .success-screen h2 { font-size: 28px; color: #28a745; margin-bottom: 12px; }
+    .success-screen p { color: var(--gray-medium); font-size: 16px; max-width: 400px; margin: 0 auto 8px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .fotos-grid { grid-template-columns: 1fr 1fr; } .progress-step .step-label { display: none !important; } .progress-line { width: 30px; } .cadastro-header h1 { font-size: 22px; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <nav class="navbar">
+      <a href="/" class="logo"><span>Acheei</span></a>
+      <div class="nav-links">
+        <a href="/">Inicio</a>
+        <a href="/#categorias">Categorias</a>
+        <a href="cadastro.html" class="btn btn-primary"><span>🔨</span> Cadastre-se como Profissional</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="cadastro-container">
+    <div class="cadastro-card">
+      <div class="cadastro-header">
+        <h1>Cadastre-se como Profissional</h1>
+        <p>Encontre novos clientes e faça seu negocio crescer</p>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-step active" data-step="1">
+          <span class="step-number">1</span>
+          <span class="step-label">Dados Pessoais</span>
+        </div>
+        <div class="progress-line" data-line="1"></div>
+        <div class="progress-step" data-step="2">
+          <span class="step-number">2</span>
+          <span class="step-label">Endereco</span>
+        </div>
+        <div class="progress-line" data-line="2"></div>
+        <div class="progress-step" data-step="3">
+          <span class="step-number">3</span>
+          <span class="step-label">Perfil</span>
+        </div>
+      </div>
+
+      <form id="cadastroForm" novalidate>
+        <div class="form-step active" id="step1">
+          <h3>Dados Pessoais</h3>
+          <p class="step-description">Informe seus dados basicos para comecar o cadastro</p>
+          <div class="form-group">
+            <label for="cpf">CPF <span class="required">*</span></label>
+            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" required maxlength="14">
+            <div class="error-message" id="cpfError">CPF inválido</div>
+          </div>
+          <div class="form-group">
+            <label for="data_nascimento">Data de Nascimento <span class="required">*</span></label>
+            <input type="date" id="data_nascimento" name="data_nascimento" required>
+            <div class="error-message" id="dataError">Data de nascimento inválida</div>
+          </div>
+        </div>
+
+        <div class="form-step" id="step2">
+          <h3>Endereco Completo</h3>
+          <p class="step-description">Informe seu endereco para clientes encontrarem voce</p>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="endereco">Rua <span class="required">*</span></label>
+              <input type="text" id="endereco" name="endereco" placeholder="Nome da rua" required>
+            </div>
+            <div class="form-group">
+              <label for="numero">Numero</label>
+              <input type="text" id="numero" name="numero" placeholder="N">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="bairro">Bairro <span class="required">*</span></label>
+              <input type="text" id="bairro" name="bairro" placeholder="Seu bairro" required>
+            </div>
+            <div class="form-group">
+              <label for="cidade">Cidade <span class="required">*</span></label>
+              <input type="text" id="cidade" name="cidade" placeholder="Sua cidade" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="estado">Estado <span class="required">*</span></label>
+              <select id="estado" name="estado" required>
+                <option value="">Selecione</option>
+                <option value="AC">Acre</option><option value="AL">Alagoas</option><option value="AP">Amapa</option>
+                <option value="AM">Amazonas</option><option value="BA">Bahia</option><option value="CE">Ceara</option>
+                <option value="DF">Distrito Federal</option><option value="ES">Espirito Santo</option><option value="GO">Goias</option>
+                <option value="MA">Maranhao</option><option value="MT">Mato Grosso</option><option value="MS">Mato Grosso do Sul</option>
+                <option value="MG">Minas Gerais</option><option value="PA">Para</option><option value="PB">Paraiba</option>
+                <option value="PR">Parana</option><option value="PE">Pernambuco</option><option value="PI">Piaui</option>
+                <option value="RJ">Rio de Janeiro</option><option value="RN">Rio Grande do Norte</option><option value="RS">Rio Grande do Sul</option>
+                <option value="RO">Rondonia</option><option value="RR">Roraima</option><option value="SC">Santa Catarina</option>
+                <option value="SP">Sao Paulo</option><option value="SE">Sergipe</option><option value="TO">Tocantins</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cep">CEP <span class="required">*</span></label>
+              <input type="text" id="cep" name="cep" placeholder="00000-000" required maxlength="9">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-step" id="step3">
+          <h3>Seu Perfil Profissional</h3>
+          <p class="step-description">Monte seu perfil para atrair clientes</p>
+          <div class="form-group">
+            <label for="nome_perfil">Nome de Perfil <span class="required">*</span></label>
+            <input type="text" id="nome_perfil" name="nome_perfil" placeholder="Como voce quer ser chamado" required>
+          </div>
+          <div class="form-group">
+            <label>Foto de Perfil</label>
+            <div class="photo-upload" id="fotoPerfilUpload">
+              <img class="photo-preview" id="fotoPerfilPreview" alt="Preview">
+              <span class="upload-icon">📸</span>
+              <p>Clique para adicionar sua foto de perfil</p>
+              <input type="file" id="foto_perfil" accept="image/*">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="profissao">Profissao exercida <span class="required">*</span></label>
+            <input type="text" id="profissao" name="profissao" placeholder="Ex: Eletricista, Pedreiro..." required>
+          </div>
+          <div class="form-group">
+            <label>Fotos de Servicos Realizados (ate 3)</label>
+            <div class="fotos-grid">
+              <div class="foto-upload-item" data-index="0">
+                <input type="file" accept="image/*" class="foto-servico-input">
+                <span class="upload-icon">📷</span>
+                <p>Foto 1</p>
+                <button type="button" class="remove-foto">&times;</button>
+              </div>
+              <div class="foto-upload-item" data-index="1">
+                <input type="file" accept="image/*" class="foto-servico-input">
+                <span class="upload-icon">📷</span>
+                <p>Foto 2</p>
+                <button type="button" class="remove-foto">&times;</button>
+              </div>
+              <div class="foto-upload-item" data-index="2">
+                <input type="file" accept="image/*" class="foto-servico-input">
+                <span class="upload-icon">📷</span>
+                <p>Foto 3</p>
+                <button type="button" class="remove-foto">&times;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-navigation">
+          <button type="button" class="btn btn-outline" id="prevBtn" style="visibility: hidden;">Voltar</button>
+          <button type="button" class="btn btn-primary" id="nextBtn">Proximo</button>
+          <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">Cadastrar</button>
+        </div>
+      </form>
+
+      <div class="success-screen" id="successScreen">
+        <span class="success-icon">🎉</span>
+        <h2>Cadastro Realizado!</h2>
+        <p>Seu perfil foi enviado para analise do administrador.</p>
+        <p>Assim que aprovado, voce aparecera nas buscas dos clientes.</p>
+        <a href="/" class="btn btn-primary btn-lg">Voltar para Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/cadastro.js"></script>
+</body>
+</html>
+
