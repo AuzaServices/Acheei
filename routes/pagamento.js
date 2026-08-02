@@ -73,7 +73,6 @@ module.exports = function(db, dbConnected) {
               pending: `${mp.APP_URL}/profissional.html?status=pending&solicitacao_id=${solicitacao_id}`,
               failure: `${mp.APP_URL}/profissional.html?status=failure&solicitacao_id=${solicitacao_id}`
             },
-            auto_return: 'approved',
             notification_url: `${mp.APP_URL}/api/pagamento/webhook`,
             external_reference: `solicitacao_${solicitacao_id}`,
             statement_descriptor: 'ACHEEI',
@@ -81,6 +80,11 @@ module.exports = function(db, dbConnected) {
               installments: 1
             }
           };
+
+          // auto_return só funciona com URLs HTTPS (produção)
+          if (mp.APP_URL.startsWith('https://')) {
+            preferenceData.auto_return = 'approved';
+          }
 
           const result = await mp.preference.create({ body: preferenceData });
 

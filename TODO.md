@@ -15,8 +15,17 @@ Substituir pagamento simulado por pagamento real via Mercado Pago Checkout Pro.
        - Redirecionar profissional ao Checkout Pro do Mercado Pago
        - `verificarRetornoPagamento()` para processar retorno do checkout
        - Passar `solicitacao_id` nos back_urls
+- [x] 8. Adicionar `MERCADO_PAGO_ACCESS_TOKEN` no arquivo `.env`
+- [x] 9. Adicionar `APP_URL=http://localhost:3000` no arquivo `.env`
+- [x] 10. Corrigir `routes/pagamento.js`: `auto_return` só quando URL é HTTPS
+- [x] 11. Reiniciar o servidor e validar endpoints:
+       - `POST /api/pagamento/preferencia` → preferência criada com sucesso (preference_id + init_point)
+       - `POST /api/pagamento/webhook` → webhook de teste recebido
+       - `POST /api/pagamento/verificar/:id` → status consultado corretamente
+       - `GET /api/pagamento/webhook` → webhook ativo
 
-## Pendente (usuário precisa fazer)
-- [ ] 8. Adicionar `MERCADO_PAGO_ACCESS_TOKEN=TEST-...` no arquivo `.env`
-- [ ] 9. Reiniciar o servidor (Ctrl+C no terminal atual e rodar `node server.js` de novo)
-</｜DSML｜content>
+## Observação
+O Access Token usado é de produção (`APP_USR-...`), não de teste (`TEST-...`).
+Para testar com cartão de teste, usar credenciais de teste do Mercado Pago.
+O chat é liberado automaticamente quando o pagamento é aprovado (via webhook ou verificação).
+
