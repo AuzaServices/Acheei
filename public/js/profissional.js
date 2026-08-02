@@ -200,8 +200,7 @@ function renderizarSolicitacoes() {
         '<h4>' + sol.cliente_nome + '</h4>' +
         '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
       '</div>' +
-      '<div class="info-grid">' +
-        '<div class="item"><div class="label">Telefone</div><div class="value">' + sol.cliente_telefone + '</div></div>' +
+'<div class="info-grid">' +
         '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
       '</div>' +
       '<div class="descricao">' + sol.descricao + '</div>' +

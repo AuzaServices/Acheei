@@ -265,11 +265,12 @@ function renderizarSolicitacoes(solicitacoes) {
     var sol = solicitacoes[i];
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
-    card.innerHTML =
+var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui é do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
+      card.innerHTML =
       '<div class="card-header"><h4>Solicitacao #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
       '<div class="info">' +
         '<div class="item"><div class="label">Cliente</div><div class="value">' + sol.cliente_nome + '</div></div>' +
-        '<div class="item"><div class="label">Telefone</div><div class="value">' + sol.cliente_telefone + '</div></div>' +
+        '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">💬 ' + sol.cliente_telefone + '</a></div></div>' +
         '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
         '<div class="item" style="grid-column:1/-1;"><div class="label">Descricao do Servico</div><div class="value">' + sol.descricao + '</div></div>' +
       '</div>';
