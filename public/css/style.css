@@ -997,6 +997,17 @@ img {
   animation: spin 0.8s ease-in-out infinite;
 }
 
+/* ==================== Icon SVG ==================== */
+.icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn .icon-svg {
+  font-size: 16px;
+}
+
 /* ==================== Empty State ==================== */
 .empty-state {
   text-align: center;

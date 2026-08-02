@@ -154,25 +154,25 @@ function renderizarTabela(tbodyId, profissionais) {
   }
   for (var i = 0; i < profissionais.length; i++) {
     var prof = profissionais[i];
-    var foto = prof.foto_perfil ? '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" class="foto-mini">' : '<div class="foto-mini-placeholder">👤</div>';
+    var foto = prof.foto_perfil ? '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" class="foto-mini">' : '<div class="foto-mini-placeholder">' + icon('user') + '</div>';
     var sc = prof.status_aprovacao;
     var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
     var acoes = gerarAcoes(prof);
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + foto + '</td><td><strong>' + prof.nome_perfil + '</strong></td><td>' + prof.cpf + '</td><td>' + prof.profissao + '</td><td>' + prof.cidade + '/' + prof.estado + '</td><td><span class="status-badge ' + sc + '">' + sl + '</span></td><td><div class="action-btns"><button class="btn btn-outline btn-sm" onclick="verDetalhes(' + prof.id + ')">👁️ Ver</button>' + acoes + '</div></td>';
+    tr.innerHTML = '<td>' + foto + '</td><td><strong>' + prof.nome_perfil + '</strong></td><td>' + prof.cpf + '</td><td>' + prof.profissao + '</td><td>' + prof.cidade + '/' + prof.estado + '</td><td><span class="status-badge ' + sc + '">' + sl + '</span></td><td><div class="action-btns"><button class="btn btn-outline btn-sm" onclick="verDetalhes(' + prof.id + ')">' + icon('eye') + ' Ver</button>' + acoes + '</div></td>';
     tbody.appendChild(tr);
   }
 }
 
 function gerarAcoes(prof) {
   if (prof.status_aprovacao === 'pendente') {
-    return '<button class="btn btn-success btn-sm" onclick="aprovarProfissional(' + prof.id + ')">✅ Aprovar</button><button class="btn btn-danger btn-sm" onclick="reprovarProfissional(' + prof.id + ')">❌ Reprovar</button>';
+    return '<button class="btn btn-success btn-sm" onclick="aprovarProfissional(' + prof.id + ')">' + icon('check') + ' Aprovar</button><button class="btn btn-danger btn-sm" onclick="reprovarProfissional(' + prof.id + ')">' + icon('x') + ' Reprovar</button>';
   }
   if (prof.status_aprovacao === 'aprovado') {
-    return '<button class="btn btn-danger btn-sm" onclick="reprovarProfissional(' + prof.id + ')">❌ Reprovar</button>';
+    return '<button class="btn btn-danger btn-sm" onclick="reprovarProfissional(' + prof.id + ')">' + icon('x') + ' Reprovar</button>';
   }
   if (prof.status_aprovacao === 'reprovado') {
-    return '<button class="btn btn-success btn-sm" onclick="aprovarProfissional(' + prof.id + ')">✅ Aprovar</button><button class="btn btn-danger btn-sm" onclick="deletarProfissional(' + prof.id + ')" style="background:#6c757d;border-color:#6c757d;">🗑️ Deletar</button>';
+    return '<button class="btn btn-success btn-sm" onclick="aprovarProfissional(' + prof.id + ')">' + icon('check') + ' Aprovar</button><button class="btn btn-danger btn-sm" onclick="deletarProfissional(' + prof.id + ')" style="background:#6c757d;border-color:#6c757d;">' + icon('trash') + ' Deletar</button>';
   }
   return '';
 }
@@ -196,8 +196,8 @@ async function reprovarProfissional(id) {
 }
 
 async function deletarProfissional(id) {
-  if (!confirm('⚠️ TEM CERTEZA? Esta ação irá DELETAR PERMANENTEMENTE este profissional, TODAS as suas fotos (Cloudinary) e solicitações relacionadas. Esta ação não pode ser desfeita!')) return;
-  if (!confirm('Confirmação final: deseja realmente excluir permanentemente este registro?')) return;
+  if (!confirm('ATENCAO! Esta acao ira DELETAR PERMANENTEMENTE este profissional, TODAS as suas fotos (Cloudinary) e solicitacoes relacionadas. Esta acao nao pode ser desfeita!')) return;
+  if (!confirm('Confirmacao final: deseja realmente excluir permanentemente este registro?')) return;
   var result = await apiRequest(API_BASE + '/admin/deletar/' + id, { method: 'DELETE' });
   if (result && result.success) {
     var msg = 'Profissional deletado permanentemente!';
@@ -258,19 +258,19 @@ function renderizarSolicitacoes(solicitacoes) {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
   if (solicitacoes.length === 0) {
-    container.innerHTML = '<div class="empty-state"><span class="icon">📋</span><h3>Nenhuma solicitacao recebida</h3><p>As solicitacoes de servicos dos clientes aparecerao aqui.</p></div>';
+    container.innerHTML = '<div class="empty-state"><span class="icon">' + icon('clipboard') + '</span><h3>Nenhuma solicitacao recebida</h3><p>As solicitacoes de servicos dos clientes aparecerao aqui.</p></div>';
     return;
   }
   for (var i = 0; i < solicitacoes.length; i++) {
     var sol = solicitacoes[i];
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
-var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui é do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
+var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
       card.innerHTML =
       '<div class="card-header"><h4>Solicitacao #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
       '<div class="info">' +
         '<div class="item"><div class="label">Cliente</div><div class="value">' + sol.cliente_nome + '</div></div>' +
-        '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">💬 ' + sol.cliente_telefone + '</a></div></div>' +
+        '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">' + icon('chat') + ' ' + sol.cliente_telefone + '</a></div></div>' +
         '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
         '<div class="item" style="grid-column:1/-1;"><div class="label">Descricao do Servico</div><div class="value">' + sol.descricao + '</div></div>' +
       '</div>';
