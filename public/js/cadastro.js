@@ -303,7 +303,33 @@ function setupServicoPhotos() {
 }
 
 // ============================================
-// Submit Form
+// Cloudinary Upload
+// ============================================
+async function uploadImageToCloudinary(base64Image, folder) {
+  const response = await fetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: base64Image, folder: folder })
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Erro no upload');
+  return result.data.url;
+}
+
+async function uploadMultipleToCloudinary(images, folder) {
+  if (images.length === 0) return [];
+  const response = await fetch(`${API_BASE}/upload/multiplas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ images: images, folder: folder })
+  });
+  const result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Erro no upload');
+  return result.data.map(item => item.url);
+}
+
+// ============================================
+// Submit Form (com Cloudinary)
 // ============================================
 async function submitForm(event) {
   event.preventDefault();
@@ -312,26 +338,41 @@ async function submitForm(event) {
 
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner"></span> Cadastrando...';
-
-  const fotosServicos = formData.fotos_servicos.filter(f => f !== null);
-
-  const data = {
-    cpf: document.getElementById('cpf').value,
-    data_nascimento: document.getElementById('data_nascimento').value,
-    endereco: document.getElementById('endereco').value.trim(),
-    numero: document.getElementById('numero').value.trim(),
-    bairro: document.getElementById('bairro').value.trim(),
-    cidade: document.getElementById('cidade').value.trim(),
-    estado: document.getElementById('estado').value,
-    cep: document.getElementById('cep').value,
-    nome_perfil: document.getElementById('nome_perfil').value.trim(),
-    foto_perfil: formData.foto_perfil || '',
-    profissao: document.getElementById('profissao').value.trim(),
-    fotos_servicos: fotosServicos
-  };
+  submitBtn.innerHTML = '<span class="spinner"></span> Enviando imagens...';
 
   try {
+    // Upload foto de perfil para Cloudinary
+    let fotoPerfilUrl = '';
+    if (formData.foto_perfil) {
+      submitBtn.innerHTML = '<span class="spinner"></span> Enviando foto de perfil...';
+      fotoPerfilUrl = await uploadImageToCloudinary(formData.foto_perfil, 'perfis');
+    }
+
+    // Upload fotos de serviço para Cloudinary
+    const fotosServicos = formData.fotos_servicos.filter(f => f !== null);
+    let fotosServicosUrls = [];
+    if (fotosServicos.length > 0) {
+      submitBtn.innerHTML = '<span class="spinner"></span> Enviando fotos dos servicos...';
+      fotosServicosUrls = await uploadMultipleToCloudinary(fotosServicos, 'servicos');
+    }
+
+    submitBtn.innerHTML = '<span class="spinner"></span> Cadastrando...';
+
+    const data = {
+      cpf: document.getElementById('cpf').value,
+      data_nascimento: document.getElementById('data_nascimento').value,
+      endereco: document.getElementById('endereco').value.trim(),
+      numero: document.getElementById('numero').value.trim(),
+      bairro: document.getElementById('bairro').value.trim(),
+      cidade: document.getElementById('cidade').value.trim(),
+      estado: document.getElementById('estado').value,
+      cep: document.getElementById('cep').value,
+      nome_perfil: document.getElementById('nome_perfil').value.trim(),
+      foto_perfil: fotoPerfilUrl,
+      profissao: document.getElementById('profissao').value.trim(),
+      fotos_servicos: fotosServicosUrls
+    };
+
     const response = await fetch(`${API_BASE}/profissionais`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -349,7 +390,7 @@ async function submitForm(event) {
     }
   } catch (error) {
     console.error('Erro ao cadastrar:', error);
-    showToast('Erro ao conectar com o servidor', 'error');
+    showToast(error.message || 'Erro ao conectar com o servidor', 'error');
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '✅ Cadastrar';

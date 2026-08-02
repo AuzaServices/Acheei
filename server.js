@@ -76,6 +76,7 @@ db.connect(function(err) {
 app.use('/api/profissionais', require('./routes/profissionais')(db, () => dbConnected));
 app.use('/api/solicitacoes', require('./routes/solicitacoes')(db, () => dbConnected));
 app.use('/api/admin', require('./routes/admin')(db, () => dbConnected));
+app.use('/api/upload', require('./routes/upload')());
 
 // Rota de fallback
 app.get('*', function(req, res, next) {
