@@ -15,7 +15,7 @@ module.exports = function(db, dbConnected) {
   // Listar profissionais aprovados (público)
   // ============================================
   router.get('/', function(req, res) {
-    if (!dbConnected) {
+    if (!dbConnected()) {
       return res.json({ success: true, data: mockProfissionais, total: mockProfissionais.length });
     }
     var cidade = req.query.cidade;
@@ -56,6 +56,9 @@ module.exports = function(db, dbConnected) {
   // Listar todas os profissionais (admin)
   // ============================================
   router.get('/todas', (req, res) => {
+    if (!dbConnected()) {
+      return res.json({ success: true, data: [], message: 'Banco de dados indisponível' });
+    }
     db.query('SELECT * FROM profissionais ORDER BY data_cadastro DESC', (err, results) => {
       if (err) {
         console.error('Erro ao buscar profissionais:', err);
@@ -82,6 +85,9 @@ module.exports = function(db, dbConnected) {
   // Listar categorias únicas (para autocomplete)
   // ============================================
   router.get('/categorias', (req, res) => {
+    if (!dbConnected()) {
+      return res.json({ success: true, data: [] });
+    }
     db.query(
       "SELECT DISTINCT profissao FROM profissionais WHERE status_aprovacao = 'aprovado' ORDER BY profissao",
       (err, results) => {
@@ -105,6 +111,9 @@ module.exports = function(db, dbConnected) {
   // Buscar profissional por ID
   // ============================================
   router.get('/:id', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
     db.query(
       'SELECT * FROM profissionais WHERE id = ?',
       [req.params.id],
@@ -140,6 +149,9 @@ module.exports = function(db, dbConnected) {
   // Cadastro de profissional (3 etapas)
   // ============================================
   router.post('/', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
     const {
       cpf,
       data_nascimento,

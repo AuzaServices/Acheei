@@ -37,6 +37,9 @@ module.exports = function(db, dbConnected) {
   // Autenticação do administrador
   // ============================================
   router.post('/login', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
     const { usuario, senha } = req.body;
 
     if (!usuario || !senha) {
@@ -122,6 +125,9 @@ module.exports = function(db, dbConnected) {
   // Aprovar profissional
   // ============================================
   router.put('/aprovar/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
     db.query(
       "UPDATE profissionais SET status_aprovacao = 'aprovado' WHERE id = ?",
       [req.params.id],
@@ -154,6 +160,9 @@ module.exports = function(db, dbConnected) {
   // Reprovar profissional
   // ============================================
   router.put('/reprovar/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
     db.query(
       "UPDATE profissionais SET status_aprovacao = 'reprovado' WHERE id = ?",
       [req.params.id],
@@ -186,6 +195,9 @@ module.exports = function(db, dbConnected) {
   // Criar novo administrador (protegido)
   // ============================================
   router.post('/criar', authMiddleware, async (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
     const { usuario, senha } = req.body;
 
     if (!usuario || !senha) {

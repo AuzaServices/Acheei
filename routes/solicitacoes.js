@@ -11,6 +11,9 @@ module.exports = function(db, dbConnected) {
   // Cliente solicita serviço a um profissional
   // ============================================
   router.post('/', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
     const { cliente_nome, cliente_telefone, descricao, profissional_id } = req.body;
 
     // Validações
@@ -81,6 +84,9 @@ module.exports = function(db, dbConnected) {
   // Listar solicitações de um profissional
   // ============================================
   router.get('/profissional/:id', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
     db.query(
       'SELECT * FROM solicitacoes WHERE profissional_id = ? ORDER BY data_solicitacao DESC',
       [req.params.id],
@@ -107,6 +113,9 @@ module.exports = function(db, dbConnected) {
   // Listar todas as solicitações (admin)
   // ============================================
   router.get('/', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
     db.query(
       `SELECT s.*, p.nome_perfil, p.profissao 
        FROM solicitacoes s 

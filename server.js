@@ -72,10 +72,10 @@ db.connect(function(err) {
   }
 });
 
-// Rotas
-app.use('/api/profissionais', require('./routes/profissionais')(db, dbConnected));
-app.use('/api/solicitacoes', require('./routes/solicitacoes')(db, dbConnected));
-app.use('/api/admin', require('./routes/admin')(db, dbConnected));
+// Rotas (passa getter para acompanhar status ao vivo da conexão)
+app.use('/api/profissionais', require('./routes/profissionais')(db, () => dbConnected));
+app.use('/api/solicitacoes', require('./routes/solicitacoes')(db, () => dbConnected));
+app.use('/api/admin', require('./routes/admin')(db, () => dbConnected));
 
 // Rota de fallback
 app.get('*', function(req, res, next) {
