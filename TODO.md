@@ -1,31 +1,31 @@
-# TODO - Integração Mercado Pago (Checkout Pro)
+# TODO - Upgrade Chat com Notificações Push e Widget Messenger
 
 ## Objetivo
-Substituir pagamento simulado por pagamento real via Mercado Pago Checkout Pro.
+Implementar notificações push (Chrome/Google), bloquear cadastro/solicitação até aceitar notificações, e criar chat estilo Messenger com bolha pulsante.
 
-## Passos Concluídos
-- [x] 1. Instalar SDK `mercadopago` via npm
-- [x] 2. Criar `config/mercadopago.js` (configuração SDK + helpers)
-- [x] 3. Criar `routes/pagamento.js` (preferencia, webhook, verificar, confirmar)
-- [x] 4. Registrar rota `/api/pagamento` no `server.js`
-- [x] 5. Adicionar coluna `preference_id` na tabela `solicitacoes`
-- [x] 6. Atualizar `database/schema.sql` com coluna `preference_id`
-- [x] 7. Atualizar `public/js/profissional.js`:
-       - Substituir `PUT /solicitacoes/:id/pagar` por `POST /api/pagamento/preferencia`
-       - Redirecionar profissional ao Checkout Pro do Mercado Pago
-       - `verificarRetornoPagamento()` para processar retorno do checkout
-       - Passar `solicitacao_id` nos back_urls
-- [x] 8. Adicionar `MERCADO_PAGO_ACCESS_TOKEN` no arquivo `.env`
-- [x] 9. Adicionar `APP_URL=http://localhost:3000` no arquivo `.env`
-- [x] 10. Corrigir `routes/pagamento.js`: `auto_return` só quando URL é HTTPS
-- [x] 11. Reiniciar o servidor e validar endpoints:
-       - `POST /api/pagamento/preferencia` → preferência criada com sucesso (preference_id + init_point)
-       - `POST /api/pagamento/webhook` → webhook de teste recebido
-       - `POST /api/pagamento/verificar/:id` → status consultado corretamente
-       - `GET /api/pagamento/webhook` → webhook ativo
+## Backend
+- [ ] 1. Instalar `web-push` (npm)
+- [ ] 2. Criar `config/push.js` (configuração VAPID + helpers)
+- [ ] 3. Adicionar coluna `push_subscription` na tabela `clientes` (schema.sql + migration)
+- [ ] 4. `routes/clientes.js`: endpoint `POST /api/clientes/push-subscription`
+- [ ] 5. `routes/mensagens.js`: enviar notificação push quando profissional enviar mensagem
 
-## Observação
-O Access Token usado é de produção (`APP_USR-...`), não de teste (`TEST-...`).
-Para testar com cartão de teste, usar credenciais de teste do Mercado Pago.
-O chat é liberado automaticamente quando o pagamento é aprovado (via webhook ou verificação).
+## Frontend - Notificações
+- [ ] 6. Criar `public/sw.js` (service worker para exibir notificações)
+- [ ] 7. Criar `public/js/push.js` (register, subscribe, save subscription)
+- [ ] 8. `public/cliente.html`: botão "Criar Conta" travado até aceitar notificações
+- [ ] 9. `public/js/cliente.js`: fluxo de aceitar notificações antes do cadastro
+- [ ] 10. `public/index.html`: botão "Enviar Solicitação" travado até aceitar notificações
+- [ ] 11. `public/js/main.js`: pedir permissão e liberar botão
+
+## Frontend - Chat Messenger
+- [ ] 12. `public/cliente.html`: widget de chat flutuante (bolha mínimizada + painel)
+- [ ] 13. `public/js/cliente.js`: polling de novas mensagens + bolha pulsante
+- [ ] 14. `public/css/style.css`: estilos do widget de chat flutuante
+
+## Testes
+- [ ] 15. Testar cadastro exige aceitar notificações
+- [ ] 16. Testar envio de solicitação exige aceitar notificações
+- [ ] 17. Testar notificação push ao profissional enviar mensagem
+- [ ] 18. Testar widget de chat Messenger pulsando com nova mensagem
 

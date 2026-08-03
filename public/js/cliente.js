@@ -78,6 +78,42 @@ function switchAuthTab(tab) {
   document.getElementById('loginError').style.display = 'none';
   document.getElementById('cadastroError').style.display = 'none';
   document.getElementById('cadastroSuccess').style.display = 'none';
+  if (tab === 'cadastro') {
+    document.getElementById('pushNotice').style.display = 'block';
+    atualizarEstadoBotaoCadastro();
+  }
+}
+
+// ============================================
+// Notificações Push - Cadastro
+// ============================================
+var notificacoesAceitas = localStorage.getItem('acheei_notificacoes') === 'true';
+
+function atualizarEstadoBotaoCadastro() {
+  var btn = document.getElementById('btnCriarConta');
+  if (notificacoesAceitas) {
+    btn.disabled = false;
+    btn.innerHTML = 'Criar Conta';
+  } else {
+    btn.disabled = true;
+    btn.innerHTML = '🔕 Aceite as notificações para continuar';
+  }
+}
+
+async function ativarNotificacoesCadastro() {
+  var btn = document.querySelector('#pushNotice .btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Ativando...';
+  var ok = await ativarNotificacoes();
+  if (ok) {
+    notificacoesAceitas = true;
+    localStorage.setItem('acheei_notificacoes', 'true');
+    document.getElementById('pushNotice').innerHTML = '✅ <strong>Notificações ativadas!</strong> <p style="margin:8px 0 0;">Agora você pode criar sua conta normalmente.</p>';
+    atualizarEstadoBotaoCadastro();
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '🔔 Aceitar Notificações';
+  }
 }
 
 function mostrarAuth() {
@@ -408,6 +444,217 @@ async function verificarToken() {
 }
 
 // ============================================
+// Widget de Chat Flutuante (Messenger)
+// ============================================
+var widgetSolicitacoesCache = [];
+var widgetChatInterval = null;
+var widgetUltimasMensagens = {};
+var widgetPainelAberto = false;
+
+function mostrarWidgetChat() {
+  var widget = document.getElementById('chatWidget');
+  if (widget) widget.classList.add('active');
+}
+
+function esconderWidgetChat() {
+  var widget = document.getElementById('chatWidget');
+  if (widget) widget.classList.remove('active');
+}
+
+function toggleChatPainel() {
+  var panel = document.getElementById('chatPanel');
+  var isOpen = panel.classList.contains('open');
+  widgetPainelAberto = !isOpen;
+  if (isOpen) {
+    panel.classList.remove('open');
+  } else {
+    panel.classList.add('open');
+    // Zera badge e pulsação ao abrir
+    var bubble = document.getElementById('chatBubble');
+    bubble.classList.remove('pulse');
+    var badge = document.getElementById('chatBadge');
+    badge.classList.remove('show');
+    badge.textContent = '0';
+    widgetCarregarSolicitacoes();
+  }
+}
+
+async function widgetCarregarSolicitacoes() {
+  var result = await apiRequest(API_BASE + '/clientes/solicitacoes');
+  if (!result || !result.success) return;
+
+  widgetSolicitacoesCache = result.data;
+  var select = document.getElementById('widgetChatSelect');
+  var currentVal = select.value;
+  select.innerHTML = '<option value="">Selecione uma conversa...</option>';
+
+  for (var i = 0; i < result.data.length; i++) {
+    var sol = result.data[i];
+    var option = document.createElement('option');
+    option.value = sol.id;
+    option.textContent = sol.nome_perfil + ' - ' + sol.profissao;
+    select.appendChild(option);
+  }
+
+  if (currentVal && currentVal !== '') {
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === currentVal) {
+        select.value = currentVal;
+        break;
+      }
+    }
+  }
+
+  if (select.value) widgetCarregarChat();
+}
+
+function widgetCarregarChat() {
+  var select = document.getElementById('widgetChatSelect');
+  var solicitacaoId = select.value;
+  var body = document.getElementById('widgetChatBody');
+  var footer = document.getElementById('widgetChatFooter');
+
+  if (widgetChatInterval) {
+    clearInterval(widgetChatInterval);
+    widgetChatInterval = null;
+  }
+
+  if (!solicitacaoId) {
+    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa</p></div>';
+    footer.style.display = 'none';
+    return;
+  }
+
+  footer.style.display = 'flex';
+  widgetCarregarMensagens(solicitacaoId);
+
+  // Polling a cada 5s
+  widgetChatInterval = setInterval(function() {
+    widgetCarregarMensagens(solicitacaoId);
+  }, 5000);
+}
+
+async function widgetCarregarMensagens(solicitacaoId) {
+  var result = await apiRequest(API_BASE + '/clientes/mensagens/' + solicitacaoId);
+  if (!result || !result.success) return;
+
+  var body = document.getElementById('widgetChatBody');
+  var mensagens = result.data;
+
+  // Guarda as mensagens para detectar novas
+  if (!widgetUltimasMensagens[solicitacaoId]) {
+    widgetUltimasMensagens[solicitacaoId] = 0;
+  }
+
+  var novas = [];
+  for (var i = 0; i < mensagens.length; i++) {
+    if (mensagens[i].id > widgetUltimasMensagens[solicitacaoId]) {
+      novas.push(mensagens[i]);
+    }
+  }
+
+  // Atualiza último id
+  if (mensagens.length > 0) {
+    widgetUltimasMensagens[solicitacaoId] = mensagens[mensagens.length - 1].id;
+  }
+
+  // Detecta novas mensagens do profissional (não lidas)
+  var select = document.getElementById('widgetChatSelect');
+  var chatAberto = widgetPainelAberto && select.value === solicitacaoId;
+  var qtdeNovaProfissional = 0;
+  for (var j = 0; j < novas.length; j++) {
+    if (novas[j].remetente === 'profissional') {
+      qtdeNovaProfissional++;
+    }
+  }
+
+  // Se tem novas mensagens do profissional e o chat não está aberto nessa conversa
+  if (qtdeNovaProfissional > 0 && !chatAberto) {
+    var bubble = document.getElementById('chatBubble');
+    bubble.classList.add('pulse');
+    var badge = document.getElementById('chatBadge');
+    var count = parseInt(badge.textContent) || 0;
+    badge.textContent = count + qtdeNovaProfissional;
+    badge.classList.add('show');
+  }
+
+  // Só renderiza se for a conversa selecionada no widget
+  if (select.value === solicitacaoId) {
+    body.setAttribute('data-solicitacao', solicitacaoId);
+    renderizarWidgetChat(mensagens);
+  }
+}
+
+function renderizarWidgetChat(mensagens) {
+  var body = document.getElementById('widgetChatBody');
+  body.innerHTML = '';
+
+  if (mensagens.length === 0) {
+    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Nenhuma mensagem ainda. Envie algo!</p></div>';
+    return;
+  }
+
+  for (var i = 0; i < mensagens.length; i++) {
+    var msg = mensagens[i];
+    var div = document.createElement('div');
+    div.className = 'chat-panel-msg ' + (msg.remetente === 'cliente' ? 'cliente' : 'profissional');
+    var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
+    body.appendChild(div);
+  }
+  body.scrollTop = body.scrollHeight;
+}
+
+async function widgetEnviarMensagem() {
+  var select = document.getElementById('widgetChatSelect');
+  var solicitacaoId = select.value;
+  var input = document.getElementById('widgetChatInput');
+  var texto = input.value.trim();
+
+  if (!solicitacaoId) {
+    showToast('Selecione uma conversa', 'error');
+    return;
+  }
+  if (!texto) return;
+
+  input.value = '';
+  var result = await apiRequest(API_BASE + '/clientes/mensagens', {
+    method: 'POST',
+    body: JSON.stringify({ solicitacao_id: parseInt(solicitacaoId), texto: texto })
+  });
+
+  if (result && result.success) {
+    await widgetCarregarMensagens(solicitacaoId);
+    // Se havia pulsação, remove (usuário respondeu)
+    var bubble = document.getElementById('chatBubble');
+    bubble.classList.remove('pulse');
+  }
+}
+
+// ============================================
+// Salvar assinatura push após login/cadastro
+// ============================================
+(async function() {
+  var loginOriginal = login;
+  login = async function(event) {
+    await loginOriginal(event);
+    if (token) {
+      await salvarAssinaturaPush();
+      mostrarWidgetChat();
+    }
+  };
+
+  var cadastroOriginal = cadastrar;
+  cadastrar = async function(event) {
+    await cadastroOriginal(event);
+    if (token) {
+      await salvarAssinaturaPush();
+      mostrarWidgetChat();
+    }
+  };
+})();
+
+// ============================================
 // Initialize
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
@@ -416,5 +663,18 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('cadastroTelefone').addEventListener('input', function(e) {
     e.target.value = formatTelefone(e.target.value);
   });
-  verificarToken();
+
+  // Inicializar push
+  if ('Notification' in window && Notification.permission === 'granted') {
+    registrarServiceWorker();
+  }
+
+  // Se já está logado (token válido), mostrar o widget
+  if (token) {
+    verificarToken().then(function() {
+      mostrarWidgetChat();
+    });
+  } else {
+    verificarToken();
+  }
 });

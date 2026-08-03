@@ -222,6 +222,39 @@ module.exports = function(db, dbConnected) {
   });
 
   // ============================================
+  // POST /api/clientes/push-subscription
+  // Salvar assinatura push do cliente logado
+  // ============================================
+  router.post('/push-subscription', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const { subscription } = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ success: false, message: 'Assinatura push inválida' });
+    }
+
+    // Salvar como JSON string (LONGTEXT)
+    const subStr = JSON.stringify(subscription);
+
+    db.query(
+      'UPDATE clientes SET push_subscription = ? WHERE id = ?',
+      [subStr, req.cliente.id],
+      (err, result) => {
+        if (err) {
+          console.error('Erro ao salvar assinatura push:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao salvar assinatura push' });
+        }
+        res.json({
+          success: true,
+          message: 'Notificações ativadas com sucesso!',
+          data: { ativo: true }
+        });
+      }
+    );
+  });
+
+  // ============================================
   // GET /api/clientes/mensagens/:solicitacao_id
   // Mensagens do chat de uma solicitação
   // ============================================

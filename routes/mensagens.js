@@ -3,6 +3,7 @@
 // ============================================
 const express = require('express');
 const router = express.Router();
+const { notificarCliente } = require('../config/push');
 
 module.exports = function(db, dbConnected) {
 
@@ -79,6 +80,33 @@ module.exports = function(db, dbConnected) {
           console.error('Erro ao enviar mensagem:', err);
           return res.status(500).json({ success: false, message: 'Erro ao enviar mensagem' });
         }
+
+        // Se mensagem foi do profissional, enviar notificação push para o cliente
+        if (remetente === 'profissional') {
+          // Buscar dados do profissional e do cliente para a notificação
+          db.query(
+            `SELECT s.cliente_id, s.cliente_nome, p.nome_perfil, p.profissao
+             FROM solicitacoes s
+             LEFT JOIN profissionais p ON s.profissional_id = p.id
+             WHERE s.id = ?`,
+            [solicitacao_id],
+            (err2, solResults) => {
+              if (!err2 && solResults.length > 0 && solResults[0].cliente_id) {
+                const sol = solResults[0];
+                const textoCurto = texto.trim().substring(0, 100) + (texto.trim().length > 100 ? '...' : '');
+                const payload = {
+                  title: `💬 ${sol.nome_perfil} (${sol.profissao})`,
+                  body: textoCurto,
+                  tag: `chat_${solicitacao_id}`,
+                  url: `/cliente.html?chat=${solicitacao_id}`,
+                  solicitacao_id: solicitacao_id
+                };
+                notificarCliente(db, sol.cliente_id, payload).catch(() => {});
+              }
+            }
+          );
+        }
+
         res.status(201).json({
           success: true,
           message: 'Mensagem enviada!',

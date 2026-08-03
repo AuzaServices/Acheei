@@ -206,6 +206,11 @@
         <div style="background:var(--gray-bg);padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:13px;color:var(--gray-medium);">
           Crie sua conta ou faça login para acompanhar seus orçamentos
         </div>
+        <div class="push-notice-modal" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;font-size:13px;color:#856404;">
+          <strong>🔔 Ative as notificações!</strong>
+          <p style="margin:6px 0 0;">Precisamos da sua autorização para enviar notificações quando o profissional responder.</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacaoSolicitacao()" style="width:100%;justify-content:center;margin-top:8px;">🔔 Aceitar Notificações</button>
+        </div>
         <div class="form-group">
           <label for="clienteNome">Seu Nome</label>
           <input type="text" id="clienteNome" name="cliente_nome" placeholder="Digite seu nome completo" required>
@@ -263,6 +268,7 @@
   </footer>
 
   <script src="js/icons.js"></script>
+  <script src="js/push.js"></script>
   <script src="js/main.js"></script>
   <script>
     // Mobile Menu Toggle

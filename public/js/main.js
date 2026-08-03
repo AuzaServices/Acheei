@@ -209,18 +209,40 @@ function setupAutocomplete() {
 // ============================================
 // Modal de Solicitação
 // ============================================
+var pushNoticeAceito = localStorage.getItem('acheei_notificacoes') === 'true';
+
 function abrirModalSolicitacao(id, nome, profissao) {
   document.getElementById('modalProfissionalId').value = id;
   document.getElementById('modalProfissionalNome').textContent = nome;
   document.getElementById('modalProfissionalProfissao').textContent = profissao;
   document.getElementById('solicitacaoModal').classList.add('active');
   document.body.style.overflow = 'hidden';
+
+  // Mostrar aviso de notificações se ainda não aceitou
+  var pushNotice = document.querySelector('.push-notice-modal');
+  if (pushNotice && !pushNoticeAceito && Notification.permission !== 'granted') {
+    pushNotice.style.display = 'block';
+  }
 }
 
 function fecharModal() {
   document.getElementById('solicitacaoModal').classList.remove('active');
   document.getElementById('solicitacaoForm').reset();
   document.body.style.overflow = '';
+}
+
+// Função para ativar notificações no modal da index
+async function ativarNotificacaoSolicitacao() {
+  var ok = await ativarNotificacoes();
+  if (ok) {
+    pushNoticeAceito = true;
+    localStorage.setItem('acheei_notificacoes', 'true');
+    var pushNotice = document.querySelector('.push-notice-modal');
+    if (pushNotice) {
+      pushNotice.innerHTML = '✅ <strong>Notificações ativadas!</strong>';
+      pushNotice.style.borderColor = '#28a745';
+    }
+  }
 }
 
 // ============================================

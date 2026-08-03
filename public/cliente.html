@@ -7,6 +7,7 @@
   <meta name="description" content="Acompanhe seus orçamentos e converse com profissionais.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
   <style>
     .cliente-body { background: #f0f0f0; }
     .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
@@ -27,6 +28,8 @@
     .auth-form .btn { width: 100%; justify-content: center; padding: 14px; font-size: 16px; }
     .auth-error { color: #dc3545; font-size: 14px; text-align: center; margin-top: 12px; display: none; }
     .auth-success { color: #28a745; font-size: 14px; text-align: center; margin-top: 12px; display: none; }
+    .push-notice { background: #fff3cd; border: 1px solid #ffc107; border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: #856404; display: none; }
+    .push-notice .btn { margin-top: 8px; }
     .dashboard { display: none; min-height: 100vh; }
     .dashboard-header { background: var(--white); box-shadow: var(--shadow-sm); padding: 0 20px; position: sticky; top: 0; z-index: 100; }
     .dashboard-nav { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
@@ -82,7 +85,38 @@
     .chat-input-area .btn { padding: 12px 20px; }
     .chat-selector { margin-bottom: 16px; }
     .chat-selector select { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 15px; }
-    @media (max-width: 768px) { .dashboard-tabs { flex-direction: column; } .solicitacao-card .card-header { flex-direction: column; } }
+    /* Widget de Chat Flutuante (Messenger) */
+    .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none; }
+    .chat-widget.active { display: block; }
+    .chat-bubble { width: 60px; height: 60px; border-radius: 50%; background: var(--red-primary); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-lg); transition: var(--transition); border: none; position: relative; }
+    .chat-bubble:hover { transform: scale(1.1); background: var(--red-dark); }
+    .chat-bubble.pulse { animation: pulseBubble 1.5s ease-in-out infinite; }
+    @keyframes pulseBubble { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,0,0,0.5); } 50% { box-shadow: 0 0 0 20px rgba(255,0,0,0); } }
+    .chat-badge { position: absolute; top: -5px; right: -5px; background: #ffc107; color: #000; font-size: 12px; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
+    .chat-badge.show { display: flex; }
+    .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; max-width: calc(100vw - 40px); max-height: 500px; background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); overflow: hidden; display: none; flex-direction: column; animation: slideUpChat 0.3s ease; z-index: 9998; }
+    .chat-panel.open { display: flex; }
+    @keyframes slideUpChat { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--red-primary); color: var(--white); }
+    .chat-panel-header h4 { font-size: 16px; font-weight: 700; }
+    .chat-panel-header button { background: none; border: none; color: var(--white); font-size: 20px; cursor: pointer; padding: 4px; }
+    .chat-panel-body { flex: 1; overflow-y: auto; padding: 12px; min-height: 300px; max-height: 350px; }
+    .chat-panel-empty { text-align: center; padding: 40px 20px; color: var(--gray-medium); font-size: 14px; }
+    .chat-panel-empty .icon { font-size: 48px; display: block; margin-bottom: 12px; }
+    .chat-panel-footer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--gray-lighter); }
+    .chat-panel-footer input { flex: 1; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
+    .chat-panel-footer input:focus { outline: none; border-color: var(--red-primary); }
+    .chat-panel-footer .btn { padding: 10px 16px; }
+    .chat-panel-msg { margin-bottom: 12px; }
+    .chat-panel-msg .bubble { max-width: 85%; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.4; }
+    .chat-panel-msg.cliente { display: flex; justify-content: flex-end; }
+    .chat-panel-msg.cliente .bubble { background: var(--red-primary); color: var(--white); border-bottom-right-radius: 4px; }
+    .chat-panel-msg.profissional .bubble { background: var(--gray-bg); color: var(--black-primary); border-bottom-left-radius: 4px; }
+    .chat-panel-msg .time { font-size: 10px; color: var(--gray-light); margin-top: 4px; }
+    .chat-panel-msg.cliente .time { text-align: right; color: rgba(255,255,255,0.7); }
+    .chat-panel-select { padding: 12px; border-bottom: 1px solid var(--gray-lighter); }
+    .chat-panel-select select { width: 100%; padding: 10px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 13px; }
+    @media (max-width: 768px) { .dashboard-tabs { flex-direction: column; } .solicitacao-card .card-header { flex-direction: column; } .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; } }
   </style>
 </head>
 <body class="cliente-body">
@@ -112,6 +146,11 @@
     </form>
 
     <form class="auth-form" id="cadastroForm">
+      <div class="push-notice" id="pushNotice">
+        <strong>🔔 Ative as notificações!</strong>
+        <p style="margin: 8px 0 0;">Precisamos da sua autorização para enviar notificações quando o profissional responder. Você receberá alerts no navegador.</p>
+        <button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacoesCadastro()" style="width:100%;justify-content:center;">🔔 Aceitar Notificações</button>
+      </div>
       <div class="form-group">
         <label for="cadastroNome">Nome Completo</label>
         <input type="text" id="cadastroNome" placeholder="Seu nome" required>
@@ -128,12 +167,11 @@
         <label for="cadastroTelefone">Telefone</label>
         <input type="tel" id="cadastroTelefone" placeholder="(11) 99999-9999">
       </div>
-      <button type="submit" class="btn btn-primary btn-lg">Criar Conta</button>
+      <button type="submit" class="btn btn-primary btn-lg" id="btnCriarConta" disabled>Criar Conta</button>
       <div class="auth-error" id="cadastroError"></div>
       <div class="auth-success" id="cadastroSuccess">Conta criada! Entrando...</div>
     </form>
   </div>
-</div>
 
 <div class="dashboard" id="dashboard">
   <header class="dashboard-header">
@@ -161,11 +199,9 @@
 
     <div class="tab-content active" id="tabSolicitacoes">
       <div id="solicitacoesList"></div>
-    </div>
 
     <div class="tab-content" id="tabOrcamentos">
       <div id="orcamentosList"></div>
-    </div>
 
     <div class="tab-content" id="tabChat">
       <div class="chat-selector">
@@ -179,17 +215,45 @@
           <input type="text" id="chatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') enviarMensagemCliente()">
           <button class="btn btn-primary" onclick="enviarMensagemCliente()">Enviar</button>
         </div>
-      </div>
       <div id="chatEmptyState" class="empty-state">
         <span class="icon">💬</span>
         <h3>Selecione uma solicitação</h3>
         <p>Escolha uma solicitação acima para conversar com o profissional.</p>
       </div>
-    </div>
   </div>
+
+<!-- Widget de Chat Flutuante (Messenger) -->
+<div class="chat-widget" id="chatWidget">
+  <button class="chat-bubble" id="chatBubble" onclick="toggleChatPainel()">
+    💬
+    <span class="chat-badge" id="chatBadge">0</span>
+  </button>
 </div>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-panel-header">
+    <h4>💬 Conversas</h4>
+    <button onclick="toggleChatPainel()">&times;</button>
+  </div>
+  <div class="chat-panel-select">
+    <select id="widgetChatSelect" onchange="widgetCarregarChat()">
+      <option value="">Selecione uma conversa...</option>
+    </select>
+  </div>
+  <div class="chat-panel-body" id="widgetChatBody">
+    <div class="chat-panel-empty">
+      <span class="icon">💬</span>
+      <p>Selecione uma conversa acima</p>
+    </div>
+  <div class="chat-panel-footer" id="widgetChatFooter" style="display:none;">
+    <input type="text" id="widgetChatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') widgetEnviarMensagem()">
+    <button class="btn btn-primary" onclick="widgetEnviarMensagem()">Enviar</button>
+  </div>
 
 <script src="js/icons.js"></script>
+<script src="js/push.js"></script>
 <script src="js/cliente.js"></script>
 </body>
 </html>
+</｜DSML｜content>
+</｜DSML｜invoke>
+</｜DSML｜tool_calls>
