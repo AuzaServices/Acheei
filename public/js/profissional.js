@@ -271,17 +271,25 @@ function copiarChavePix() {
 
 async function verificarStatusPix(solicitacaoId) {
   if (!solicitacaoId) return;
-  var result = await apiRequest(API_BASE + '/pagamento/status/' + solicitacaoId);
+
+  // Consulta o Mercado Pago diretamente (não apenas o banco local),
+  // para detectar o pagamento mesmo sem o webhook chegar (ex: localhost)
+  var result = await apiRequest(API_BASE + '/pagamento/verificar/' + solicitacaoId, { method: 'POST' });
+
   if (result && result.success && result.data) {
     if (result.data.status_pagamento === 'pago') {
       if (pixTimer) { clearInterval(pixTimer); pixTimer = null; }
       fecharModalPix();
       showToast('✅ Pagamento confirmado! Chat liberado!', 'success');
+
+      // Atualiza o badge/botão na lista
       var btn = document.querySelector('button[onclick*="pagarSolicitacao(' + solicitacaoId + ')"]');
       if (btn) {
         btn.outerHTML = '<span class="badge pago">✅ Pago</span>';
       }
       await carregarSolicitacoes();
+    } else {
+      console.log('Pagamento ainda pendente para solicitação #' + solicitacaoId);
     }
   }
 }
