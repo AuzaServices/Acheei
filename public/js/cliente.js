@@ -235,7 +235,7 @@ function renderizarSolicitacoes(solicitacoes) {
   for (var i = 0; i < solicitacoes.length; i++) {
     var sol = solicitacoes[i];
     var foto = sol.foto_perfil ? '<img src="' + sol.foto_perfil + '" class="foto">' : '<div class="foto-placeholder">👤</div>';
-    var pagamento = sol.status_pagamento === 'pago' ? '<span class="status-badge" style="background:#d4edda;color:#155724;">✅ Pago - Chat liberado</span>' : '<span class="status-badge pendente">⏳ Aguardando pagamento</span>';
+    var pagamento = sol.status_pagamento === 'pago' ? '<span class="status-badge" style="background:#d4edda;color:#155724;">Chat liberado</span>' : '<span class="status-badge pendente">Aguarde a liberação do Chat</span>';
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
     card.innerHTML =

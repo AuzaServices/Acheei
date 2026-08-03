@@ -188,10 +188,10 @@ function renderizarSolicitacoes() {
     var sol = solicitacoesData[i];
     var statusPag = sol.status_pagamento || 'pendente';
     var badgeHtml = statusPag === 'pago'
-      ? '<span class="badge pago">✅ Pago</span>'
-      : '<span class="badge pendente">⏳ Pendente</span>';
+      ? '<span class="badge pago">Pago</span>'
+      : '<span class="badge pendente">Pendente</span>';
     var pagarBtn = statusPag === 'pendente'
-      ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">💳 Pagar R$14,99</button>'
+      ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
       : '';
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
@@ -285,7 +285,7 @@ async function verificarStatusPix(solicitacaoId) {
       // Atualiza o badge/botão na lista
       var btn = document.querySelector('button[onclick*="pagarSolicitacao(' + solicitacaoId + ')"]');
       if (btn) {
-        btn.outerHTML = '<span class="badge pago">✅ Pago</span>';
+        btn.outerHTML = '<span class="badge pago">Pago</span>';
       }
       await carregarSolicitacoes();
     } else {
@@ -558,7 +558,7 @@ async function carregarChatSolicitacoes() {
       var sol = result.data[i];
       var opt = document.createElement('option');
       opt.value = sol.id;
-      opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome + ' (' + (sol.status_pagamento === 'pago' ? '✅ Pago' : '⏳ Pendente') + ')';
+      opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome + ' (' + (sol.status_pagamento === 'pago' ? 'Pago' : 'Pendente') + ')';
       select.appendChild(opt);
     }
   }
@@ -683,13 +683,13 @@ function verificarRetornoPagamento() {
   }
 
   if (status === 'success') {
-    showToast('✅ Pagamento realizado com sucesso! Verificando...', 'info');
+    showToast('Pagamento realizado com sucesso! Verificando...', 'info');
 
     // Tenta verificar o pagamento no backend
     setTimeout(async function() {
       var result = await apiRequest(API_BASE + '/pagamento/verificar/' + solicitacaoId, { method: 'POST' });
       if (result && result.success && result.data && result.data.status_pagamento === 'pago') {
-        showToast('✅ Chat liberado! Agora você pode conversar com o cliente.', 'success');
+        showToast('Chat liberado! Agora você pode conversar com o cliente.', 'success');
         await carregarSolicitacoes();
       } else if (result && result.success && result.data && result.data.status_pagamento === 'pendente') {
         showToast('Pagamento ainda não confirmado. Use o botão "Confirmar" manualmente se necessário.', 'warning');
