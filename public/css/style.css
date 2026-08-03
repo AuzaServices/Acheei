@@ -437,6 +437,17 @@ img {
   font-size: 16px;
 }
 
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ==================== Hero Section ==================== */
 .hero {
   background: linear-gradient(135deg, var(--black-primary) 0%, var(--black-secondary) 50%, var(--red-dark) 100%);

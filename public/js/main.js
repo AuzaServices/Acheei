@@ -218,10 +218,23 @@ function abrirModalSolicitacao(id, nome, profissao) {
   document.getElementById('solicitacaoModal').classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Mostrar aviso de notificações se ainda não aceitou
+  // Bloquear envio até o usuário aceitar as notificações push
+  var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
   var pushNotice = document.querySelector('.push-notice-modal');
-  if (pushNotice && !pushNoticeAceito && Notification.permission !== 'granted') {
-    pushNotice.style.display = 'block';
+  var notificaoSuportada = typeof Notification !== 'undefined';
+  var notificacoesOk = pushNoticeAceito || (notificaoSuportada && Notification.permission === 'granted');
+
+  if (pushNotice) {
+    // Se o navegador não suporta notificações, não bloqueia o envio
+    if (!notificaoSuportada) {
+      pushNotice.style.display = 'none';
+    } else {
+      pushNotice.style.display = notificacoesOk ? 'none' : 'block';
+    }
+  }
+  if (submitBtn) {
+    submitBtn.disabled = notificaoSuportada ? !notificacoesOk : false;
+    submitBtn.classList.toggle('btn-disabled', notificaoSuportada && !notificacoesOk);
   }
 }
 
@@ -241,6 +254,12 @@ async function ativarNotificacaoSolicitacao() {
     if (pushNotice) {
       pushNotice.innerHTML = '✅ <strong>Notificações ativadas!</strong>';
       pushNotice.style.borderColor = '#28a745';
+    }
+    // Liberar o botão de envio após aceitar notificações
+    var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('btn-disabled');
     }
   }
 }

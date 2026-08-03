@@ -88,3 +88,16 @@ CREATE TABLE IF NOT EXISTS admin (
 INSERT INTO admin (usuario, senha) VALUES 
 ('admin', '$2b$10$8K1p/a0dL1LXMIgoEDFrwOfMQkfAjkMBcGm6qOVqYKAFB1f5UqK8q')
 ON DUPLICATE KEY UPDATE usuario = usuario;
+
+-- ============================================
+-- Tabela: clientes
+-- ============================================
+CREATE TABLE IF NOT EXISTS clientes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  senha VARCHAR(255) NOT NULL,
+  telefone VARCHAR(20),
+  push_subscription LONGTEXT,
+  data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

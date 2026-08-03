@@ -7,7 +7,7 @@
   <meta name="description" content="Acompanhe seus orçamentos e converse com profissionais.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <style>
     .cliente-body { background: #f0f0f0; }
     .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
@@ -94,7 +94,7 @@
     @keyframes pulseBubble { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,0,0,0.5); } 50% { box-shadow: 0 0 0 20px rgba(255,0,0,0); } }
     .chat-badge { position: absolute; top: -5px; right: -5px; background: #ffc107; color: #000; font-size: 12px; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
     .chat-badge.show { display: flex; }
-    .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; max-width: calc(100vw - 40px); max-height: 500px; background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); overflow: hidden; display: none; flex-direction: column; animation: slideUpChat 0.3s ease; z-index: 9998; }
+    .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; max-width: calc(100vw - 40px); max-height: 500px; background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; display: none; flex-direction: column; animation: slideUpChat 0.3s ease; z-index: 9998; }
     .chat-panel.open { display: flex; }
     @keyframes slideUpChat { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .chat-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--red-primary); color: var(--white); }
@@ -148,7 +148,7 @@
     <form class="auth-form" id="cadastroForm">
       <div class="push-notice" id="pushNotice">
         <strong>🔔 Ative as notificações!</strong>
-        <p style="margin: 8px 0 0;">Precisamos da sua autorização para enviar notificações quando o profissional responder. Você receberá alerts no navegador.</p>
+        <p style="margin: 8px 0 0;">Precisamos da sua autorização para enviar notificações quando o profissional responder. Você receberá alertas no navegador.</p>
         <button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacoesCadastro()" style="width:100%;justify-content:center;">🔔 Aceitar Notificações</button>
       </div>
       <div class="form-group">
@@ -172,6 +172,7 @@
       <div class="auth-success" id="cadastroSuccess">Conta criada! Entrando...</div>
     </form>
   </div>
+</div>
 
 <div class="dashboard" id="dashboard">
   <header class="dashboard-header">
@@ -199,9 +200,11 @@
 
     <div class="tab-content active" id="tabSolicitacoes">
       <div id="solicitacoesList"></div>
+    </div>
 
     <div class="tab-content" id="tabOrcamentos">
       <div id="orcamentosList"></div>
+    </div>
 
     <div class="tab-content" id="tabChat">
       <div class="chat-selector">
@@ -215,12 +218,15 @@
           <input type="text" id="chatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') enviarMensagemCliente()">
           <button class="btn btn-primary" onclick="enviarMensagemCliente()">Enviar</button>
         </div>
+      </div>
       <div id="chatEmptyState" class="empty-state">
         <span class="icon">💬</span>
         <h3>Selecione uma solicitação</h3>
         <p>Escolha uma solicitação acima para conversar com o profissional.</p>
       </div>
+    </div>
   </div>
+</div>
 
 <!-- Widget de Chat Flutuante (Messenger) -->
 <div class="chat-widget" id="chatWidget">
@@ -244,16 +250,16 @@
       <span class="icon">💬</span>
       <p>Selecione uma conversa acima</p>
     </div>
+  </div>
   <div class="chat-panel-footer" id="widgetChatFooter" style="display:none;">
     <input type="text" id="widgetChatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') widgetEnviarMensagem()">
     <button class="btn btn-primary" onclick="widgetEnviarMensagem()">Enviar</button>
   </div>
+</div>
 
 <script src="js/icons.js"></script>
 <script src="js/push.js"></script>
 <script src="js/cliente.js"></script>
 </body>
 </html>
-</｜DSML｜content>
-</｜DSML｜invoke>
-</｜DSML｜tool_calls>
+</content>
