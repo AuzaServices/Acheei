@@ -276,16 +276,7 @@ function renderizarSolicitacoes(solicitacoes) {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
   if (solicitacoes.length === 0) {
-   container.innerHTML = `
-  <div class="empty-state">
-    <span class="icon">📋</span>
-    <h3>Nenhuma solicitação</h3>
-    <p>Você ainda não solicitou nenhum serviço. Volte à página inicial e encontre um profissional!</p>
-    <button type="submit" class="btn-search" style="margin-top:16px;">
-      <span data-icon="search"></span> Buscar
-    </button>
-  </div>
-`;
+    container.innerHTML = '<div class="empty-state"><span class="icon">📋</span><h3>Nenhuma solicitação</h3><p>Você ainda não solicitou nenhum serviço. Volte à página inicial e encontre um profissional!</p><a href="/" class="btn btn-primary" style="margin-top:16px;">Buscar Profissionais</a></div>';
     return;
   }
   for (var i = 0; i < solicitacoes.length; i++) {
