@@ -1,5 +1,5 @@
 // ============================================
-// Rotas de Pagamento - Mercado Pago (Checkout Pro)
+// Rotas de Pagamento - Mercado Pago
 // Liberação do chat para profissionais (R$14,99)
 // ============================================
 const express = require('express');
@@ -10,8 +10,8 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // POST /api/pagamento/pix
-  // Cria um pagamento PIX (transparente) — QR Code direto na plataforma
-  // body: { solicitacao_id, profissional_id, cliente_nome, cliente_telefone, descricao }
+  // Tenta criar pagamento PIX transparente. Se a conta não tiver chave PIX,
+  // faz fallback automático para Checkout Pro (que suporta PIX na página do MP)
   // ============================================
   router.post('/pix', async (req, res) => {
     if (!dbConnected()) {
@@ -51,17 +51,15 @@ module.exports = function(db, dbConnected) {
         }
 
         const sol = results[0];
-        const idempotencyKey = `${solicitacao_id}_${Date.now()}`;
 
         try {
-          // Cria pagamento PIX via API
+          // Tenta criar pagamento PIX via API
           const { MercadoPagoConfig, Payment } = require('mercadopago');
           const client = new MercadoPagoConfig({
             accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN
           });
           const paymentClient = new Payment(client);
 
-          // Data de expiração do QR Code (30 minutos)
           const expirationDate = new Date(Date.now() + 30 * 60 * 1000);
 
           const paymentData = {
@@ -81,7 +79,6 @@ module.exports = function(db, dbConnected) {
 
           const result = await paymentClient.create(paymentData);
 
-          // Salva o payment_id e preference_id na solicitação
           db.query(
             'UPDATE solicitacoes SET preference_id = ?, status_pagamento = "pendente" WHERE id = ?',
             [result.id.toString(), solicitacao_id],
@@ -92,10 +89,11 @@ module.exports = function(db, dbConnected) {
 
           console.log(`🧾 Pagamento PIX criado para solicitação #${solicitacao_id}: payment_id=${result.id}`);
 
-          res.json({
+          return res.json({
             success: true,
             message: 'Pagamento PIX criado com sucesso',
             data: {
+              tipo: 'pix',
               payment_id: result.id,
               status: result.status,
               qr_code_base64: result.point_of_interaction?.transaction_data?.qr_code_base64 || '',
@@ -106,10 +104,80 @@ module.exports = function(db, dbConnected) {
             }
           });
         } catch (error) {
-          console.error('Erro ao criar pagamento PIX:', error.message || error);
-          res.status(500).json({
+          const msgPix = (error.message || '').toString();
+
+          // Se a conta não tiver chave PIX habilitada, faz fallback para Checkout Pro
+          // (que suporta PIX internamente na página do Mercado Pago)
+          if (msgPix.includes('Collector user without key enabled') || msgPix.includes('key enabled')) {
+            console.log(`Conta sem chave PIX para QR render. Usando Checkout Pro como fallback para solicitação #${solicitacao_id}`);
+            try {
+              const descricaoPagamento = descricao || sol.descricao || 'Liberação de chat com cliente';
+              const payerData = req.body.payer_email ? { email: req.body.payer_email } : {};
+
+              const preferenceData = {
+                items: [
+                  {
+                    id: `solicitacao_${solicitacao_id}`,
+                    title: `Liberação de chat - Solicitação #${solicitacao_id} (${cliente_nome || 'Cliente'})`,
+                    description: descricaoPagamento,
+                    quantity: 1,
+                    unit_price: mp.VALOR_LIBERACAO_CHAT,
+                    currency_id: 'BRL'
+                  }
+                ],
+                payer: payerData,
+                back_urls: {
+                  success: `${mp.APP_URL}/profissional.html?status=success&solicitacao_id=${solicitacao_id}`,
+                  pending: `${mp.APP_URL}/profissional.html?status=pending&solicitacao_id=${solicitacao_id}`,
+                  failure: `${mp.APP_URL}/profissional.html?status=failure&solicitacao_id=${solicitacao_id}`
+                },
+                notification_url: `${mp.APP_URL}/api/pagamento/webhook`,
+                external_reference: `solicitacao_${solicitacao_id}`,
+                statement_descriptor: 'ACHEEI',
+                payment_methods: {
+                  installments: 1
+                }
+              };
+
+              if (mp.APP_URL.startsWith('https://')) {
+                preferenceData.auto_return = 'approved';
+              }
+
+              const prefResult = await mp.preference.create({ body: preferenceData });
+              const initPoint = mp.getInitPoint(prefResult);
+
+              db.query(
+                'UPDATE solicitacoes SET preference_id = ?, status_pagamento = "pendente" WHERE id = ?',
+                [prefResult.id, solicitacao_id],
+                (updateErr) => {
+                  if (updateErr) console.error('Erro ao salvar preference_id no fallback:', updateErr);
+                }
+              );
+
+              return res.json({
+                success: true,
+                message: 'Pagamento via Checkout Pro (PIX disponível na página do Mercado Pago)',
+                data: {
+                  tipo: 'checkout',
+                  preference_id: prefResult.id,
+                  init_point: initPoint,
+                  sandbox_init_point: prefResult.sandbox_init_point,
+                  valor: mp.VALOR_LIBERACAO_CHAT
+                }
+              });
+            } catch (prefError) {
+              console.error('Erro no fallback Checkout Pro:', prefError.message || prefError);
+              return res.status(500).json({
+                success: false,
+                message: 'Erro ao criar pagamento: ' + (prefError.message || 'erro desconhecido')
+              });
+            }
+          }
+
+          console.error('Erro ao criar pagamento PIX:', msgPix);
+          return res.status(500).json({
             success: false,
-            message: 'Erro ao criar pagamento PIX: ' + (error.message || 'erro desconhecido')
+            message: 'Erro ao criar pagamento PIX: ' + msgPix
           });
         }
       }
@@ -118,8 +186,7 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // POST /api/pagamento/preferencia
-  // Cria uma preferência de pagamento no Mercado Pago
-  // body: { solicitacao_id, profissional_id, cliente_nome, cliente_telefone, descricao }
+  // Cria uma preferência de pagamento no Mercado Pago (Checkout Pro)
   // ============================================
   router.post('/preferencia', async (req, res) => {
     if (!dbConnected()) {
@@ -142,7 +209,6 @@ module.exports = function(db, dbConnected) {
       });
     }
 
-    // Verifica se já está paga
     db.query(
       'SELECT id, status_pagamento, descricao FROM solicitacoes WHERE id = ? AND profissional_id = ?',
       [solicitacao_id, profissional_id],
@@ -189,7 +255,6 @@ module.exports = function(db, dbConnected) {
             }
           };
 
-          // auto_return só funciona com URLs HTTPS (produção)
           if (mp.APP_URL.startsWith('https://')) {
             preferenceData.auto_return = 'approved';
           }
@@ -210,6 +275,7 @@ module.exports = function(db, dbConnected) {
             success: true,
             message: 'Preferência criada com sucesso',
             data: {
+              tipo: 'checkout',
               preference_id: result.id,
               init_point: initPoint,
               sandbox_init_point: result.sandbox_init_point,
@@ -229,7 +295,6 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // GET /api/pagamento/status/:solicitacao_id
-  // Consulta o status de pagamento de uma solicitação
   // ============================================
   router.get('/status/:solicitacao_id', (req, res) => {
     if (!dbConnected()) {
@@ -252,8 +317,6 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // POST /api/pagamento/verificar/:solicitacao_id
-  // Verifica no Mercado Pago se o pagamento foi aprovado
-  // e libera o chat se estiver aprovado
   // ============================================
   router.post('/verificar/:solicitacao_id', async (req, res) => {
     if (!dbConnected()) {
@@ -327,7 +390,6 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // POST /api/pagamento/webhook
-  // Recebe notificações do Mercado Pago (webhook)
   // ============================================
   router.post('/webhook', (req, res) => {
     res.status(200).json({ success: true });
@@ -351,8 +413,6 @@ module.exports = function(db, dbConnected) {
 
   // ============================================
   // POST /api/pagamento/confirmar (fallback manual)
-  // Confirma manualmente o pagamento de uma solicitação
-  // (usado apenas em desenvolvimento/testes sem webhook)
   // ============================================
   router.post('/confirmar', (req, res) => {
     if (!dbConnected()) {

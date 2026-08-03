@@ -331,7 +331,18 @@ async function pagarSolicitacao(id) {
     if (result && result.success && result.data) {
       // Adiciona solicitacao_id nos dados para o modal
       result.data.solicitacao_id = id;
-      abrirModalPix(result.data);
+
+      if (result.data.tipo === 'checkout') {
+        // Fallback: redireciona para o Checkout Pro (PIX disponível na página do MP)
+        if (result.data.init_point) {
+          window.open(result.data.init_point, '_blank');
+          showToast('Abra a página do Mercado Pago para pagar com PIX', 'info');
+        } else {
+          showToast('Erro: link de pagamento não gerado', 'error');
+        }
+      } else {
+        abrirModalPix(result.data);
+      }
     } else {
       var msg = (result && result.message) ? result.message : 'Erro ao criar pagamento PIX';
       showToast(msg, 'error');
