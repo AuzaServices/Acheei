@@ -108,6 +108,19 @@ async function assinarPush() {
 // (chamado após login/cadastro do cliente)
 // ============================================
 async function salvarAssinaturaPush() {
+  // Se não tem assinatura em memória, tenta recuperar a pendente do localStorage
+  if (!pushSubscription) {
+    const pending = localStorage.getItem('acheei_pending_subscription');
+    if (pending) {
+      try {
+        pushSubscription = JSON.parse(pending);
+      } catch (e) {
+        localStorage.removeItem('acheei_pending_subscription');
+        return false;
+      }
+    }
+  }
+
   if (!pushSubscription) return false;
 
   try {

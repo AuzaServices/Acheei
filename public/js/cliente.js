@@ -239,7 +239,18 @@ function switchTab(tab, btn) {
   for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
   var map = { solicitacoes: 'tabSolicitacoes', orcamentos: 'tabOrcamentos', chat: 'tabChat' };
   document.getElementById(map[tab]).classList.add('active');
-  if (tab === 'chat') carregarSolicitacoesParaChat();
+
+  // Controlar o balão do chat: esconder ao entrar na aba Chat, reaparecer ao sair
+  if (tab === 'chat') {
+    esconderWidgetChat();
+    // Fecha o painel flutuante se estiver aberto
+    var panel = document.getElementById('chatPanel');
+    if (panel) panel.classList.remove('open');
+    widgetPainelAberto = false;
+    carregarSolicitacoesParaChat();
+  } else {
+    mostrarWidgetChat();
+  }
 }
 
 // ============================================
@@ -454,11 +465,31 @@ var widgetPainelAberto = false;
 function mostrarWidgetChat() {
   var widget = document.getElementById('chatWidget');
   if (widget) widget.classList.add('active');
+  // Reinicia o carregamento das conversas do widget
+  widgetPainelAberto = false;
+  var panel = document.getElementById('chatPanel');
+  if (panel) panel.classList.remove('open');
 }
 
 function esconderWidgetChat() {
   var widget = document.getElementById('chatWidget');
   if (widget) widget.classList.remove('active');
+  // Para o polling do widget enquanto escondido
+  if (widgetChatInterval) {
+    clearInterval(widgetChatInterval);
+    widgetChatInterval = null;
+  }
+  // Zera badge e pulsação
+  var badge = document.getElementById('chatBadge');
+  if (badge) {
+    badge.classList.remove('show');
+    badge.textContent = '0';
+  }
+  var bubble = document.getElementById('chatBubble');
+  if (bubble) bubble.classList.remove('pulse');
+  var panel = document.getElementById('chatPanel');
+  if (panel) panel.classList.remove('open');
+  widgetPainelAberto = false;
 }
 
 function toggleChatPainel() {

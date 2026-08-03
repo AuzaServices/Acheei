@@ -294,12 +294,16 @@ async function enviarSolicitacao(event) {
     let clienteId = null;
     let clienteToken = null;
 
-    if (cadastroResult.success) {
+if (cadastroResult.success) {
       // Cadastro novo
       clienteId = cadastroResult.data.cliente.id;
       clienteToken = cadastroResult.data.token;
       // Salvar token do cliente
       localStorage.setItem('acheei_cliente_token', clienteToken);
+      // Salvar a assinatura push que foi aceita antes do login/cadastro
+      if (typeof salvarAssinaturaPendente === 'function') {
+        salvarAssinaturaPendente();
+      }
     } else {
       // Se email já existe, tenta login
       if (cadastroResult.message && cadastroResult.message.includes('já está cadastrado')) {
@@ -314,6 +318,10 @@ async function enviarSolicitacao(event) {
           clienteId = loginResult.data.cliente.id;
           clienteToken = loginResult.data.token;
           localStorage.setItem('acheei_cliente_token', clienteToken);
+          // Salvar a assinatura push aceita antes do login
+          if (typeof salvarAssinaturaPendente === 'function') {
+            salvarAssinaturaPendente();
+          }
         } else {
 showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error');
           submitBtn.disabled = false;
