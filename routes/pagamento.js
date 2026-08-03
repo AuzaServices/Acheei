@@ -9,6 +9,114 @@ const mp = require('../config/mercadopago');
 module.exports = function(db, dbConnected) {
 
   // ============================================
+  // POST /api/pagamento/pix
+  // Cria um pagamento PIX (transparente) — QR Code direto na plataforma
+  // body: { solicitacao_id, profissional_id, cliente_nome, cliente_telefone, descricao }
+  // ============================================
+  router.post('/pix', async (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+
+    if (!mp.isConfigured) {
+      return res.status(500).json({
+        success: false,
+        message: 'Mercado Pago não configurado. Configure o MERCADO_PAGO_ACCESS_TOKEN no arquivo .env'
+      });
+    }
+
+    const { solicitacao_id, profissional_id, cliente_nome, cliente_telefone, descricao } = req.body;
+
+    if (!solicitacao_id || !profissional_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campos obrigatórios: solicitacao_id, profissional_id'
+      });
+    }
+
+    // Verifica se já está paga
+    db.query(
+      'SELECT id, status_pagamento FROM solicitacoes WHERE id = ? AND profissional_id = ?',
+      [solicitacao_id, profissional_id],
+      async (err, results) => {
+        if (err) {
+          console.error('Erro ao verificar solicitação:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao verificar solicitação' });
+        }
+        if (results.length === 0) {
+          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
+        }
+        if (results[0].status_pagamento === 'pago') {
+          return res.status(400).json({ success: false, message: 'Esta solicitação já está paga. O chat já está liberado.' });
+        }
+
+        const sol = results[0];
+        const idempotencyKey = `${solicitacao_id}_${Date.now()}`;
+
+        try {
+          // Cria pagamento PIX via API
+          const { MercadoPagoConfig, Payment } = require('mercadopago');
+          const client = new MercadoPagoConfig({
+            accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN
+          });
+          const paymentClient = new Payment(client);
+
+          // Data de expiração do QR Code (30 minutos)
+          const expirationDate = new Date(Date.now() + 30 * 60 * 1000);
+
+          const paymentData = {
+            body: {
+              transaction_amount: mp.VALOR_LIBERACAO_CHAT,
+              description: `Liberação de chat - Solicitação #${solicitacao_id} (${cliente_nome || 'Cliente'})`,
+              payment_method_id: 'pix',
+              payer: {
+                email: req.body.payer_email || 'acheei@cliente.com.br',
+                first_name: cliente_nome || 'Cliente',
+                last_name: 'Acheei'
+              },
+              date_of_expiration: expirationDate.toISOString(),
+              external_reference: `solicitacao_${solicitacao_id}`
+            }
+          };
+
+          const result = await paymentClient.create(paymentData);
+
+          // Salva o payment_id e preference_id na solicitação
+          db.query(
+            'UPDATE solicitacoes SET preference_id = ?, status_pagamento = "pendente" WHERE id = ?',
+            [result.id.toString(), solicitacao_id],
+            (updateErr) => {
+              if (updateErr) console.error('Erro ao salvar payment_id:', updateErr);
+            }
+          );
+
+          console.log(`🧾 Pagamento PIX criado para solicitação #${solicitacao_id}: payment_id=${result.id}`);
+
+          res.json({
+            success: true,
+            message: 'Pagamento PIX criado com sucesso',
+            data: {
+              payment_id: result.id,
+              status: result.status,
+              qr_code_base64: result.point_of_interaction?.transaction_data?.qr_code_base64 || '',
+              qr_code: result.point_of_interaction?.transaction_data?.qr_code || '',
+              ticket_url: result.point_of_interaction?.transaction_data?.ticket_url || '',
+              transaction_amount: mp.VALOR_LIBERACAO_CHAT,
+              date_of_expiration: expirationDate.toISOString()
+            }
+          });
+        } catch (error) {
+          console.error('Erro ao criar pagamento PIX:', error.message || error);
+          res.status(500).json({
+            success: false,
+            message: 'Erro ao criar pagamento PIX: ' + (error.message || 'erro desconhecido')
+          });
+        }
+      }
+    );
+  });
+
+  // ============================================
   // POST /api/pagamento/preferencia
   // Cria uma preferência de pagamento no Mercado Pago
   // body: { solicitacao_id, profissional_id, cliente_nome, cliente_telefone, descricao }

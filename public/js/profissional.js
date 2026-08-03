@@ -210,8 +210,82 @@ function renderizarSolicitacoes() {
 }
 
 // ============================================
-// Pagamento via Mercado Pago (Checkout Pro)
+// Pagamento via Mercado Pago (PIX Transparente)
 // ============================================
+let pixTimer = null;
+
+function abrirModalPix(data) {
+  document.getElementById('pixModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Exibe QR Code
+  var qrContainer = document.getElementById('pixQrCode');
+  if (data.qr_code_base64) {
+    qrContainer.innerHTML = '<img src="data:image/png;base64,' + data.qr_code_base64 + '" alt="QR Code PIX" style="width:220px;height:220px;display:block;margin:0 auto;">';
+  } else {
+    qrContainer.innerHTML = '<div style="text-align:center;padding:20px;color:var(--gray-medium);"><span style="font-size:48px;display:block;margin-bottom:8px;">📱</span><p>QR Code indisponível</p></div>';
+  }
+
+  // Exibe código copia e cola
+  document.getElementById('pixCopiaCola').value = data.qr_code || '';
+
+  // Exibe valor
+  document.getElementById('pixValor').textContent = 'R$ ' + (data.transaction_amount || 14.99).toFixed(2).replace('.', ',');
+
+  // Exibe tempo de expiração
+  if (data.date_of_expiration) {
+    var expDate = new Date(data.date_of_expiration);
+    document.getElementById('pixExpiracao').textContent = 'Válido até: ' + expDate.toLocaleTimeString('pt-BR');
+  }
+
+  // Armazena solicitacao_id para verificação
+  document.getElementById('pixSolicitacaoId').value = data.solicitacao_id || '';
+
+  // Inicia verificação automática
+  var solicitacaoId = data.solicitacao_id;
+  if (solicitacaoId && pixTimer) clearInterval(pixTimer);
+  if (solicitacaoId) {
+    pixTimer = setInterval(function() {
+      verificarStatusPix(solicitacaoId);
+    }, 5000);
+  }
+}
+
+function fecharModalPix() {
+  document.getElementById('pixModal').classList.remove('active');
+  document.body.style.overflow = '';
+  if (pixTimer) { clearInterval(pixTimer); pixTimer = null; }
+}
+
+function copiarChavePix() {
+  var input = document.getElementById('pixCopiaCola');
+  if (!input.value) return;
+  input.select();
+  input.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(input.value).then(function() {
+    showToast('Código PIX copiado!', 'success');
+  }).catch(function() {
+    showToast('Copie o código manualmente', 'info');
+  });
+}
+
+async function verificarStatusPix(solicitacaoId) {
+  if (!solicitacaoId) return;
+  var result = await apiRequest(API_BASE + '/pagamento/status/' + solicitacaoId);
+  if (result && result.success && result.data) {
+    if (result.data.status_pagamento === 'pago') {
+      if (pixTimer) { clearInterval(pixTimer); pixTimer = null; }
+      fecharModalPix();
+      showToast('✅ Pagamento confirmado! Chat liberado!', 'success');
+      var btn = document.querySelector('button[onclick*="pagarSolicitacao(' + solicitacaoId + ')"]');
+      if (btn) {
+        btn.outerHTML = '<span class="badge pago">✅ Pago</span>';
+      }
+      await carregarSolicitacoes();
+    }
+  }
+}
+
 async function pagarSolicitacao(id) {
   if (!profissional) {
     showToast('Faça login primeiro', 'error');
@@ -231,13 +305,13 @@ async function pagarSolicitacao(id) {
   var btn = event && event.target ? event.target : null;
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Redirecionando...';
+    btn.innerHTML = '<span class="spinner"></span> Gerando PIX...';
   }
 
-  showToast('Criando pagamento... aguarde', 'info');
+  showToast('Gerando pagamento PIX... aguarde', 'info');
 
   try {
-    var result = await apiRequest(API_BASE + '/pagamento/preferencia', {
+    var result = await apiRequest(API_BASE + '/pagamento/pix', {
       method: 'POST',
       body: JSON.stringify({
         solicitacao_id: id,
@@ -254,20 +328,21 @@ async function pagarSolicitacao(id) {
       btn.innerHTML = '💳 Pagar R$14,99';
     }
 
-    if (result && result.success && result.data && result.data.init_point) {
-      // Redireciona para o checkout do Mercado Pago
-      window.location.href = result.data.init_point;
+    if (result && result.success && result.data) {
+      // Adiciona solicitacao_id nos dados para o modal
+      result.data.solicitacao_id = id;
+      abrirModalPix(result.data);
     } else {
-      var msg = (result && result.message) ? result.message : 'Erro ao criar pagamento';
+      var msg = (result && result.message) ? result.message : 'Erro ao criar pagamento PIX';
       showToast(msg, 'error');
     }
   } catch (error) {
-    console.error('Erro ao pagar:', error);
+    console.error('Erro ao pagar via PIX:', error);
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '💳 Pagar R$14,99';
     }
-    showToast('Erro ao processar pagamento', 'error');
+    showToast('Erro ao processar pagamento PIX', 'error');
   }
 }
 

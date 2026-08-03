@@ -318,6 +318,51 @@
   </div>
 </div>
 
+<!-- MODAL PIX -->
+<div class="modal-overlay" id="pixModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h3><span data-icon="qr-code"></span> Pagamento via PIX</h3>
+      <button class="modal-close" onclick="fecharModalPix()">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <input type="hidden" id="pixSolicitacaoId" value="">
+
+      <div style="background:var(--gray-bg);border-radius:var(--radius-md);padding:24px;margin-bottom:16px;">
+        <div id="pixQrCode" style="min-height:220px;display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:var(--gray-medium);">
+            <span style="font-size:48px;display:block;margin-bottom:8px;">📱</span>
+            <p>Gerando QR Code...</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--gray-medium);margin-bottom:4px;">Valor</div>
+        <div style="font-size:28px;font-weight:800;color:var(--red-primary);" id="pixValor">R$ 14,99</div>
+        <div style="font-size:12px;color:var(--gray-light);margin-top:4px;" id="pixExpiracao">Válido por 30 minutos</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:13px;color:var(--gray-medium);margin-bottom:6px;">PIX Copia e Cola</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="pixCopiaCola" readonly style="flex:1;padding:10px 14px;border:2px solid var(--gray-lighter);border-radius:var(--radius-sm);font-size:13px;background:var(--white);cursor:default;" placeholder="Clique em copiar">
+          <button class="btn btn-primary" onclick="copiarChavePix()" style="white-space:nowrap;"><span data-icon="copy"></span> Copiar</button>
+        </div>
+      </div>
+
+      <div style="padding:12px;background:#fff3cd;border-radius:var(--radius-sm);margin-bottom:16px;">
+        <p style="font-size:13px;color:#856404;margin:0;">
+          ⏳ O pagamento é verificado automaticamente a cada 5 segundos.
+          <br>Após o pagamento, o chat será liberado automaticamente.
+        </p>
+      </div>
+
+      <button class="btn btn-outline" onclick="fecharModalPix()" style="width:100%;justify-content:center;">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <script src="js/icons.js"></script>
 <script src="js/profissional.js"></script>
 </body>
