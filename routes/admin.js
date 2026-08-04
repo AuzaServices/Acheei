@@ -283,6 +283,78 @@ module.exports = function(db, dbConnected) {
   });
 
   // ============================================
+  // DELETE /api/admin/profissional/:id/foto-perfil
+  // Remover foto de perfil do profissional
+  // ============================================
+  router.delete('/profissional/:id/foto-perfil', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    db.query('SELECT foto_perfil FROM profissionais WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+      const fotoPerfil = results[0].foto_perfil;
+      const publicId = getCloudinaryPublicId(fotoPerfil);
+      if (publicId) {
+        cloudinary.uploader.destroy(publicId).catch((e) => { console.error('Erro Cloudinary:', e.message); });
+      }
+      db.query('UPDATE profissionais SET foto_perfil = ? WHERE id = ?', ['', req.params.id], (err) => {
+        if (err) {
+          console.error('Erro ao remover foto de perfil:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao remover foto de perfil' });
+        }
+        res.json({ success: true, message: 'Foto de perfil removida com sucesso' });
+      });
+    });
+  });
+
+  // ============================================
+  // DELETE /api/admin/profissional/:id/fotos-servicos/:index
+  // Remover foto de serviço do profissional
+  // ============================================
+  router.delete('/profissional/:id/fotos-servicos/:index', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    const index = parseInt(req.params.index, 10);
+    db.query('SELECT fotos_servicos FROM profissionais WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+      let fotosServicos = [];
+      try {
+        fotosServicos = results[0].fotos_servicos ? JSON.parse(results[0].fotos_servicos) : [];
+      } catch (e) {
+        fotosServicos = [];
+      }
+      if (isNaN(index) || index < 0 || index >= fotosServicos.length) {
+        return res.status(400).json({ success: false, message: 'Foto de serviço inválida' });
+      }
+      const removedFoto = fotosServicos.splice(index, 1)[0];
+      const publicId = getCloudinaryPublicId(removedFoto);
+      if (publicId) {
+        cloudinary.uploader.destroy(publicId).catch((e) => { console.error('Erro Cloudinary:', e.message); });
+      }
+      db.query('UPDATE profissionais SET fotos_servicos = ? WHERE id = ?', [JSON.stringify(fotosServicos), req.params.id], (err) => {
+        if (err) {
+          console.error('Erro ao remover foto de serviço:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao remover foto de serviço' });
+        }
+        res.json({ success: true, message: 'Foto de serviço removida com sucesso' });
+      });
+    });
+  });
+
+  // ============================================
   // POST /api/admin/criar
   // Criar novo administrador (protegido)
   // ============================================
