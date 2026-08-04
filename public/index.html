@@ -24,7 +24,7 @@
           <span data-icon="hard-hat"></span> Área do Profissional
         </a>
       </div>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Menu" aria-controls="mobileMenu" aria-expanded="false">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
         <span></span>
         <span></span>
         <span></span>
@@ -33,17 +33,10 @@
   </header>
 
   <!-- Mobile Menu Overlay -->
-  <div class="mobile-menu-overlay" id="menuOverlay" aria-hidden="true"></div>
+  <div class="mobile-menu-overlay" id="menuOverlay"></div>
 
   <!-- Mobile Menu Panel -->
-  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <div class="menu-header">
-      <div class="menu-icon" data-icon="hard-hat"></div>
-      <div>
-        <h3>Acheei</h3>
-        <p>Navegação</p>
-      </div>
-    </div>
+  <div class="mobile-menu" id="mobileMenu">
     <div class="menu-items">
       <a href="/" class="menu-item">
         <span class="item-icon" data-icon="home"></span>
@@ -66,7 +59,7 @@
         <span class="item-text">Área do Profissional</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
-      <a href="cadastro.html" class="menu-item">
+      <a href="cadastro.html" class="menu-item menu-item-highlight">
         <span class="item-icon" data-icon="edit"></span>
         <span class="item-text">Cadastre-se como Profissional</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
@@ -269,7 +262,31 @@
 
   <script src="js/icons.js"></script>
   <script src="js/push.js"></script>
-  <script src="js/mobile-menu.js"></script>
   <script src="js/main.js"></script>
+  <script>
+    // Mobile Menu Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      var hamburger = document.getElementById('hamburgerBtn');
+      var menu = document.getElementById('mobileMenu');
+      var overlay = document.getElementById('menuOverlay');
+
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+      }
+
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', toggleMenu);
+    });
+
+    function fecharMenuMobile() {
+      document.getElementById('hamburgerBtn').classList.remove('active');
+      document.getElementById('mobileMenu').classList.remove('active');
+      document.getElementById('menuOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  </script>
 </body>
 </html>
