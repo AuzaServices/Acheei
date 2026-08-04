@@ -180,6 +180,22 @@ img {
   flex-shrink: 0;
 }
 
+.settings-btn {
+  min-width: 42px;
+  width: 42px;
+  padding: 0 0;
+  font-size: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-btn:hover {
+  background: rgba(255,0,0,0.08);
+  color: var(--red-primary);
+}
+
 .navbar .nav-links a {
   color: var(--gray-dark);
   font-weight: 500;

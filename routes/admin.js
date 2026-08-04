@@ -302,6 +302,136 @@ module.exports = function(db, dbConnected) {
     });
   });
 
+  // ============================================
+  // PUT /api/admin/solicitacoes/:id/aprovar
+  // Aprovar solicitação de troca de fotos
+  // ============================================
+  router.put('/solicitacoes/:id/aprovar', authMiddleware, async (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+
+    db.query('SELECT * FROM solicitacoes WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar solicitação:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar solicitação' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
+      }
+
+      const sol = results[0];
+      if (sol.tipo !== 'troca_fotos') {
+        return res.status(400).json({ success: false, message: 'Aprovação de troca de fotos só é válida para solicitações de troca de fotos.' });
+      }
+      if (sol.status_aprovacao !== 'pendente') {
+        return res.status(400).json({ success: false, message: 'Esta solicitação já foi respondida.' });
+      }
+
+      db.query('SELECT * FROM profissionais WHERE id = ?', [sol.profissional_id], async (err, profResults) => {
+        if (err) {
+          console.error('Erro ao buscar profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+        }
+        if (profResults.length === 0) {
+          return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+        }
+
+        const prof = profResults[0];
+        const updates = [];
+        const updateParams = [];
+
+        if (sol.foto_perfil_nova) {
+          const currentPublicId = getCloudinaryPublicId(prof.foto_perfil);
+          if (currentPublicId) {
+            await cloudinary.uploader.destroy(currentPublicId).catch(e => {
+              console.error('Erro ao remover foto de perfil antiga do Cloudinary:', e);
+            });
+          }
+          updates.push('foto_perfil = ?');
+          updateParams.push(sol.foto_perfil_nova);
+        }
+
+        if (sol.fotos_servicos_novas) {
+          let novasFotos = [];
+          try { novasFotos = JSON.parse(sol.fotos_servicos_novas); } catch (e) { novasFotos = []; }
+          if (novasFotos.length > 0) {
+            const oldFotos = prof.fotos_servicos ? JSON.parse(prof.fotos_servicos) : [];
+            oldFotos.forEach(url => {
+              const publicId = getCloudinaryPublicId(url);
+              if (publicId) {
+                cloudinary.uploader.destroy(publicId).catch(e => {
+                  console.error('Erro ao remover foto de serviço antiga do Cloudinary:', e);
+                });
+              }
+            });
+            updates.push('fotos_servicos = ?');
+            updateParams.push(JSON.stringify(novasFotos));
+          }
+        }
+
+        updates.push('ultima_troca_fotos = NOW()');
+
+        if (updates.length > 0) {
+          db.query('UPDATE profissionais SET ' + updates.join(', ') + ' WHERE id = ?', [...updateParams, sol.profissional_id], (err) => {
+            if (err) {
+              console.error('Erro ao atualizar profissional:', err);
+              return res.status(500).json({ success: false, message: 'Erro ao aplicar atualização de fotos' });
+            }
+            db.query('UPDATE solicitacoes SET status_aprovacao = ?, data_resposta = NOW() WHERE id = ?', ['aprovado', req.params.id], (err) => {
+              if (err) {
+                console.error('Erro ao atualizar solicitação:', err);
+                return res.status(500).json({ success: false, message: 'Erro ao responder solicitação' });
+              }
+              res.json({ success: true, message: 'Solicitação de troca de fotos aprovada e fotos atualizadas.' });
+            });
+          });
+        } else {
+          db.query('UPDATE solicitacoes SET status_aprovacao = ?, data_resposta = NOW() WHERE id = ?', ['aprovado', req.params.id], (err) => {
+            if (err) {
+              console.error('Erro ao atualizar solicitação:', err);
+              return res.status(500).json({ success: false, message: 'Erro ao responder solicitação' });
+            }
+            res.json({ success: true, message: 'Solicitação aprovada sem alterações de fotos.' });
+          });
+        }
+      });
+    });
+  });
+
+  // ============================================
+  // PUT /api/admin/solicitacoes/:id/rejeitar
+  // Rejeitar solicitação de troca de fotos
+  // ============================================
+  router.put('/solicitacoes/:id/rejeitar', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    db.query('SELECT * FROM solicitacoes WHERE id = ?', [req.params.id], (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar solicitação:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar solicitação' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
+      }
+      const sol = results[0];
+      if (sol.tipo !== 'troca_fotos') {
+        return res.status(400).json({ success: false, message: 'Rejeição só é válida para solicitações de troca de fotos.' });
+      }
+      if (sol.status_aprovacao !== 'pendente') {
+        return res.status(400).json({ success: false, message: 'Esta solicitação já foi respondida.' });
+      }
+      db.query('UPDATE solicitacoes SET status_aprovacao = ?, data_resposta = NOW() WHERE id = ?', ['rejeitado', req.params.id], (err) => {
+        if (err) {
+          console.error('Erro ao atualizar solicitação:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao rejeitar solicitação' });
+        }
+        res.json({ success: true, message: 'Solicitação rejeitada com sucesso.' });
+      });
+    });
+  });
+
 // ============================================
   // DELETE /api/admin/deletar/:id
   // Deletar profissional do banco e Cloudinary

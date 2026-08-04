@@ -134,6 +134,139 @@ function mostrarDashboard() {
   document.getElementById('dashboard').style.display = 'block';
 }
 
+function getNextAllowedTrocaFotosDate() {
+  if (!profissional || !profissional.ultima_troca_fotos) return null;
+  var lastDate = new Date(profissional.ultima_troca_fotos);
+  if (isNaN(lastDate.getTime())) return null;
+  lastDate.setMonth(lastDate.getMonth() + 1);
+  return lastDate;
+}
+
+function abrirModalTrocaFotos() {
+  if (!profissional) {
+    showToast('Faça login antes de solicitar troca de fotos.', 'error');
+    return;
+  }
+  var nextAllowed = getNextAllowedTrocaFotosDate();
+  if (nextAllowed && new Date() < nextAllowed) {
+    showToast('Você só pode solicitar troca de fotos novamente em ' + nextAllowed.toLocaleDateString('pt-BR') + '.', 'error');
+    return;
+  }
+  document.getElementById('trocaFotosModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharModalTrocaFotos() {
+  document.getElementById('trocaFotosModal').classList.remove('active');
+  document.getElementById('trocaFotosForm').reset();
+  document.body.style.overflow = '';
+}
+
+function readFileAsDataURL(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function() { resolve(reader.result); };
+    reader.onerror = function() { reject(reader.error); };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadImageFile(file, folder) {
+  try {
+    var imageData = await readFileAsDataURL(file);
+    var result = await apiRequest(API_BASE + '/upload', {
+      method: 'POST',
+      body: JSON.stringify({ image: imageData, folder: folder })
+    });
+    return result && result.success ? result.data.url : null;
+  } catch (error) {
+    console.error('Erro ao enviar imagem:', error);
+    return null;
+  }
+}
+
+async function uploadMultipleImages(files, folder) {
+  if (!files || files.length === 0) return [];
+  var images = [];
+  for (var i = 0; i < files.length; i++) {
+    images.push(await readFileAsDataURL(files[i]));
+  }
+  var result = await apiRequest(API_BASE + '/upload/multiplas', {
+    method: 'POST',
+    body: JSON.stringify({ images: images, folder: folder })
+  });
+  return result && result.success ? result.data.map(item => item.url) : [];
+}
+
+async function solicitarTrocaFotos(event) {
+  event.preventDefault();
+  if (!profissional) {
+    showToast('Faça login antes de solicitar troca de fotos.', 'error');
+    return;
+  }
+
+  var perfilInput = document.getElementById('novaFotoPerfil');
+  var servicosInput = document.getElementById('novasFotosServicos');
+  var motivo = document.getElementById('motivoTroca').value.trim();
+  var fotoPerfilFile = perfilInput.files[0];
+  var servicosFiles = Array.from(servicosInput.files).slice(0, 3);
+
+  if (!fotoPerfilFile && servicosFiles.length === 0) {
+    showToast('Selecione pelo menos uma nova foto para enviar.', 'error');
+    return;
+  }
+
+  if (!motivo) {
+    showToast('Informe um motivo para a troca de fotos.', 'error');
+    return;
+  }
+
+  var submitBtn = event.target.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+  }
+
+  var fotoPerfilUrl = '';
+  var fotosServicosUrls = [];
+  if (fotoPerfilFile) {
+    fotoPerfilUrl = await uploadImageFile(fotoPerfilFile, 'perfis');
+    if (!fotoPerfilUrl) {
+      showToast('Falha ao enviar foto de perfil.', 'error');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar Solicitação'; }
+      return;
+    }
+  }
+  if (servicosFiles.length > 0) {
+    fotosServicosUrls = await uploadMultipleImages(servicosFiles, 'servicos');
+    if (fotosServicosUrls.length === 0) {
+      showToast('Falha ao enviar fotos de serviços.', 'error');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar Solicitação'; }
+      return;
+    }
+  }
+
+  var result = await apiRequest(API_BASE + '/solicitacoes/troca-fotos', {
+    method: 'POST',
+    body: JSON.stringify({
+      foto_perfil_nova: fotoPerfilUrl || '',
+      fotos_servicos_novas: fotosServicosUrls,
+      motivo_troca: motivo
+    })
+  });
+
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Enviar Solicitação';
+  }
+
+  if (result && result.success) {
+    showToast('Solicitação de troca de fotos enviada ao administrador.', 'success');
+    fecharModalTrocaFotos();
+    carregarSolicitacoes();
+  }
+}
+
 // ============================================
 // Tabs
 // ============================================

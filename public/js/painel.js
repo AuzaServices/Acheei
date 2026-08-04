@@ -300,16 +300,73 @@ function renderizarSolicitacoes(solicitacoes) {
     var sol = solicitacoes[i];
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
-var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
-      card.innerHTML =
-      '<div class="card-header"><h4>Solicitacao #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
+    var tipoLabel = sol.tipo === 'troca_fotos' ? 'Troca de Fotos' : 'Serviço';
+    var aprovacLabel = sol.status_aprovacao ? sol.status_aprovacao : 'pendente';
+    var badgeTipo = '<span class="badge ' + (sol.status_aprovacao || 'pendente') + '">' + aprovacLabel.charAt(0).toUpperCase() + aprovacLabel.slice(1) + '</span>';
+    var infoHtml =
       '<div class="info">' +
-        '<div class="item"><div class="label">Cliente</div><div class="value">' + sol.cliente_nome + '</div></div>' +
-        '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">' + icon('chat') + ' ' + sol.cliente_telefone + '</a></div></div>' +
+        '<div class="item"><div class="label">Tipo</div><div class="value">' + tipoLabel + '</div></div>' +
         '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
-        '<div class="item" style="grid-column:1/-1;"><div class="label">Descricao do Servico</div><div class="value">' + sol.descricao + '</div></div>' +
-      '</div>';
+        '<div class="item"><div class="label">Status</div><div class="value">' + badgeTipo + '</div></div>';
+
+    if (sol.cliente_telefone) {
+      var telefoneLink = 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"');
+      infoHtml += '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">' + icon('chat') + ' ' + sol.cliente_telefone + '</a></div></div>';
+    }
+
+    infoHtml += '</div>';
+
+    var descricaoLabel = sol.tipo === 'troca_fotos' ? 'Motivo da troca' : 'Descrição do Serviço';
+    var descricaoHtml = '<div class="item" style="grid-column:1/-1;"><div class="label">' + descricaoLabel + '</div><div class="value">' + (sol.motivo_troca ? sol.motivo_troca : sol.descricao) + '</div></div>';
+
+    var actionsHtml = '';
+    if (sol.tipo === 'troca_fotos' && sol.status_aprovacao === 'pendente') {
+      actionsHtml = '<button class="btn btn-success btn-sm" onclick="aprovarSolicitacao(' + sol.id + ')">' + icon('check') + ' Aprovar</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="rejeitarSolicitacao(' + sol.id + ')">' + icon('x') + ' Rejeitar</button>';
+    }
+
+    var fotosHtml = '';
+    if (sol.tipo === 'troca_fotos') {
+      if (sol.foto_perfil_nova) {
+        fotosHtml += '<div style="margin-bottom:12px;"><div class="label">Nova Foto de Perfil</div><img src="' + sol.foto_perfil_nova + '" alt="Nova foto de perfil" style="width:100%;max-width:180px;border-radius:12px;margin-top:8px;object-fit:cover;"></div>';
+      }
+      var novasFotos = [];
+      try { novasFotos = sol.fotos_servicos_novas ? JSON.parse(sol.fotos_servicos_novas) : []; } catch (e) { novasFotos = []; }
+      if (novasFotos.length > 0) {
+        fotosHtml += '<div class="label">Novas Fotos de Serviço</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;">';
+        for (var j = 0; j < novasFotos.length; j++) {
+          fotosHtml += '<img src="' + novasFotos[j] + '" alt="Nova foto de serviço" style="width:100%;height:120px;object-fit:cover;border-radius:12px;">';
+        }
+        fotosHtml += '</div>';
+      }
+    }
+
+    card.innerHTML =
+      '<div class="card-header"><h4>Solicitação #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
+      infoHtml +
+      '<div class="descricao">' + descricaoHtml + fotosHtml + '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actionsHtml + '</div>';
+
     container.appendChild(card);
+  }
+}
+
+async function aprovarSolicitacao(id) {
+  if (!confirm('Aprovar esta solicitação de troca de fotos?')) return;
+  var result = await apiRequest(API_BASE + '/admin/solicitacoes/' + id + '/aprovar', { method: 'PUT' });
+  if (result && result.success) {
+    showToast('Solicitação aprovada e fotos atualizadas.', 'success');
+    await carregarSolicitacoes();
+    await carregarProfissionais();
+  }
+}
+
+async function rejeitarSolicitacao(id) {
+  if (!confirm('Rejeitar esta solicitação de troca de fotos?')) return;
+  var result = await apiRequest(API_BASE + '/admin/solicitacoes/' + id + '/rejeitar', { method: 'PUT' });
+  if (result && result.success) {
+    showToast('Solicitação rejeitada.', 'info');
+    await carregarSolicitacoes();
   }
 }
 
