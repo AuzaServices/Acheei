@@ -236,8 +236,16 @@ function verDetalhes(id) {
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
   document.getElementById('detalhesBody').innerHTML =
     fotoPerfil +
-    '<h3 style="text-align:center;margin-bottom:4px;">' + prof.nome_perfil + '</h3>' +
-    '<p style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</p>' +
+    '<div style="text-align:center;margin-bottom:16px;">' +
+      '<input type="text" id="detalhesNomePerfil" value="' + prof.nome_perfil + '" placeholder="Nome do profissional" style="width:100%;max-width:320px;padding:10px;border:1px solid #ccc;border-radius:6px;margin-bottom:10px;" />' +
+      '<input type="text" id="detalhesProfissao" value="' + prof.profissao + '" placeholder="Profissão" style="width:100%;max-width:320px;padding:10px;border:1px solid #ccc;border-radius:6px;margin-bottom:10px;" />' +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;">' +
+        '<input type="text" id="detalhesCidade" value="' + prof.cidade + '" placeholder="Cidade" style="flex:1 1 140px;padding:10px;border:1px solid #ccc;border-radius:6px;" />' +
+        '<input type="text" id="detalhesEstado" value="' + prof.estado + '" placeholder="Estado" style="flex:1 1 140px;padding:10px;border:1px solid #ccc;border-radius:6px;" />' +
+      '</div>' +
+      '<button class="btn btn-primary btn-sm" onclick="salvarDadosProfissional(' + prof.id + ')">Salvar alterações</button>' +
+    '</div>' +
+    '<div style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</div>' +
     '<div style="text-align:center;margin-bottom:16px;"><span class="status-badge ' + sc + '">' + sl + '</span></div>' +
     '<div class="detalhes-grid">' +
       '<div class="detalhes-item"><div class="label">CPF</div><div class="value">' + prof.cpf + '</div></div>' +
@@ -253,6 +261,52 @@ function verDetalhes(id) {
     '<div class="detalhes-fotos">' + fotosHtml + '</div>';
   document.getElementById('detalhesModal').classList.add('active');
   document.body.style.overflow = 'hidden';
+}
+
+async function salvarDadosProfissional(id) {
+  var nomePerfil = document.getElementById('detalhesNomePerfil').value.trim();
+  var profissao = document.getElementById('detalhesProfissao').value.trim();
+  var cidade = document.getElementById('detalhesCidade').value.trim();
+  var estado = document.getElementById('detalhesEstado').value.trim();
+
+  if (!nomePerfil) {
+    showToast('O nome do profissional não pode ficar vazio.', 'error');
+    return;
+  }
+  if (!profissao) {
+    showToast('A profissão não pode ficar vazia.', 'error');
+    return;
+  }
+  if (!cidade) {
+    showToast('A cidade não pode ficar vazia.', 'error');
+    return;
+  }
+  if (!estado) {
+    showToast('O estado não pode ficar vazio.', 'error');
+    return;
+  }
+
+  var result = await apiRequest(API_BASE + '/admin/profissional/' + id, {
+    method: 'PUT',
+    body: JSON.stringify({
+      nome_perfil: nomePerfil,
+      profissao: profissao,
+      cidade: cidade,
+      estado: estado
+    })
+  });
+
+  if (result && result.success) {
+    showToast('Dados do profissional atualizados com sucesso.', 'success');
+    atualizarDadosProfissional(id, {
+      nome_perfil: nomePerfil,
+      profissao: profissao,
+      cidade: cidade,
+      estado: estado
+    });
+    renderizarTabelas();
+    verDetalhes(id);
+  }
 }
 
 async function removerFotoPerfil(id) {

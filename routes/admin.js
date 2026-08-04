@@ -251,6 +251,49 @@ module.exports = function(db, dbConnected) {
   });
 
   // ============================================
+  // PUT /api/admin/profissional/:id
+  // Atualizar dados do profissional
+  // ============================================
+  router.put('/profissional/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+
+    var nomePerfil = req.body.nome_perfil;
+    var profissao = req.body.profissao;
+    var cidade = req.body.cidade;
+    var estado = req.body.estado;
+
+    if (typeof nomePerfil !== 'string' || !nomePerfil.trim()) {
+      return res.status(400).json({ success: false, message: 'Nome do profissional é obrigatório.' });
+    }
+    if (typeof profissao !== 'string' || !profissao.trim()) {
+      return res.status(400).json({ success: false, message: 'Profissão é obrigatória.' });
+    }
+    if (typeof cidade !== 'string' || !cidade.trim()) {
+      return res.status(400).json({ success: false, message: 'Cidade é obrigatória.' });
+    }
+    if (typeof estado !== 'string' || !estado.trim()) {
+      return res.status(400).json({ success: false, message: 'Estado é obrigatório.' });
+    }
+
+    db.query(
+      'UPDATE profissionais SET nome_perfil = ?, profissao = ?, cidade = ?, estado = ? WHERE id = ?',
+      [nomePerfil.trim(), profissao.trim(), cidade.trim(), estado.trim(), req.params.id],
+      (err, result) => {
+        if (err) {
+          console.error('Erro ao atualizar profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao atualizar dados do profissional' });
+        }
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+        }
+        res.json({ success: true, message: 'Dados do profissional atualizados com sucesso.' });
+      }
+    );
+  });
+
+  // ============================================
   // DELETE /api/admin/profissional/:id/foto-servico/:index
   // Remover foto de serviço do profissional
   // ============================================
