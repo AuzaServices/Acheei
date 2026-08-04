@@ -61,6 +61,7 @@ module.exports = function(db, dbConnected) {
           const paymentClient = new Payment(client);
 
           const expirationDate = new Date(Date.now() + 30 * 60 * 1000);
+          const uniqueReference = `solicitacao_${solicitacao_id}_${Date.now()}`;
 
           const paymentData = {
             body: {
@@ -73,7 +74,7 @@ module.exports = function(db, dbConnected) {
                 last_name: 'Acheei'
               },
               date_of_expiration: expirationDate.toISOString(),
-              external_reference: `solicitacao_${solicitacao_id}`
+              external_reference: uniqueReference
             }
           };
 
@@ -81,7 +82,7 @@ module.exports = function(db, dbConnected) {
 
           db.query(
             'UPDATE solicitacoes SET preference_id = ?, status_pagamento = "pendente" WHERE id = ?',
-            [result.id.toString(), solicitacao_id],
+            ['payment:' + result.id.toString() + '|ref:' + uniqueReference, solicitacao_id],
             (updateErr) => {
               if (updateErr) console.error('Erro ao salvar payment_id:', updateErr);
             }
@@ -114,6 +115,7 @@ module.exports = function(db, dbConnected) {
               const descricaoPagamento = descricao || sol.descricao || 'Liberação de chat com cliente';
               const payerData = req.body.payer_email ? { email: req.body.payer_email } : {};
 
+              const uniqueReference = `solicitacao_${solicitacao_id}_${Date.now()}`;
               const preferenceData = {
                 items: [
                   {
@@ -132,7 +134,7 @@ module.exports = function(db, dbConnected) {
                   failure: `${mp.APP_URL}/profissional.html?status=failure&solicitacao_id=${solicitacao_id}`
                 },
                 notification_url: `${mp.APP_URL}/api/pagamento/webhook`,
-                external_reference: `solicitacao_${solicitacao_id}`,
+                external_reference: uniqueReference,
                 statement_descriptor: 'ACHEEI',
                 payment_methods: {
                   installments: 1
@@ -148,7 +150,7 @@ module.exports = function(db, dbConnected) {
 
               db.query(
                 'UPDATE solicitacoes SET preference_id = ?, status_pagamento = "pendente" WHERE id = ?',
-                [prefResult.id, solicitacao_id],
+                ['preference:' + prefResult.id + '|ref:' + uniqueReference, solicitacao_id],
                 (updateErr) => {
                   if (updateErr) console.error('Erro ao salvar preference_id no fallback:', updateErr);
                 }
@@ -263,7 +265,7 @@ module.exports = function(db, dbConnected) {
 
           db.query(
             'UPDATE solicitacoes SET preference_id = ? WHERE id = ?',
-            [result.id, solicitacao_id],
+            ['preference:' + result.id, solicitacao_id],
             (updateErr) => {
               if (updateErr) console.error('Erro ao salvar preference_id:', updateErr);
             }
@@ -347,12 +349,54 @@ module.exports = function(db, dbConnected) {
         }
 
         // Se tivermos o payment/preference ID guardado, verifica esse pagamento diretamente primeiro.
-        if (sol.preference_id && mp.payment) {
-          try {
-            const paymentResult = await mp.payment.get({ id: sol.preference_id });
-            if (paymentResult && paymentResult.status === 'approved') {
-              const valorPago = parseFloat(paymentResult.transaction_amount || 0);
-              if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+        if (sol.preference_id) {
+          const storedId = sol.preference_id.toString();
+          const parts = storedId.split('|ref:');
+          const idPart = parts[0];
+          const refPart = parts[1] || '';
+
+          if (idPart.startsWith('payment:') && mp.payment) {
+            try {
+              const paymentId = idPart.replace('payment:', '');
+              const paymentResult = await mp.payment.get({ id: paymentId });
+              if (paymentResult && paymentResult.status === 'approved') {
+                const valorPago = parseFloat(paymentResult.transaction_amount || 0);
+                if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                  db.query(
+                    'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
+                    [solicitacaoId],
+                    (updateErr) => {
+                      if (updateErr) console.error('Erro ao liberar chat:', updateErr);
+                    }
+                  );
+                  console.log(`✅ Pagamento verificado e chat liberado para solicitacao #${solicitacaoId}`);
+                  return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
+                }
+              }
+            } catch (paymentErr) {
+              console.warn('Não conseguiu verificar pagamento direto pelo payment_id:', paymentErr.message || paymentErr);
+            }
+          }
+
+          if (idPart.startsWith('preference:') && refPart && mp.payment) {
+            try {
+              const searchResult = await mp.payment.search({
+                options: {
+                  external_reference: refPart,
+                  sort: 'date_created',
+                  criteria: 'desc',
+                  limit: 5
+                }
+              });
+              const payments = searchResult.results || searchResult.body?.results || [];
+              for (const payment of payments) {
+                const valorPago = parseFloat(payment.transaction_amount || 0);
+                if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                  approved = true;
+                  break;
+                }
+              }
+              if (approved) {
                 db.query(
                   'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
                   [solicitacaoId],
@@ -360,12 +404,12 @@ module.exports = function(db, dbConnected) {
                     if (updateErr) console.error('Erro ao liberar chat:', updateErr);
                   }
                 );
-                console.log(`✅ Pagamento verificado e chat liberado para solicitação #${solicitacaoId}`);
+                console.log(`✅ Pagamento verificado e chat liberado para solicitacao #${solicitacaoId}`);
                 return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
               }
+            } catch (searchErr) {
+              console.warn('Erro ao buscar pagamento por preference_id:', searchErr.message || searchErr);
             }
-          } catch (paymentErr) {
-            console.warn('Não conseguiu verificar pagamento direto pelo payment_id:', paymentErr.message || paymentErr);
           }
         }
 
