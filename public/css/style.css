@@ -959,6 +959,12 @@ img {
   width: 100%;
   max-width: 760px;
   max-height: 95vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: modalSlideIn 0.3s ease;
+}
 
 @keyframes modalSlideIn {
   from {
@@ -1001,6 +1007,7 @@ img {
 
 .modal-body {
   padding: 24px;
+  overflow-y: auto;
 }
 
 .modal-body .form-group {
