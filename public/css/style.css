@@ -1248,28 +1248,25 @@ img {
   margin: 18px 0 12px;
 }
 
-.section-title {
+..section-title {
   margin-top: 20px;
   margin-bottom: 14px;
   font-size: 18px;
   font-weight: 700;
-  color: var(--black-primary);
-  border-radius: 50%;
   background: rgba(0,0,0,0.55);
   color: var(--white);
-  font-size: 18px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
   transition: background 0.2s ease;
 }
 
 .photo-delete-btn:hover {
   background: rgba(0,0,0,0.75);
-}
-
-  gap: 12px;
 }
 
 /* ==================== Autocomplete ==================== */
