@@ -292,41 +292,59 @@ function fecharDetalhes() {
 function renderizarSolicitacoes(solicitacoes) {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
-  if (solicitacoes.length === 0) {
+  if (!solicitacoes || solicitacoes.length === 0) {
     container.innerHTML = '<div class="empty-state"><span class="icon">' + icon('clipboard') + '</span><h3>Nenhuma solicitacao recebida</h3><p>As solicitacoes de servicos dos clientes aparecerao aqui.</p></div>';
     return;
   }
-  for (var i = 0; i < solicitacoes.length; i++) {
-    var sol = solicitacoes[i];
-    var card = document.createElement('div');
-    card.className = 'solicitacao-card';
-    var tipoLabel = sol.tipo === 'troca_fotos' ? 'Troca de Fotos' : 'Serviço';
-    var aprovacLabel = sol.status_aprovacao ? sol.status_aprovacao : 'pendente';
-    var badgeTipo = '<span class="badge ' + (sol.status_aprovacao || 'pendente') + '">' + aprovacLabel.charAt(0).toUpperCase() + aprovacLabel.slice(1) + '</span>';
-    var infoHtml =
-      '<div class="info">' +
-        '<div class="item"><div class="label">Tipo</div><div class="value">' + tipoLabel + '</div></div>' +
-        '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
-        '<div class="item"><div class="label">Status</div><div class="value">' + badgeTipo + '</div></div>';
 
-    if (sol.cliente_telefone) {
-      var telefoneLink = 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"');
-      infoHtml += '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">' + icon('chat') + ' ' + sol.cliente_telefone + '</a></div></div>';
-    }
+  var servicos = solicitacoes.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
+  var trocas = solicitacoes.filter(function(sol) { return sol.tipo === 'troca_fotos'; });
 
-    infoHtml += '</div>';
+  if (servicos.length > 0) {
+    var servicosSection = document.createElement('div');
+    servicosSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Serviço</h3>';
+    servicos.forEach(function(sol) {
+      var statusPag = sol.status_pagamento || 'pendente';
+      var badgeHtml = statusPag === 'pago'
+        ? '<span class="badge pago">Pago</span>'
+        : '<span class="badge pendente">Pendente</span>';
+      var pagarBtn = statusPag === 'pendente'
+        ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
+        : '';
+      var card = document.createElement('div');
+      card.className = 'solicitacao-card';
+      card.innerHTML =
+        '<div class="card-header">' +
+          '<h4>Solicitação #' + sol.id + '</h4>' +
+          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
+        '</div>' +
+        '<div class="info">' +
+          '<div class="item"><div class="label">Cliente</div><div class="value">' + sol.cliente_nome + '</div></div>' +
+          '<div class="item"><div class="label">Telefone</div><div class="value">' + (sol.cliente_telefone || 'Não informado') + '</div></div>' +
+          '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
+        '</div>' +
+        '<div class="descricao"><div class="label">Descrição do Serviço</div><div class="value">' + sol.descricao + '</div></div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + pagarBtn + '</div>';
+      servicosSection.appendChild(card);
+    });
+    container.appendChild(servicosSection);
+  } else {
+    var emptyServicos = document.createElement('div');
+    emptyServicos.className = 'empty-state';
+    emptyServicos.innerHTML = '<span class="icon">📋</span><h3>Sem solicitações de serviço</h3><p>As solicitações de serviços aparecerão aqui quando forem enviadas.</p>';
+    container.appendChild(emptyServicos);
+  }
 
-    var descricaoLabel = sol.tipo === 'troca_fotos' ? 'Motivo da troca' : 'Descrição do Serviço';
-    var descricaoHtml = '<div class="item" style="grid-column:1/-1;"><div class="label">' + descricaoLabel + '</div><div class="value">' + (sol.motivo_troca ? sol.motivo_troca : sol.descricao) + '</div></div>';
-
-    var actionsHtml = '';
-    if (sol.tipo === 'troca_fotos' && sol.status_aprovacao === 'pendente') {
-      actionsHtml = '<button class="btn btn-success btn-sm" onclick="aprovarSolicitacao(' + sol.id + ')">' + icon('check') + ' Aprovar</button>' +
-                    '<button class="btn btn-danger btn-sm" onclick="rejeitarSolicitacao(' + sol.id + ')">' + icon('x') + ' Rejeitar</button>';
-    }
-
-    var fotosHtml = '';
-    if (sol.tipo === 'troca_fotos') {
+  if (trocas.length > 0) {
+    var trocasSection = document.createElement('div');
+    trocasSection.style.marginTop = '32px';
+    trocasSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Troca de Fotos</h3>';
+    trocas.forEach(function(sol) {
+      var statusLabel = sol.status_aprovacao ? sol.status_aprovacao.charAt(0).toUpperCase() + sol.status_aprovacao.slice(1) : 'Pendente';
+      var statusClass = sol.status_aprovacao || 'pendente';
+      var card = document.createElement('div');
+      card.className = 'solicitacao-card';
+      var fotosHtml = '';
       if (sol.foto_perfil_nova) {
         fotosHtml += '<div style="margin-bottom:12px;"><div class="label">Nova Foto de Perfil</div><img src="' + sol.foto_perfil_nova + '" alt="Nova foto de perfil" style="width:100%;max-width:180px;border-radius:12px;margin-top:8px;object-fit:cover;"></div>';
       }
@@ -339,15 +357,29 @@ function renderizarSolicitacoes(solicitacoes) {
         }
         fotosHtml += '</div>';
       }
-    }
-
-    card.innerHTML =
-      '<div class="card-header"><h4>Solicitação #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
-      infoHtml +
-      '<div class="descricao">' + descricaoHtml + fotosHtml + '</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actionsHtml + '</div>';
-
-    container.appendChild(card);
+      card.innerHTML =
+        '<div class="card-header">' +
+          '<h4>Troca de Fotos #' + sol.id + '</h4>' +
+          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
+        '</div>' +
+        '<div class="info">' +
+          '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
+          '<div class="item"><div class="label">Status</div><div class="value"><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div></div>' +
+        '</div>' +
+        '<div class="descricao"><div class="label">Motivo da troca</div><div class="value">' + (sol.motivo_troca || sol.descricao) + '</div></div>' +
+        fotosHtml +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">' +
+          (sol.status_aprovacao === 'pendente' ? '<button class="btn btn-success btn-sm" onclick="aprovarSolicitacao(' + sol.id + ')">Aprovar</button><button class="btn btn-danger btn-sm" onclick="rejeitarSolicitacao(' + sol.id + ')">Rejeitar</button>' : '') +
+        '</div>';
+      trocasSection.appendChild(card);
+    });
+    container.appendChild(trocasSection);
+  } else {
+    var emptyTrocas = document.createElement('div');
+    emptyTrocas.className = 'empty-state';
+    emptyTrocas.style.marginTop = '32px';
+    emptyTrocas.innerHTML = '<span class="icon">📷</span><h3>Sem solicitações de troca de fotos</h3><p>As solicitações de troca de fotos aparecerão aqui quando forem enviadas pelos profissionais.</p>';
+    container.appendChild(emptyTrocas);
   }
 }
 

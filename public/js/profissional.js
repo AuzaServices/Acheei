@@ -335,40 +335,77 @@ async function carregarSolicitacoes() {
   if (result && result.success) {
     solicitacoesData = result.data;
     renderizarSolicitacoes();
-    document.getElementById('countSolicitacoes').textContent = result.total;
-    document.getElementById('solCount').textContent = result.total + ' solicitação' + (result.total !== 1 ? 'ões' : '');
+    var servicos = solicitacoesData.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
+    var trocas = solicitacoesData.filter(function(sol) { return sol.tipo === 'troca_fotos'; });
+    document.getElementById('countSolicitacoes').textContent = servicos.length;
+    document.getElementById('solCount').textContent = servicos.length + ' solicitação' + (servicos.length !== 1 ? 'ões' : '') + (trocas.length > 0 ? ' + ' + trocas.length + ' trocas de fotos' : '');
   }
 }
 
 function renderizarSolicitacoes() {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
-  if (solicitacoesData.length === 0) {
+  if (!solicitacoesData || solicitacoesData.length === 0) {
     container.innerHTML = '<div class="empty-state"><span class="icon">📋</span><h3>Nenhuma solicitação ainda</h3><p>Quando clientes solicitarem seus serviços, aparecerão aqui.</p></div>';
     return;
   }
-  for (var i = 0; i < solicitacoesData.length; i++) {
-    var sol = solicitacoesData[i];
-    var statusPag = sol.status_pagamento || 'pendente';
-    var badgeHtml = statusPag === 'pago'
-      ? '<span class="badge pago">Pago</span>'
-      : '<span class="badge pendente">Pendente</span>';
-    var pagarBtn = statusPag === 'pendente'
-      ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
-      : '';
-    var card = document.createElement('div');
-    card.className = 'solicitacao-card';
-    card.innerHTML =
-      '<div class="card-header">' +
-        '<h4>' + sol.cliente_nome + '</h4>' +
-        '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
-      '</div>' +
-'<div class="info-grid">' +
-        '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
-      '</div>' +
-      '<div class="descricao">' + sol.descricao + '</div>' +
-      '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>';
-    container.appendChild(card);
+
+  var servicos = solicitacoesData.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
+  var trocas = solicitacoesData.filter(function(sol) { return sol.tipo === 'troca_fotos'; });
+
+  if (servicos.length > 0) {
+    var servicosSection = document.createElement('div');
+    servicosSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Serviço</h3>';
+    servicos.forEach(function(sol) {
+      var statusPag = sol.status_pagamento || 'pendente';
+      var badgeHtml = statusPag === 'pago'
+        ? '<span class="badge pago">Pago</span>'
+        : '<span class="badge pendente">Pendente</span>';
+      var pagarBtn = statusPag === 'pendente'
+        ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
+        : '';
+      var card = document.createElement('div');
+      card.className = 'solicitacao-card';
+      card.innerHTML =
+        '<div class="card-header">' +
+          '<h4>' + sol.cliente_nome + '</h4>' +
+          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
+        '</div>' +
+        '<div class="info-grid">' +
+          '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
+        '</div>' +
+        '<div class="descricao">' + sol.descricao + '</div>' +
+        '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>';
+      servicosSection.appendChild(card);
+    });
+    container.appendChild(servicosSection);
+  }
+
+  if (trocas.length > 0) {
+    var trocasSection = document.createElement('div');
+    trocasSection.style.marginTop = '32px';
+    trocasSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Troca de Fotos</h3>';
+    trocas.forEach(function(sol) {
+      var statusLabel = sol.status_aprovacao ? sol.status_aprovacao.charAt(0).toUpperCase() + sol.status_aprovacao.slice(1) : 'Pendente';
+      var statusClass = sol.status_aprovacao || 'pendente';
+      var card = document.createElement('div');
+      card.className = 'solicitacao-card';
+      card.innerHTML =
+        '<div class="card-header">' +
+          '<h4>Troca de Fotos</h4>' +
+          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
+        '</div>' +
+        '<div class="info-grid">' +
+          '<div class="item"><div class="label">Status</div><div class="value"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>' +
+        '</div>' +
+        '<div class="descricao">' + (sol.motivo_troca || sol.descricao) + '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<div style="font-size:13px;color:var(--gray-medium);">Foto de perfil nova: ' + (sol.foto_perfil_nova ? '<a href="' + sol.foto_perfil_nova + '" target="_blank">Ver</a>' : 'Nenhuma') + '</div>' +
+          '<div style="font-size:13px;color:var(--gray-medium);">Fotos de serviço novas: ' + (sol.fotos_servicos_novas ? JSON.parse(sol.fotos_servicos_novas).length : 0) + '</div>' +
+        '</div>';
+      trocasSection.appendChild(card);
+    });
+    container.appendChild(trocasSection);
   }
 }
 
@@ -772,8 +809,9 @@ async function carregarChatSolicitacoes() {
   select.innerHTML = '<option value="">Selecione uma solicitação para conversar</option>';
   var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
   if (result && result.success) {
-    for (var i = 0; i < result.data.length; i++) {
-      var sol = result.data[i];
+    var servicos = result.data.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
+    for (var i = 0; i < servicos.length; i++) {
+      var sol = servicos[i];
       var opt = document.createElement('option');
       opt.value = sol.id;
       opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome + ' (' + (sol.status_pagamento === 'pago' ? 'Pago' : 'Pendente') + ')';
