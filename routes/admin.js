@@ -198,6 +198,110 @@ module.exports = function(db, dbConnected) {
     );
   });
 
+  function getCloudinaryPublicId(url) {
+    if (!url || !url.includes('cloudinary')) return null;
+    var cleanUrl = url.split('?')[0];
+    var parts = cleanUrl.split('/');
+    var filename = parts[parts.length - 1].split('.')[0];
+    var folder = 'acheei/';
+    if (cleanUrl.includes('/perfis/')) folder = 'acheei/perfis/';
+    else if (cleanUrl.includes('/servicos/')) folder = 'acheei/servicos/';
+    return folder + filename;
+  }
+
+  // ============================================
+  // PUT /api/admin/profissional/:id/foto-perfil
+  // Remover foto de perfil do profissional
+  // ============================================
+  router.put('/profissional/:id/foto-perfil', authMiddleware, async (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+
+    db.query('SELECT foto_perfil FROM profissionais WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+
+      var fotoPerfil = results[0].foto_perfil;
+      if (!fotoPerfil) {
+        return res.status(400).json({ success: false, message: 'Nenhuma foto de perfil encontrada' });
+      }
+
+      var publicId = getCloudinaryPublicId(fotoPerfil);
+      if (publicId) {
+        await cloudinary.uploader.destroy(publicId).catch(e => {
+          console.error('Erro ao remover foto do Cloudinary:', e);
+        });
+      }
+
+      db.query('UPDATE profissionais SET foto_perfil = ? WHERE id = ?', ['', req.params.id], (err) => {
+        if (err) {
+          console.error('Erro ao atualizar profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao remover foto de perfil' });
+        }
+
+        res.json({ success: true, message: 'Foto de perfil removida com sucesso' });
+      });
+    });
+  });
+
+  // ============================================
+  // DELETE /api/admin/profissional/:id/foto-servico/:index
+  // Remover foto de serviço do profissional
+  // ============================================
+  router.delete('/profissional/:id/foto-servico/:index', authMiddleware, async (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+
+    var index = parseInt(req.params.index, 10);
+    if (isNaN(index) || index < 0) {
+      return res.status(400).json({ success: false, message: 'Índice de foto inválido' });
+    }
+
+    db.query('SELECT fotos_servicos FROM profissionais WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+
+      var fotosServicos = [];
+      if (results[0].fotos_servicos) {
+        try { fotosServicos = JSON.parse(results[0].fotos_servicos); } catch (e) { fotosServicos = []; }
+      }
+
+      if (!Array.isArray(fotosServicos) || index >= fotosServicos.length || !fotosServicos[index]) {
+        return res.status(400).json({ success: false, message: 'Foto de serviço não encontrada' });
+      }
+
+      var fotoUrl = fotosServicos[index];
+      var publicId = getCloudinaryPublicId(fotoUrl);
+      if (publicId) {
+        await cloudinary.uploader.destroy(publicId).catch(e => {
+          console.error('Erro ao remover foto do Cloudinary:', e);
+        });
+      }
+
+      fotosServicos.splice(index, 1);
+      db.query('UPDATE profissionais SET fotos_servicos = ? WHERE id = ?', [JSON.stringify(fotosServicos), req.params.id], (err) => {
+        if (err) {
+          console.error('Erro ao atualizar profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao remover foto de serviço' });
+        }
+
+        res.json({ success: true, message: 'Foto de serviço removida com sucesso', data: { fotos_servicos: fotosServicos } });
+      });
+    });
+  });
+
 // ============================================
   // DELETE /api/admin/deletar/:id
   // Deletar profissional do banco e Cloudinary
