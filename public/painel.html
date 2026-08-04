@@ -95,7 +95,7 @@
     <div class="dashboard-nav">
       <div class="logo-menu">
         <div class="logo">Acheei Admin</div>
-        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu móvel">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu móvel" aria-controls="mobileMenu" aria-expanded="false">
           <span></span>
           <span></span>
           <span></span>
@@ -108,8 +108,8 @@
     </div>
   </header>
 
-  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-  <div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" aria-hidden="true"></div>
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
     <div class="menu-header">
       <div class="menu-icon">A</div>
       <div>

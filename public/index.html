@@ -24,7 +24,7 @@
           <span data-icon="hard-hat"></span> Área do Profissional
         </a>
       </div>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu" aria-controls="mobileMenu" aria-expanded="false">
         <span></span>
         <span></span>
         <span></span>
@@ -33,10 +33,10 @@
   </header>
 
   <!-- Mobile Menu Overlay -->
-  <div class="mobile-menu-overlay" id="menuOverlay"></div>
+  <div class="mobile-menu-overlay" id="menuOverlay" aria-hidden="true"></div>
 
   <!-- Mobile Menu Panel -->
-  <div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
     <div class="menu-header">
       <div class="menu-icon" data-icon="hard-hat"></div>
       <div>

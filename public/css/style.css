@@ -126,6 +126,40 @@ img {
   display: flex;
   align-items: center;
   gap: 30px;
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.navbar .nav-links > * {
+  white-space: nowrap;
+}
+
+.navbar .logo-menu,
+.dashboard-nav .logo-menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.navbar .logo-menu .logo,
+.dashboard-nav .logo-menu .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dashboard-nav .logo-menu {
+  flex: 1;
+}
+
+.dashboard-nav .admin-info,
+.dashboard-nav .cliente-info {
+  flex-shrink: 0;
 }
 
 .navbar .nav-links a {
@@ -227,7 +261,7 @@ img {
 
 /* Mobile Menu Panel */
 .mobile-menu {
-  display: none;
+  display: block;
   position: fixed;
   top: 0;
   right: -100%;
@@ -359,7 +393,6 @@ img {
   }
 
   .dashboard-nav .logo-menu {
-    width: 100%;
     justify-content: space-between;
   }
 

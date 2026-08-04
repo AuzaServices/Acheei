@@ -10,9 +10,18 @@ function openMobileMenu() {
   var overlay = getMobileMenuOverlay();
   var menu = document.getElementById('mobileMenu');
   var button = getMobileMenuButton();
-  if (overlay) overlay.classList.add('active');
-  if (menu) menu.classList.add('active');
-  if (button) button.classList.add('active');
+  if (overlay) {
+    overlay.classList.add('active');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  if (menu) {
+    menu.classList.add('active');
+    menu.setAttribute('aria-hidden', 'false');
+  }
+  if (button) {
+    button.classList.add('active');
+    button.setAttribute('aria-expanded', 'true');
+  }
   document.body.style.overflow = 'hidden';
 }
 
@@ -20,9 +29,18 @@ function closeMobileMenu() {
   var overlay = getMobileMenuOverlay();
   var menu = document.getElementById('mobileMenu');
   var button = getMobileMenuButton();
-  if (overlay) overlay.classList.remove('active');
-  if (menu) menu.classList.remove('active');
-  if (button) button.classList.remove('active');
+  if (overlay) {
+    overlay.classList.remove('active');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+  if (menu) {
+    menu.classList.remove('active');
+    menu.setAttribute('aria-hidden', 'true');
+  }
+  if (button) {
+    button.classList.remove('active');
+    button.setAttribute('aria-expanded', 'false');
+  }
   document.body.style.overflow = '';
 }
 
@@ -48,7 +66,7 @@ function fecharMenuMobile() {
   closeMobileMenu();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+function setupMobileMenu() {
   var hamburger = getMobileMenuButton();
   var overlay = getMobileMenuOverlay();
   if (hamburger) hamburger.addEventListener('click', toggleMobileMenu);
@@ -56,4 +74,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeMobileMenu();
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupMobileMenu);
+} else {
+  setupMobileMenu();
+}
