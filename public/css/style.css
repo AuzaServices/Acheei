@@ -86,7 +86,9 @@ img {
 
 /* ==================== Header / Navbar ==================== */
 .header {
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
@@ -280,7 +282,9 @@ img {
   width: 85%;
   max-width: 340px;
   height: 100%;
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   z-index: 999;
   padding: 90px 24px 30px;
   transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
