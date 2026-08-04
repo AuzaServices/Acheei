@@ -73,16 +73,9 @@ db.query('CREATE TABLE IF NOT EXISTS orcamentos (id INT AUTO_INCREMENT PRIMARY K
     // Adicionar colunas novas se não existirem (compatibilidade)
     db.query("ALTER TABLE profissionais ADD COLUMN email VARCHAR(100) UNIQUE AFTER data_cadastro", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE profissionais ADD COLUMN senha VARCHAR(255) AFTER email", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE profissionais ADD COLUMN ultima_troca_fotos TIMESTAMP NULL AFTER data_cadastro", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE solicitacoes ADD COLUMN status_pagamento ENUM('pendente','pago') DEFAULT 'pendente' AFTER data_solicitacao", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE solicitacoes ADD COLUMN cliente_id INT AFTER profissional_id", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN tipo ENUM('servico','troca_fotos') DEFAULT 'servico' AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN status_aprovacao ENUM('pendente','aprovado','rejeitado') DEFAULT 'pendente' AFTER tipo", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN foto_perfil_nova VARCHAR(255) AFTER status_aprovacao", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN fotos_servicos_novas LONGTEXT AFTER foto_perfil_nova", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN motivo_troca TEXT AFTER fotos_servicos_novas", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN data_resposta TIMESTAMP NULL AFTER status_aprovacao", function(err) { if (err) { /* coluna já existe */ } });
     db.query("ALTER TABLE clientes ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription:', err.message); } });
     // Criar admin padrão
     criarAdminPadrao();

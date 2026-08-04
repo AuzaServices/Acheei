@@ -134,139 +134,6 @@ function mostrarDashboard() {
   document.getElementById('dashboard').style.display = 'block';
 }
 
-function getNextAllowedTrocaFotosDate() {
-  if (!profissional || !profissional.ultima_troca_fotos) return null;
-  var lastDate = new Date(profissional.ultima_troca_fotos);
-  if (isNaN(lastDate.getTime())) return null;
-  lastDate.setMonth(lastDate.getMonth() + 1);
-  return lastDate;
-}
-
-function abrirModalTrocaFotos() {
-  if (!profissional) {
-    showToast('Faça login antes de solicitar troca de fotos.', 'error');
-    return;
-  }
-  var nextAllowed = getNextAllowedTrocaFotosDate();
-  if (nextAllowed && new Date() < nextAllowed) {
-    showToast('Você só pode solicitar troca de fotos novamente em ' + nextAllowed.toLocaleDateString('pt-BR') + '.', 'error');
-    return;
-  }
-  document.getElementById('trocaFotosModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function fecharModalTrocaFotos() {
-  document.getElementById('trocaFotosModal').classList.remove('active');
-  document.getElementById('trocaFotosForm').reset();
-  document.body.style.overflow = '';
-}
-
-function readFileAsDataURL(file) {
-  return new Promise(function(resolve, reject) {
-    var reader = new FileReader();
-    reader.onload = function() { resolve(reader.result); };
-    reader.onerror = function() { reject(reader.error); };
-    reader.readAsDataURL(file);
-  });
-}
-
-async function uploadImageFile(file, folder) {
-  try {
-    var imageData = await readFileAsDataURL(file);
-    var result = await apiRequest(API_BASE + '/upload', {
-      method: 'POST',
-      body: JSON.stringify({ image: imageData, folder: folder })
-    });
-    return result && result.success ? result.data.url : null;
-  } catch (error) {
-    console.error('Erro ao enviar imagem:', error);
-    return null;
-  }
-}
-
-async function uploadMultipleImages(files, folder) {
-  if (!files || files.length === 0) return [];
-  var images = [];
-  for (var i = 0; i < files.length; i++) {
-    images.push(await readFileAsDataURL(files[i]));
-  }
-  var result = await apiRequest(API_BASE + '/upload/multiplas', {
-    method: 'POST',
-    body: JSON.stringify({ images: images, folder: folder })
-  });
-  return result && result.success ? result.data.map(item => item.url) : [];
-}
-
-async function solicitarTrocaFotos(event) {
-  event.preventDefault();
-  if (!profissional) {
-    showToast('Faça login antes de solicitar troca de fotos.', 'error');
-    return;
-  }
-
-  var perfilInput = document.getElementById('novaFotoPerfil');
-  var servicosInput = document.getElementById('novasFotosServicos');
-  var motivo = document.getElementById('motivoTroca').value.trim();
-  var fotoPerfilFile = perfilInput.files[0];
-  var servicosFiles = Array.from(servicosInput.files).slice(0, 3);
-
-  if (!fotoPerfilFile && servicosFiles.length === 0) {
-    showToast('Selecione pelo menos uma nova foto para enviar.', 'error');
-    return;
-  }
-
-  if (!motivo) {
-    showToast('Informe um motivo para a troca de fotos.', 'error');
-    return;
-  }
-
-  var submitBtn = event.target.querySelector('button[type="submit"]');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando...';
-  }
-
-  var fotoPerfilUrl = '';
-  var fotosServicosUrls = [];
-  if (fotoPerfilFile) {
-    fotoPerfilUrl = await uploadImageFile(fotoPerfilFile, 'perfis');
-    if (!fotoPerfilUrl) {
-      showToast('Falha ao enviar foto de perfil.', 'error');
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar Solicitação'; }
-      return;
-    }
-  }
-  if (servicosFiles.length > 0) {
-    fotosServicosUrls = await uploadMultipleImages(servicosFiles, 'servicos');
-    if (fotosServicosUrls.length === 0) {
-      showToast('Falha ao enviar fotos de serviços.', 'error');
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar Solicitação'; }
-      return;
-    }
-  }
-
-  var result = await apiRequest(API_BASE + '/solicitacoes/troca-fotos', {
-    method: 'POST',
-    body: JSON.stringify({
-      foto_perfil_nova: fotoPerfilUrl || '',
-      fotos_servicos_novas: fotosServicosUrls,
-      motivo_troca: motivo
-    })
-  });
-
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Enviar Solicitação';
-  }
-
-  if (result && result.success) {
-    showToast('Solicitação de troca de fotos enviada ao administrador.', 'success');
-    fecharModalTrocaFotos();
-    carregarSolicitacoes();
-  }
-}
-
 // ============================================
 // Tabs
 // ============================================
@@ -335,77 +202,40 @@ async function carregarSolicitacoes() {
   if (result && result.success) {
     solicitacoesData = result.data;
     renderizarSolicitacoes();
-    var servicos = solicitacoesData.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
-    var trocas = solicitacoesData.filter(function(sol) { return sol.tipo === 'troca_fotos'; });
-    document.getElementById('countSolicitacoes').textContent = servicos.length;
-    document.getElementById('solCount').textContent = servicos.length + ' solicitação' + (servicos.length !== 1 ? 'ões' : '') + (trocas.length > 0 ? ' + ' + trocas.length + ' trocas de fotos' : '');
+    document.getElementById('countSolicitacoes').textContent = result.total;
+    document.getElementById('solCount').textContent = result.total + ' solicitação' + (result.total !== 1 ? 'ões' : '');
   }
 }
 
 function renderizarSolicitacoes() {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
-  if (!solicitacoesData || solicitacoesData.length === 0) {
+  if (solicitacoesData.length === 0) {
     container.innerHTML = '<div class="empty-state"><span class="icon">📋</span><h3>Nenhuma solicitação ainda</h3><p>Quando clientes solicitarem seus serviços, aparecerão aqui.</p></div>';
     return;
   }
-
-  var servicos = solicitacoesData.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
-  var trocas = solicitacoesData.filter(function(sol) { return sol.tipo === 'troca_fotos'; });
-
-  if (servicos.length > 0) {
-    var servicosSection = document.createElement('div');
-    servicosSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Serviço</h3>';
-    servicos.forEach(function(sol) {
-      var statusPag = sol.status_pagamento || 'pendente';
-      var badgeHtml = statusPag === 'pago'
-        ? '<span class="badge pago">Pago</span>'
-        : '<span class="badge pendente">Pendente</span>';
-      var pagarBtn = statusPag === 'pendente'
-        ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
-        : '';
-      var card = document.createElement('div');
-      card.className = 'solicitacao-card';
-      card.innerHTML =
-        '<div class="card-header">' +
-          '<h4>' + sol.cliente_nome + '</h4>' +
-          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
-        '</div>' +
-        '<div class="info-grid">' +
-          '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
-        '</div>' +
-        '<div class="descricao">' + sol.descricao + '</div>' +
-        '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>';
-      servicosSection.appendChild(card);
-    });
-    container.appendChild(servicosSection);
-  }
-
-  if (trocas.length > 0) {
-    var trocasSection = document.createElement('div');
-    trocasSection.style.marginTop = '32px';
-    trocasSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Troca de Fotos</h3>';
-    trocas.forEach(function(sol) {
-      var statusLabel = sol.status_aprovacao ? sol.status_aprovacao.charAt(0).toUpperCase() + sol.status_aprovacao.slice(1) : 'Pendente';
-      var statusClass = sol.status_aprovacao || 'pendente';
-      var card = document.createElement('div');
-      card.className = 'solicitacao-card';
-      card.innerHTML =
-        '<div class="card-header">' +
-          '<h4>Troca de Fotos</h4>' +
-          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
-        '</div>' +
-        '<div class="info-grid">' +
-          '<div class="item"><div class="label">Status</div><div class="value"><span class="badge ' + statusClass + '">' + statusLabel + '</span></div></div>' +
-        '</div>' +
-        '<div class="descricao">' + (sol.motivo_troca || sol.descricao) + '</div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-          '<div style="font-size:13px;color:var(--gray-medium);">Foto de perfil nova: ' + (sol.foto_perfil_nova ? '<a href="' + sol.foto_perfil_nova + '" target="_blank">Ver</a>' : 'Nenhuma') + '</div>' +
-          '<div style="font-size:13px;color:var(--gray-medium);">Fotos de serviço novas: ' + (sol.fotos_servicos_novas ? JSON.parse(sol.fotos_servicos_novas).length : 0) + '</div>' +
-        '</div>';
-      trocasSection.appendChild(card);
-    });
-    container.appendChild(trocasSection);
+  for (var i = 0; i < solicitacoesData.length; i++) {
+    var sol = solicitacoesData[i];
+    var statusPag = sol.status_pagamento || 'pendente';
+    var badgeHtml = statusPag === 'pago'
+      ? '<span class="badge pago">Pago</span>'
+      : '<span class="badge pendente">Pendente</span>';
+    var pagarBtn = statusPag === 'pendente'
+      ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
+      : '';
+    var card = document.createElement('div');
+    card.className = 'solicitacao-card';
+    card.innerHTML =
+      '<div class="card-header">' +
+        '<h4>' + sol.cliente_nome + '</h4>' +
+        '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
+      '</div>' +
+'<div class="info-grid">' +
+        '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
+      '</div>' +
+      '<div class="descricao">' + sol.descricao + '</div>' +
+      '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>';
+    container.appendChild(card);
   }
 }
 
@@ -652,97 +482,42 @@ async function excluirOrcamento(id) {
 // ============================================
 // Calculadora
 // ============================================
-var calcExpression = '0';
-
-function updateCalcDisplay() {
-  var display = document.getElementById('calcDisplay');
-  if (!display) return;
-  display.value = calcExpression;
-}
-
-function normalizeExpression(expr) {
-  return expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
-}
-
-function safeEvaluate(expr) {
-  try {
-    var sanitized = normalizeExpression(expr).replace(/[^0-9+\-*/().]/g, '');
-    var result = Function('return ' + sanitized)();
-    if (typeof result === 'number' && isFinite(result)) {
-      return result;
-    }
-  } catch (e) {
-    return null;
+function calcular(tipo) {
+  var res = 0;
+  if (tipo === 'soma') {
+    var a = parseFloat(document.getElementById('calcSoma1').value) || 0;
+    var b = parseFloat(document.getElementById('calcSoma2').value) || 0;
+    res = a + b;
+    document.getElementById('resSoma').textContent = res;
+  } else if (tipo === 'subtracao') {
+    var a = parseFloat(document.getElementById('calcSub1').value) || 0;
+    var b = parseFloat(document.getElementById('calcSub2').value) || 0;
+    res = a - b;
+    document.getElementById('resSub').textContent = res;
+  } else if (tipo === 'multiplicacao') {
+    var a = parseFloat(document.getElementById('calcMult1').value) || 0;
+    var b = parseFloat(document.getElementById('calcMult2').value) || 0;
+    res = a * b;
+    document.getElementById('resMult').textContent = res;
+  } else if (tipo === 'divisao') {
+    var a = parseFloat(document.getElementById('calcDiv1').value) || 0;
+    var b = parseFloat(document.getElementById('calcDiv2').value) || 1;
+    if (b === 0) { showToast('Divisão por zero!', 'error'); return; }
+    res = a / b;
+    document.getElementById('resDiv').textContent = res.toFixed(2);
+  } else if (tipo === 'porcentagem') {
+    var valor = parseFloat(document.getElementById('calcPctValor').value) || 0;
+    var pct = parseFloat(document.getElementById('calcPctPct').value) || 0;
+    res = (valor * pct) / 100;
+    document.getElementById('resPct').textContent = res.toFixed(2);
+  } else if (tipo === 'juros') {
+    var capital = parseFloat(document.getElementById('calcJurosCapital').value) || 0;
+    var taxa = parseFloat(document.getElementById('calcJurosTaxa').value) || 0;
+    var tempo = parseFloat(document.getElementById('calcJurosTempo').value) || 0;
+    res = capital * (taxa / 100) * tempo;
+    document.getElementById('resJuros').textContent = 'Juros: R$ ' + res.toFixed(2).replace('.', ',') + ' | Total: R$ ' + (capital + res).toFixed(2).replace('.', ',');
   }
-  return null;
 }
-
-function calcInput(value) {
-  if (calcExpression === '0' && /[0-9.]/.test(value)) {
-    calcExpression = value === '.' ? '0.' : value;
-  } else if (/[%÷×+\-]/.test(value)) {
-    var lastChar = calcExpression.slice(-1);
-    if (/[÷×+\-]/.test(lastChar)) {
-      calcExpression = calcExpression.slice(0, -1) + value;
-    } else {
-      calcExpression += value;
-    }
-  } else if (value === '.') {
-    var parts = calcExpression.split(/[÷×+\-]/);
-    var current = parts[parts.length - 1];
-    if (!current.includes('.')) {
-      calcExpression += '.';
-    }
-  } else {
-    calcExpression += value;
-  }
-  updateCalcDisplay();
-}
-
-function calcClearAll() {
-  calcExpression = '0';
-  updateCalcDisplay();
-}
-
-function calcDelete() {
-  if (calcExpression.length <= 1) {
-    calcExpression = '0';
-  } else {
-    calcExpression = calcExpression.slice(0, -1);
-    if (/^[+\-×÷]$/.test(calcExpression)) calcExpression = '0';
-  }
-  updateCalcDisplay();
-}
-
-function calcPercent() {
-  var current = calcExpression;
-  var result = safeEvaluate(current);
-  if (result === null) {
-    showToast('Expressão inválida', 'error');
-    return;
-  }
-  calcExpression = String(result / 100);
-  updateCalcDisplay();
-}
-
-function calcEqual() {
-  var expression = calcExpression;
-  var lastChar = expression.slice(-1);
-  if (/[÷×+\-]/.test(lastChar)) {
-    expression = expression.slice(0, -1);
-  }
-  var result = safeEvaluate(expression);
-  if (result === null) {
-    showToast('Expressão inválida', 'error');
-    return;
-  }
-  calcExpression = result.toString();
-  updateCalcDisplay();
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  updateCalcDisplay();
-});
 
 // ============================================
 // Ferramentas
@@ -809,9 +584,8 @@ async function carregarChatSolicitacoes() {
   select.innerHTML = '<option value="">Selecione uma solicitação para conversar</option>';
   var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
   if (result && result.success) {
-    var servicos = result.data.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
-    for (var i = 0; i < servicos.length; i++) {
-      var sol = servicos[i];
+    for (var i = 0; i < result.data.length; i++) {
+      var sol = result.data[i];
       var opt = document.createElement('option');
       opt.value = sol.id;
       opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome + ' (' + (sol.status_pagamento === 'pago' ? 'Pago' : 'Pendente') + ')';
@@ -965,15 +739,8 @@ function verificarRetornoPagamento() {
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('loginForm').addEventListener('submit', login);
-  var hamburgerBtn = document.getElementById('hamburgerBtn');
-  if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleMobileMenu);
-  var mobileOverlay = document.getElementById('mobileMenuOverlay');
-  if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      fecharModalOrcamento();
-      closeMobileMenu();
-    }
+    if (e.key === 'Escape') fecharModalOrcamento();
   });
   document.getElementById('orcamentoModal').addEventListener('click', function(e) {
     if (e.target === this) fecharModalOrcamento();

@@ -1160,19 +1160,100 @@ img {
 }
 
 .detalhes-perfil-foto {
-  width: 120px;
-  height: 120px;
+  width: 88px;
+  height: 88px;
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid var(--red-primary);
 }
 
-.photo-delete-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
+.detalhes-profissao-item,
+.detalhes-localizacao-card {
+  position: relative;
+}
+
+.detalhes-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--gray-lighter);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  transition: var(--transition);
+  font-family: var(--font-primary);
+  background: var(--white);
+}
+
+.detalhes-select:focus {
+  outline: none;
+  border-color: var(--red-primary);
+  box-shadow: 0 0 0 3px rgba(255,0,0,0.12);
+}
+
+.icon-btn {
+  background: transparent;
   border: none;
+  color: var(--gray-dark);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.icon-btn:hover {
+  background: rgba(255,0,0,0.08);
+  color: var(--red-primary);
+}
+
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.localizacao-view {
+  font-size: 15px;
+  color: var(--black-primary);
+}
+
+.localizacao-edit {
+  display: none;
+}
+
+.localizacao-edit.hidden {
+  display: none;
+}
+
+.localizacao-edit:not(.hidden) {
+  display: block;
+}
+
+.localizacao-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.localizacao-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.status-row {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0 12px;
+}
+
+.section-title {
+  margin-top: 20px;
+  margin-bottom: 14px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black-primary);
   border-radius: 50%;
   background: rgba(0,0,0,0.55);
   color: var(--white);

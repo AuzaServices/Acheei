@@ -220,39 +220,18 @@ function verDetalhes(id) {
   }
   var fotosHtml = '';
   if (fotosServicos.length > 0) {
-    for (var i = 0; i < fotosServicos.length; i++) {
-      fotosHtml += '<div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoServico(' + prof.id + ', ' + i + ')">×</button><img src="' + fotosServicos[i] + '" alt="Servico"></div>';
-    }
+    for (var i = 0; i < fotosServicos.length; i++) fotosHtml += '<img src="' + fotosServicos[i] + '" alt="Servico">';
   } else {
-    fotosHtml = '<div class="foto-box foto-placeholder">Nenhuma foto de serviço cadastrada</div>';
+    fotosHtml = '<p style="color:#999;">Nenhuma foto de servico cadastrada</p>';
   }
   var fotoPerfil = '';
-  if (prof.foto_perfil) {
-    fotoPerfil = '<div class="detalhes-perfil-container"><div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoPerfil(' + prof.id + ')">×</button><img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" class="detalhes-perfil-foto"></div></div>';
-  } else {
-    fotoPerfil = '<div class="detalhes-perfil-container"><div class="foto-box foto-placeholder">Sem foto de perfil</div></div>';
-  }
+  if (prof.foto_perfil) fotoPerfil = '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;display:block;margin:0 auto 16px;">';
   var sc = prof.status_aprovacao;
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
   document.getElementById('detalhesBody').innerHTML =
     fotoPerfil +
-    '<div class="detalhes-edit-card">' +
-      '<h4>Editar informações</h4>' +
-      '<div class="detalhes-edit-row single">' +
-        '<input type="text" id="detalhesNomePerfil" class="detalhes-edit-input" value="' + prof.nome_perfil + '" placeholder="Nome do profissional" />' +
-      '</div>' +
-      '<div class="detalhes-edit-row single">' +
-        '<input type="text" id="detalhesProfissao" class="detalhes-edit-input" value="' + prof.profissao + '" placeholder="Profissão" />' +
-      '</div>' +
-      '<div class="detalhes-edit-row">' +
-        '<input type="text" id="detalhesCidade" class="detalhes-edit-input" value="' + prof.cidade + '" placeholder="Cidade" />' +
-        '<input type="text" id="detalhesEstado" class="detalhes-edit-input" value="' + prof.estado + '" placeholder="Estado" />' +
-      '</div>' +
-      '<div class="detalhes-actions">' +
-        '<button class="btn btn-primary btn-sm" onclick="salvarDadosProfissional(' + prof.id + ')">Salvar alterações</button>' +
-      '</div>' +
-    '</div>' +
-    '<div style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</div>' +
+    '<h3 style="text-align:center;margin-bottom:4px;">' + prof.nome_perfil + '</h3>' +
+    '<p style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</p>' +
     '<div style="text-align:center;margin-bottom:16px;"><span class="status-badge ' + sc + '">' + sl + '</span></div>' +
     '<div class="detalhes-grid">' +
       '<div class="detalhes-item"><div class="label">CPF</div><div class="value">' + prof.cpf + '</div></div>' +
@@ -270,81 +249,6 @@ function verDetalhes(id) {
   document.body.style.overflow = 'hidden';
 }
 
-async function salvarDadosProfissional(id) {
-  var nomePerfil = document.getElementById('detalhesNomePerfil').value.trim();
-  var profissao = document.getElementById('detalhesProfissao').value.trim();
-  var cidade = document.getElementById('detalhesCidade').value.trim();
-  var estado = document.getElementById('detalhesEstado').value.trim();
-
-  if (!nomePerfil) {
-    showToast('O nome do profissional não pode ficar vazio.', 'error');
-    return;
-  }
-  if (!profissao) {
-    showToast('A profissão não pode ficar vazia.', 'error');
-    return;
-  }
-  if (!cidade) {
-    showToast('A cidade não pode ficar vazia.', 'error');
-    return;
-  }
-  if (!estado) {
-    showToast('O estado não pode ficar vazio.', 'error');
-    return;
-  }
-
-  var result = await apiRequest(API_BASE + '/admin/profissional/' + id, {
-    method: 'PUT',
-    body: JSON.stringify({
-      nome_perfil: nomePerfil,
-      profissao: profissao,
-      cidade: cidade,
-      estado: estado
-    })
-  });
-
-  if (result && result.success) {
-    showToast('Dados do profissional atualizados com sucesso.', 'success');
-    atualizarDadosProfissional(id, {
-      nome_perfil: nomePerfil,
-      profissao: profissao,
-      cidade: cidade,
-      estado: estado
-    });
-    renderizarTabelas();
-    verDetalhes(id);
-  }
-}
-
-async function removerFotoPerfil(id) {
-  if (!confirm('Remover a foto de perfil deste profissional?')) return;
-  var result = await apiRequest(API_BASE + '/admin/profissional/' + id + '/foto-perfil', { method: 'PUT' });
-  if (result && result.success) {
-    showToast('Foto de perfil removida com sucesso.', 'success');
-    atualizarDadosProfissional(id, { foto_perfil: '' });
-    verDetalhes(id);
-  }
-}
-
-async function removerFotoServico(id, index) {
-  if (!confirm('Remover esta foto de serviço?')) return;
-  var result = await apiRequest(API_BASE + '/admin/profissional/' + id + '/foto-servico/' + index, { method: 'DELETE' });
-  if (result && result.success) {
-    showToast('Foto de serviço removida com sucesso.', 'success');
-    atualizarDadosProfissional(id, { fotos_servicos: result.data ? result.data.fotos_servicos : [] });
-    verDetalhes(id);
-  }
-}
-
-function atualizarDadosProfissional(id, changes) {
-  for (var i = 0; i < profissionaisData.length; i++) {
-    if (profissionaisData[i].id === id) {
-      profissionaisData[i] = Object.assign({}, profissionaisData[i], changes);
-      break;
-    }
-  }
-}
-
 function fecharDetalhes() {
   document.getElementById('detalhesModal').classList.remove('active');
   document.body.style.overflow = '';
@@ -353,113 +257,24 @@ function fecharDetalhes() {
 function renderizarSolicitacoes(solicitacoes) {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
-  if (!solicitacoes || solicitacoes.length === 0) {
+  if (solicitacoes.length === 0) {
     container.innerHTML = '<div class="empty-state"><span class="icon">' + icon('clipboard') + '</span><h3>Nenhuma solicitacao recebida</h3><p>As solicitacoes de servicos dos clientes aparecerao aqui.</p></div>';
     return;
   }
-
-  var servicos = solicitacoes.filter(function(sol) { return sol.tipo !== 'troca_fotos'; });
-  var trocas = solicitacoes.filter(function(sol) { return sol.tipo === 'troca_fotos'; });
-
-  if (servicos.length > 0) {
-    var servicosSection = document.createElement('div');
-    servicosSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Serviço</h3>';
-    servicos.forEach(function(sol) {
-      var statusPag = sol.status_pagamento || 'pendente';
-      var badgeHtml = statusPag === 'pago'
-        ? '<span class="badge pago">Pago</span>'
-        : '<span class="badge pendente">Pendente</span>';
-      var pagarBtn = statusPag === 'pendente'
-        ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
-        : '';
-      var card = document.createElement('div');
-      card.className = 'solicitacao-card';
+  for (var i = 0; i < solicitacoes.length; i++) {
+    var sol = solicitacoes[i];
+    var card = document.createElement('div');
+    card.className = 'solicitacao-card';
+var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
       card.innerHTML =
-        '<div class="card-header">' +
-          '<h4>Solicitação #' + sol.id + '</h4>' +
-          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
-        '</div>' +
-        '<div class="info">' +
-          '<div class="item"><div class="label">Cliente</div><div class="value">' + sol.cliente_nome + '</div></div>' +
-          '<div class="item"><div class="label">Telefone</div><div class="value">' + (sol.cliente_telefone || 'Não informado') + '</div></div>' +
-          '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
-        '</div>' +
-        '<div class="descricao"><div class="label">Descrição do Serviço</div><div class="value">' + sol.descricao + '</div></div>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + pagarBtn + '</div>';
-      servicosSection.appendChild(card);
-    });
-    container.appendChild(servicosSection);
-  } else {
-    var emptyServicos = document.createElement('div');
-    emptyServicos.className = 'empty-state';
-    emptyServicos.innerHTML = '<span class="icon">📋</span><h3>Sem solicitações de serviço</h3><p>As solicitações de serviços aparecerão aqui quando forem enviadas.</p>';
-    container.appendChild(emptyServicos);
-  }
-
-  if (trocas.length > 0) {
-    var trocasSection = document.createElement('div');
-    trocasSection.style.marginTop = '32px';
-    trocasSection.innerHTML = '<h3 style="margin-bottom:16px;">Solicitações de Troca de Fotos</h3>';
-    trocas.forEach(function(sol) {
-      var statusLabel = sol.status_aprovacao ? sol.status_aprovacao.charAt(0).toUpperCase() + sol.status_aprovacao.slice(1) : 'Pendente';
-      var statusClass = sol.status_aprovacao || 'pendente';
-      var card = document.createElement('div');
-      card.className = 'solicitacao-card';
-      var fotosHtml = '';
-      if (sol.foto_perfil_nova) {
-        fotosHtml += '<div style="margin-bottom:12px;"><div class="label">Nova Foto de Perfil</div><img src="' + sol.foto_perfil_nova + '" alt="Nova foto de perfil" style="width:100%;max-width:180px;border-radius:12px;margin-top:8px;object-fit:cover;"></div>';
-      }
-      var novasFotos = [];
-      try { novasFotos = sol.fotos_servicos_novas ? JSON.parse(sol.fotos_servicos_novas) : []; } catch (e) { novasFotos = []; }
-      if (novasFotos.length > 0) {
-        fotosHtml += '<div class="label">Novas Fotos de Serviço</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:8px;">';
-        for (var j = 0; j < novasFotos.length; j++) {
-          fotosHtml += '<img src="' + novasFotos[j] + '" alt="Nova foto de serviço" style="width:100%;height:120px;object-fit:cover;border-radius:12px;">';
-        }
-        fotosHtml += '</div>';
-      }
-      card.innerHTML =
-        '<div class="card-header">' +
-          '<h4>Troca de Fotos #' + sol.id + '</h4>' +
-          '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
-        '</div>' +
-        '<div class="info">' +
-          '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
-          '<div class="item"><div class="label">Status</div><div class="value"><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></div></div>' +
-        '</div>' +
-        '<div class="descricao"><div class="label">Motivo da troca</div><div class="value">' + (sol.motivo_troca || sol.descricao) + '</div></div>' +
-        fotosHtml +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">' +
-          (sol.status_aprovacao === 'pendente' ? '<button class="btn btn-success btn-sm" onclick="aprovarSolicitacao(' + sol.id + ')">Aprovar</button><button class="btn btn-danger btn-sm" onclick="rejeitarSolicitacao(' + sol.id + ')">Rejeitar</button>' : '') +
-        '</div>';
-      trocasSection.appendChild(card);
-    });
-    container.appendChild(trocasSection);
-  } else {
-    var emptyTrocas = document.createElement('div');
-    emptyTrocas.className = 'empty-state';
-    emptyTrocas.style.marginTop = '32px';
-    emptyTrocas.innerHTML = '<span class="icon">📷</span><h3>Sem solicitações de troca de fotos</h3><p>As solicitações de troca de fotos aparecerão aqui quando forem enviadas pelos profissionais.</p>';
-    container.appendChild(emptyTrocas);
-  }
-}
-
-async function aprovarSolicitacao(id) {
-  if (!confirm('Aprovar esta solicitação de troca de fotos?')) return;
-  var result = await apiRequest(API_BASE + '/admin/solicitacoes/' + id + '/aprovar', { method: 'PUT' });
-  if (result && result.success) {
-    showToast('Solicitação aprovada e fotos atualizadas.', 'success');
-    await carregarSolicitacoes();
-    await carregarProfissionais();
-  }
-}
-
-async function rejeitarSolicitacao(id) {
-  if (!confirm('Rejeitar esta solicitação de troca de fotos?')) return;
-  var result = await apiRequest(API_BASE + '/admin/solicitacoes/' + id + '/rejeitar', { method: 'PUT' });
-  if (result && result.success) {
-    showToast('Solicitação rejeitada.', 'info');
-    await carregarSolicitacoes();
+      '<div class="card-header"><h4>Solicitacao #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
+      '<div class="info">' +
+        '<div class="item"><div class="label">Cliente</div><div class="value">' + sol.cliente_nome + '</div></div>' +
+        '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">' + icon('chat') + ' ' + sol.cliente_telefone + '</a></div></div>' +
+        '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
+        '<div class="item" style="grid-column:1/-1;"><div class="label">Descricao do Servico</div><div class="value">' + sol.descricao + '</div></div>' +
+      '</div>';
+    container.appendChild(card);
   }
 }
 

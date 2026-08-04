@@ -93,51 +93,13 @@
 <div class="dashboard" id="dashboard">
   <header class="dashboard-header">
     <div class="dashboard-nav">
-      <div class="logo-menu">
-        <div class="logo">Acheei Admin</div>
-        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu móvel" aria-controls="mobileMenu" aria-expanded="false">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
+      <div class="logo">Acheei Admin</div>
       <div class="admin-info">
         <span id="adminName">Admin</span>
         <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
       </div>
     </div>
   </header>
-
-  <div class="mobile-menu-overlay" id="mobileMenuOverlay" aria-hidden="true"></div>
-  <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <div class="menu-items">
-      <button type="button" class="menu-item" onclick="navigateMobileMenu('pendentes')">
-        <span class="item-icon">⏳</span>
-        <span class="item-text">Pendentes</span>
-        <span class="item-arrow">→</span>
-      </button>
-      <button type="button" class="menu-item" onclick="navigateMobileMenu('aprovados')">
-        <span class="item-icon">✅</span>
-        <span class="item-text">Aprovados</span>
-        <span class="item-arrow">→</span>
-      </button>
-      <button type="button" class="menu-item" onclick="navigateMobileMenu('reprovados')">
-        <span class="item-icon">❌</span>
-        <span class="item-text">Reprovados</span>
-        <span class="item-arrow">→</span>
-      </button>
-      <button type="button" class="menu-item" onclick="navigateMobileMenu('solicitacoes')">
-        <span class="item-icon">📋</span>
-        <span class="item-text">Solicitações</span>
-        <span class="item-arrow">→</span>
-      </button>
-    </div>
-    <div class="menu-divider"></div>
-    <button type="button" class="menu-item" onclick="logout(); closeMobileMenu();">
-      <span class="item-icon">🚪</span>
-      <span class="item-text">Sair</span>
-    </button>
-  </div>
 
   <div class="dashboard-content">
     <div class="dashboard-tabs">
@@ -229,7 +191,6 @@
 </div>
 
 <script src="js/icons.js"></script>
-<script src="js/mobile-menu.js"></script>
 <script src="js/painel.js"></script>
 </body>
 </html>

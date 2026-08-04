@@ -37,6 +37,13 @@
 
   <!-- Mobile Menu Panel -->
   <div class="mobile-menu" id="mobileMenu">
+    <div class="menu-header">
+      <div class="menu-icon" data-icon="hard-hat"></div>
+      <div>
+        <h3>Acheei</h3>
+        <p>Navegação</p>
+      </div>
+    </div>
     <div class="menu-items">
       <a href="/" class="menu-item">
         <span class="item-icon" data-icon="home"></span>
@@ -59,14 +66,14 @@
         <span class="item-text">Área do Profissional</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
-      <a href="cadastro.html" class="menu-item menu-item-highlight">
+      <a href="cadastro.html" class="menu-item">
         <span class="item-icon" data-icon="edit"></span>
         <span class="item-text">Cadastre-se como Profissional</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
     </div>
     <div class="menu-footer">
-      <p>&copy; 2026 Acheei. Todos os direitos reservados.</p>
+      <p>&copy; 2024 Acheei. Todos os direitos reservados.</p>
     </div>
   </div>
 
@@ -107,20 +114,6 @@
       <button type="submit" class="btn-search"><span data-icon="search"></span> Buscar</button>
     </form>
   </section>
-
-  <section id="resultados" class="results-section" style="display: none;">
-    <div class="results-header">
-      <h3>Profissionais Encontrados</h3>
-      <span class="results-count" id="resultsCount">0 resultados</span>
-    </div>
-    <div class="profissionais-grid" id="profissionaisGrid"></div>
-  </section>
-
-  <div id="emptyState" class="empty-state" style="display: none;">
-    <span class="icon" data-icon="search"></span>
-    <h3>Nenhum profissional encontrado</h3>
-    <p>Tente ajustar sua busca ou selecionar outra categoria de serviço.</p>
-  </div>
 
   <section id="categorias" class="categories">
     <div class="section-title">
@@ -177,6 +170,14 @@
         <span class="name">Fotógrafo</span>
       </div>
     </div>
+  </section>
+
+  <section id="resultados" class="results-section" style="display: none;">
+    <div class="results-header">
+      <h3>Profissionais Encontrados</h3>
+      <span class="results-count" id="resultsCount">0 resultados</span>
+    </div>
+    <div class="profissionais-grid" id="profissionaisGrid"></div>
   </section>
 
   <div id="loadingContainer" class="loading-container" style="display: none;">
@@ -262,7 +263,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 Acheei. Todos os direitos reservados.</p>
+      <p>&copy; 2024 Acheei. Todos os direitos reservados.</p>
     </div>
   </footer>
 

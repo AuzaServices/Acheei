@@ -147,10 +147,7 @@ module.exports = function(db, dbConnected) {
               foto_perfil: prof.foto_perfil,
               profissao: prof.profissao,
               cidade: prof.cidade,
-              estado: prof.estado,
-              status_aprovacao: prof.status_aprovacao,
-              ultima_troca_fotos: prof.ultima_troca_fotos,
-              fotos_servicos: prof.fotos_servicos ? JSON.parse(prof.fotos_servicos) : []
+              estado: prof.estado
             }
           }
         });
@@ -191,9 +188,7 @@ module.exports = function(db, dbConnected) {
             profissao: prof.profissao,
             cidade: prof.cidade,
             estado: prof.estado,
-            status_aprovacao: prof.status_aprovacao,
-            ultima_troca_fotos: prof.ultima_troca_fotos,
-            fotos_servicos: prof.fotos_servicos ? JSON.parse(prof.fotos_servicos) : []
+            status_aprovacao: prof.status_aprovacao
           }
         });
       });
