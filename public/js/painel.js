@@ -228,22 +228,29 @@ function verDetalhes(id) {
   }
   var fotoPerfil = '';
   if (prof.foto_perfil) {
-    fotoPerfil = '<div class="foto-box" style="width:120px;height:120px;margin:0 auto 16px;"><button type="button" class="photo-delete-btn" onclick="removerFotoPerfil(' + prof.id + ')">×</button><img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" class="detalhes-perfil-foto"></div>';
+    fotoPerfil = '<div class="detalhes-perfil-container"><div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoPerfil(' + prof.id + ')">×</button><img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" class="detalhes-perfil-foto"></div></div>';
   } else {
-    fotoPerfil = '<div class="foto-box foto-placeholder" style="width:120px;height:120px;margin:0 auto 16px;">Sem foto de perfil</div>';
+    fotoPerfil = '<div class="detalhes-perfil-container"><div class="foto-box foto-placeholder">Sem foto de perfil</div></div>';
   }
   var sc = prof.status_aprovacao;
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
   document.getElementById('detalhesBody').innerHTML =
     fotoPerfil +
-    '<div style="text-align:center;margin-bottom:16px;">' +
-      '<input type="text" id="detalhesNomePerfil" value="' + prof.nome_perfil + '" placeholder="Nome do profissional" style="width:100%;max-width:320px;padding:10px;border:1px solid #ccc;border-radius:6px;margin-bottom:10px;" />' +
-      '<input type="text" id="detalhesProfissao" value="' + prof.profissao + '" placeholder="Profissão" style="width:100%;max-width:320px;padding:10px;border:1px solid #ccc;border-radius:6px;margin-bottom:10px;" />' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:10px;">' +
-        '<input type="text" id="detalhesCidade" value="' + prof.cidade + '" placeholder="Cidade" style="flex:1 1 140px;padding:10px;border:1px solid #ccc;border-radius:6px;" />' +
-        '<input type="text" id="detalhesEstado" value="' + prof.estado + '" placeholder="Estado" style="flex:1 1 140px;padding:10px;border:1px solid #ccc;border-radius:6px;" />' +
+    '<div class="detalhes-edit-card">' +
+      '<h4>Editar informações</h4>' +
+      '<div class="detalhes-edit-row single">' +
+        '<input type="text" id="detalhesNomePerfil" class="detalhes-edit-input" value="' + prof.nome_perfil + '" placeholder="Nome do profissional" />' +
       '</div>' +
-      '<button class="btn btn-primary btn-sm" onclick="salvarDadosProfissional(' + prof.id + ')">Salvar alterações</button>' +
+      '<div class="detalhes-edit-row single">' +
+        '<input type="text" id="detalhesProfissao" class="detalhes-edit-input" value="' + prof.profissao + '" placeholder="Profissão" />' +
+      '</div>' +
+      '<div class="detalhes-edit-row">' +
+        '<input type="text" id="detalhesCidade" class="detalhes-edit-input" value="' + prof.cidade + '" placeholder="Cidade" />' +
+        '<input type="text" id="detalhesEstado" class="detalhes-edit-input" value="' + prof.estado + '" placeholder="Estado" />' +
+      '</div>' +
+      '<div class="detalhes-actions">' +
+        '<button class="btn btn-primary btn-sm" onclick="salvarDadosProfissional(' + prof.id + ')">Salvar alterações</button>' +
+      '</div>' +
     '</div>' +
     '<div style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</div>' +
     '<div style="text-align:center;margin-bottom:16px;"><span class="status-badge ' + sc + '">' + sl + '</span></div>' +
