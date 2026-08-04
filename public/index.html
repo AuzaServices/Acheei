@@ -269,31 +269,7 @@
 
   <script src="js/icons.js"></script>
   <script src="js/push.js"></script>
+  <script src="js/mobile-menu.js"></script>
   <script src="js/main.js"></script>
-  <script>
-    // Mobile Menu Toggle
-    document.addEventListener('DOMContentLoaded', function() {
-      var hamburger = document.getElementById('hamburgerBtn');
-      var menu = document.getElementById('mobileMenu');
-      var overlay = document.getElementById('menuOverlay');
-
-      function toggleMenu() {
-        hamburger.classList.toggle('active');
-        menu.classList.toggle('active');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
-      }
-
-      hamburger.addEventListener('click', toggleMenu);
-      overlay.addEventListener('click', toggleMenu);
-    });
-
-    function fecharMenuMobile() {
-      document.getElementById('hamburgerBtn').classList.remove('active');
-      document.getElementById('mobileMenu').classList.remove('active');
-      document.getElementById('menuOverlay').classList.remove('active');
-      document.body.style.overflow = '';
-    }
-  </script>
 </body>
 </html>

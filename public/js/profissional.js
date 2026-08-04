@@ -154,6 +154,36 @@ function switchTab(tab, btn) {
   if (tab === 'chat') carregarChatSolicitacoes();
 }
 
+function openMobileMenu() {
+  document.getElementById('mobileMenuOverlay').classList.add('active');
+  document.getElementById('mobileMenu').classList.add('active');
+  document.getElementById('hamburgerBtn').classList.add('active');
+}
+
+function closeMobileMenu() {
+  document.getElementById('mobileMenuOverlay').classList.remove('active');
+  document.getElementById('mobileMenu').classList.remove('active');
+  document.getElementById('hamburgerBtn').classList.remove('active');
+}
+
+function toggleMobileMenu() {
+  var menu = document.getElementById('mobileMenu');
+  if (menu.classList.contains('active')) {
+    closeMobileMenu();
+  } else {
+    openMobileMenu();
+  }
+}
+
+function navigateMobileMenu(tab) {
+  closeMobileMenu();
+  var selector = ".dashboard-tab[onclick=\"switchTab('" + tab + "', this)\"]";
+  var btn = document.querySelector(selector);
+  if (btn) {
+    btn.click();
+  }
+}
+
 // ============================================
 // Carregar Dados
 // ============================================
@@ -764,8 +794,15 @@ function verificarRetornoPagamento() {
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('loginForm').addEventListener('submit', login);
+  var hamburgerBtn = document.getElementById('hamburgerBtn');
+  if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleMobileMenu);
+  var mobileOverlay = document.getElementById('mobileMenuOverlay');
+  if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') fecharModalOrcamento();
+    if (e.key === 'Escape') {
+      fecharModalOrcamento();
+      closeMobileMenu();
+    }
   });
   document.getElementById('orcamentoModal').addEventListener('click', function(e) {
     if (e.target === this) fecharModalOrcamento();

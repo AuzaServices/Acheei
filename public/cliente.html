@@ -177,13 +177,53 @@
 <div class="dashboard" id="dashboard">
   <header class="dashboard-header">
     <div class="dashboard-nav">
-      <div class="logo">Acheei Cliente</div>
+      <div class="logo-menu">
+        <div class="logo">Acheei Cliente</div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu móvel">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
       <div class="cliente-info">
         <span id="clienteName">Cliente</span>
         <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
       </div>
     </div>
   </header>
+
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="menu-header">
+      <div class="menu-icon">C</div>
+      <div>
+        <h3>Acheei Cliente</h3>
+        <p>Menu de navegação</p>
+      </div>
+    </div>
+    <div class="menu-items">
+      <button type="button" class="menu-item" onclick="navigateMobileMenu('solicitacoes')">
+        <span class="item-icon">📋</span>
+        <span class="item-text">Solicitações</span>
+        <span class="item-arrow">→</span>
+      </button>
+      <button type="button" class="menu-item" onclick="navigateMobileMenu('orcamentos')">
+        <span class="item-icon">💰</span>
+        <span class="item-text">Orçamentos</span>
+        <span class="item-arrow">→</span>
+      </button>
+      <button type="button" class="menu-item" onclick="navigateMobileMenu('chat')">
+        <span class="item-icon">💬</span>
+        <span class="item-text">Chat</span>
+        <span class="item-arrow">→</span>
+      </button>
+    </div>
+    <div class="menu-divider"></div>
+    <button type="button" class="menu-item" onclick="logout(); closeMobileMenu();">
+      <span class="item-icon">🚪</span>
+      <span class="item-text">Sair</span>
+    </button>
+  </div>
 
   <div class="dashboard-content">
     <div class="dashboard-tabs">
@@ -258,6 +298,7 @@
 </div>
 
 <script src="js/icons.js"></script>
+<script src="js/mobile-menu.js"></script>
 <script src="js/push.js"></script>
 <script src="js/cliente.js"></script>
 </body>

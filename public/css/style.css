@@ -357,6 +357,16 @@ img {
   .navbar .nav-links {
     display: none;
   }
+
+  .dashboard-nav .logo-menu {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dashboard-nav .cliente-info,
+  .dashboard-nav .admin-info {
+    display: none;
+  }
 }
 
 .btn {
