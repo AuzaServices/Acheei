@@ -221,7 +221,7 @@ function renderizarSolicitacoes() {
       ? '<span class="badge pago">Pago</span>'
       : '<span class="badge pendente">Pendente</span>';
     var pagarBtn = statusPag === 'pendente'
-      ? '<button class="btn btn-primary btn-sm" onclick="pagarSolicitacao(' + sol.id + ')">Pagar R$14,99</button>'
+      ? '<button type="button" class="btn btn-primary btn-sm" data-solicitacao-id="' + sol.id + '" onclick="pagarSolicitacao(event, ' + sol.id + ')">Pagar R$14,99</button>'
       : '';
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
@@ -313,7 +313,7 @@ async function verificarStatusPix(solicitacaoId) {
       showToast('✅ Pagamento confirmado! Chat liberado!', 'success');
 
       // Atualiza o badge/botão na lista
-      var btn = document.querySelector('button[onclick*="pagarSolicitacao(' + solicitacaoId + ')"]');
+      var btn = document.querySelector('button[data-solicitacao-id="' + solicitacaoId + '"]');
       if (btn) {
         btn.outerHTML = '<span class="badge pago">Pago</span>';
       }
@@ -324,7 +324,12 @@ async function verificarStatusPix(solicitacaoId) {
   }
 }
 
-async function pagarSolicitacao(id) {
+async function pagarSolicitacao(event, id) {
+  if (event) {
+    if (event.preventDefault) event.preventDefault();
+    if (event.stopPropagation) event.stopPropagation();
+  }
+
   if (!profissional) {
     showToast('Faça login primeiro', 'error');
     return;
@@ -340,8 +345,12 @@ async function pagarSolicitacao(id) {
     return;
   }
 
-  var btn = event && event.target ? event.target : null;
+  var btn = event && event.target ? event.target.closest('button, .btn') : null;
   if (btn) {
+    if (btn.dataset.processing === 'true') {
+      return;
+    }
+    btn.dataset.processing = 'true';
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Gerando PIX...';
   }
@@ -389,6 +398,7 @@ async function pagarSolicitacao(id) {
     console.error('Erro ao pagar via PIX:', error);
     if (btn) {
       btn.disabled = false;
+      btn.dataset.processing = 'false';
       btn.innerHTML = '💳 Pagar R$14,99';
     }
     showToast('Erro ao processar pagamento PIX', 'error');
@@ -713,7 +723,7 @@ function verificarRetornoPagamento() {
   }
 
   if (status === 'success') {
-    showToast('Pagamento realizado com sucesso! Verificando...', 'info');
+    showToast('Pagamento realizado. Verificando confirmação real...', 'info');
 
     // Tenta verificar o pagamento no backend
     setTimeout(async function() {
@@ -722,9 +732,9 @@ function verificarRetornoPagamento() {
         showToast('Chat liberado! Agora você pode conversar com o cliente.', 'success');
         await carregarSolicitacoes();
       } else if (result && result.success && result.data && result.data.status_pagamento === 'pendente') {
-        showToast('Pagamento ainda não confirmado. Use o botão "Confirmar" manualmente se necessário.', 'warning');
+        showToast('Pagamento ainda não confirmado. Aguarde o processamento do Mercado Pago.', 'warning');
       } else {
-        showToast('Pagamento recebido! Use a rota de confirmação manual se necessário.', 'info');
+        showToast('Pagamento não confirmado. Por favor, confirme novamente mais tarde.', 'warning');
       }
     }, 2000);
   } else if (status === 'pending') {

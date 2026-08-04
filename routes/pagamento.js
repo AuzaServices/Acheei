@@ -339,11 +339,38 @@ module.exports = function(db, dbConnected) {
           return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: true } });
         }
 
-        if (!mp.isConfigured || !mp.payment) {
+        if (!mp.isConfigured) {
           return res.json({
             success: false,
             message: 'Mercado Pago não configurado. Use o modo teste ou configure o token.'
           });
+        }
+
+        // Se tivermos o payment/preference ID guardado, verifica esse pagamento diretamente primeiro.
+        if (sol.preference_id && mp.payment) {
+          try {
+            const paymentResult = await mp.payment.get({ id: sol.preference_id });
+            if (paymentResult && paymentResult.status === 'approved') {
+              const valorPago = parseFloat(paymentResult.transaction_amount || 0);
+              if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                db.query(
+                  'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
+                  [solicitacaoId],
+                  (updateErr) => {
+                    if (updateErr) console.error('Erro ao liberar chat:', updateErr);
+                  }
+                );
+                console.log(`✅ Pagamento verificado e chat liberado para solicitação #${solicitacaoId}`);
+                return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
+              }
+            }
+          } catch (paymentErr) {
+            console.warn('Não conseguiu verificar pagamento direto pelo payment_id:', paymentErr.message || paymentErr);
+          }
+        }
+
+        if (!mp.payment) {
+          return res.json({ success: true, data: { status_pagamento: 'pendente' } });
         }
 
         try {
