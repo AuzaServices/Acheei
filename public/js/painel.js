@@ -220,12 +220,14 @@ function verDetalhes(id) {
   }
   var fotosHtml = '';
   if (fotosServicos.length > 0) {
-    for (var i = 0; i < fotosServicos.length; i++) fotosHtml += '<img src="' + fotosServicos[i] + '" alt="Servico">';
+    for (var i = 0; i < fotosServicos.length; i++) {
+      fotosHtml += '<div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoServico(' + prof.id + ', ' + i + ')">&times;</button><img src="' + fotosServicos[i] + '" alt="Servico"></div>';
+    }
   } else {
     fotosHtml = '<p style="color:#999;">Nenhuma foto de servico cadastrada</p>';
   }
   var fotoPerfil = '';
-  if (prof.foto_perfil) fotoPerfil = '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;display:block;margin:0 auto 16px;">';
+  if (prof.foto_perfil) fotoPerfil = '<div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoPerfil(' + prof.id + ')">&times;</button><img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;display:block;margin:0 auto 16px;"></div>';
   var sc = prof.status_aprovacao;
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
   document.getElementById('detalhesBody').innerHTML =
@@ -252,6 +254,26 @@ function verDetalhes(id) {
 function fecharDetalhes() {
   document.getElementById('detalhesModal').classList.remove('active');
   document.body.style.overflow = '';
+}
+
+async function removerFotoPerfil(id) {
+  if (!confirm('Remover foto de perfil deste profissional?')) return;
+  var result = await apiRequest(API_BASE + '/admin/profissional/' + id + '/foto-perfil', { method: 'DELETE' });
+  if (result && result.success) {
+    showToast('Foto de perfil removida com sucesso.', 'success');
+    await carregarProfissionais();
+    verDetalhes(id);
+  }
+}
+
+async function removerFotoServico(id, index) {
+  if (!confirm('Remover esta foto de serviço do profissional?')) return;
+  var result = await apiRequest(API_BASE + '/admin/profissional/' + id + '/fotos-servicos/' + index, { method: 'DELETE' });
+  if (result && result.success) {
+    showToast('Foto de serviço removida com sucesso.', 'success');
+    await carregarProfissionais();
+    verDetalhes(id);
+  }
 }
 
 function renderizarSolicitacoes(solicitacoes) {

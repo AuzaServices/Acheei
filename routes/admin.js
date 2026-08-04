@@ -38,6 +38,15 @@ function authMiddleware(req, res, next) {
   }
 }
 
+function getCloudinaryPublicId(url) {
+  if (!url || !url.includes('cloudinary')) return null;
+  const parts = url.split('/');
+  const filename = parts[parts.length - 1].split('.')[0];
+  if (url.includes('/perfis/')) return 'acheei/perfis/' + filename;
+  if (url.includes('/servicos/')) return 'acheei/servicos/' + filename;
+  return 'acheei/' + filename;
+}
+
 module.exports = function(db, dbConnected) {
 
   // ============================================
