@@ -452,42 +452,97 @@ async function excluirOrcamento(id) {
 // ============================================
 // Calculadora
 // ============================================
-function calcular(tipo) {
-  var res = 0;
-  if (tipo === 'soma') {
-    var a = parseFloat(document.getElementById('calcSoma1').value) || 0;
-    var b = parseFloat(document.getElementById('calcSoma2').value) || 0;
-    res = a + b;
-    document.getElementById('resSoma').textContent = res;
-  } else if (tipo === 'subtracao') {
-    var a = parseFloat(document.getElementById('calcSub1').value) || 0;
-    var b = parseFloat(document.getElementById('calcSub2').value) || 0;
-    res = a - b;
-    document.getElementById('resSub').textContent = res;
-  } else if (tipo === 'multiplicacao') {
-    var a = parseFloat(document.getElementById('calcMult1').value) || 0;
-    var b = parseFloat(document.getElementById('calcMult2').value) || 0;
-    res = a * b;
-    document.getElementById('resMult').textContent = res;
-  } else if (tipo === 'divisao') {
-    var a = parseFloat(document.getElementById('calcDiv1').value) || 0;
-    var b = parseFloat(document.getElementById('calcDiv2').value) || 1;
-    if (b === 0) { showToast('Divisão por zero!', 'error'); return; }
-    res = a / b;
-    document.getElementById('resDiv').textContent = res.toFixed(2);
-  } else if (tipo === 'porcentagem') {
-    var valor = parseFloat(document.getElementById('calcPctValor').value) || 0;
-    var pct = parseFloat(document.getElementById('calcPctPct').value) || 0;
-    res = (valor * pct) / 100;
-    document.getElementById('resPct').textContent = res.toFixed(2);
-  } else if (tipo === 'juros') {
-    var capital = parseFloat(document.getElementById('calcJurosCapital').value) || 0;
-    var taxa = parseFloat(document.getElementById('calcJurosTaxa').value) || 0;
-    var tempo = parseFloat(document.getElementById('calcJurosTempo').value) || 0;
-    res = capital * (taxa / 100) * tempo;
-    document.getElementById('resJuros').textContent = 'Juros: R$ ' + res.toFixed(2).replace('.', ',') + ' | Total: R$ ' + (capital + res).toFixed(2).replace('.', ',');
-  }
+var calcExpression = '0';
+
+function updateCalcDisplay() {
+  var display = document.getElementById('calcDisplay');
+  if (!display) return;
+  display.value = calcExpression;
 }
+
+function normalizeExpression(expr) {
+  return expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+}
+
+function safeEvaluate(expr) {
+  try {
+    var sanitized = normalizeExpression(expr).replace(/[^0-9+\-*/().]/g, '');
+    var result = Function('return ' + sanitized)();
+    if (typeof result === 'number' && isFinite(result)) {
+      return result;
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
+function calcInput(value) {
+  if (calcExpression === '0' && /[0-9.]/.test(value)) {
+    calcExpression = value === '.' ? '0.' : value;
+  } else if (/[%÷×+\-]/.test(value)) {
+    var lastChar = calcExpression.slice(-1);
+    if (/[÷×+\-]/.test(lastChar)) {
+      calcExpression = calcExpression.slice(0, -1) + value;
+    } else {
+      calcExpression += value;
+    }
+  } else if (value === '.') {
+    var parts = calcExpression.split(/[÷×+\-]/);
+    var current = parts[parts.length - 1];
+    if (!current.includes('.')) {
+      calcExpression += '.';
+    }
+  } else {
+    calcExpression += value;
+  }
+  updateCalcDisplay();
+}
+
+function calcClearAll() {
+  calcExpression = '0';
+  updateCalcDisplay();
+}
+
+function calcDelete() {
+  if (calcExpression.length <= 1) {
+    calcExpression = '0';
+  } else {
+    calcExpression = calcExpression.slice(0, -1);
+    if (/^[+\-×÷]$/.test(calcExpression)) calcExpression = '0';
+  }
+  updateCalcDisplay();
+}
+
+function calcPercent() {
+  var current = calcExpression;
+  var result = safeEvaluate(current);
+  if (result === null) {
+    showToast('Expressão inválida', 'error');
+    return;
+  }
+  calcExpression = String(result / 100);
+  updateCalcDisplay();
+}
+
+function calcEqual() {
+  var expression = calcExpression;
+  var lastChar = expression.slice(-1);
+  if (/[÷×+\-]/.test(lastChar)) {
+    expression = expression.slice(0, -1);
+  }
+  var result = safeEvaluate(expression);
+  if (result === null) {
+    showToast('Expressão inválida', 'error');
+    return;
+  }
+  calcExpression = result.toString();
+  updateCalcDisplay();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateCalcDisplay();
+});
 
 // ============================================
 // Ferramentas

@@ -62,14 +62,80 @@
     .orcamento-card .orc-header .valor { font-size: 20px; font-weight: 800; color: var(--red-primary); }
     .orcamento-card .orc-body { font-size: 14px; color: var(--gray-dark); margin-bottom: 8px; }
     .orcamento-card .orc-footer { display: flex; gap: 8px; }
-    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .calc-grid .calc-item { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; }
-    .calc-grid .calc-item h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
-    .calc-grid .calc-item .form-group { margin-bottom: 8px; }
-    .calc-grid .calc-item .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-medium); margin-bottom: 4px; }
-    .calc-grid .calc-item .form-group input { width: 100%; padding: 8px 12px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; transition: var(--transition); }
-    .calc-grid .calc-item .form-group input:focus { outline: none; border-color: var(--red-primary); }
-    .calc-result { margin-top: 8px; padding: 10px; background: var(--white); border-radius: var(--radius-sm); font-size: 18px; font-weight: 700; color: var(--black-primary); text-align: center; }
+    .calc-panel {
+      max-width: 540px;
+      margin: 0 auto;
+      background: #111111;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .calc-display {
+      padding: 24px 20px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    }
+    .calc-mode {
+      font-size: 12px;
+      color: var(--gray-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+    .calc-screen {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--white);
+      font-size: 42px;
+      font-weight: 700;
+      text-align: right;
+      line-height: 1;
+    }
+    .calc-screen:focus {
+      outline: none;
+    }
+    .calc-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      padding: 18px;
+      background: var(--black-secondary);
+    }
+    .calc-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 20px 0;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.18);
+    }
+    .calc-btn:hover {
+      transform: translateY(-1px);
+    }
+    .calc-btn-secondary {
+      background: var(--gray-lighter);
+      color: var(--black-primary);
+    }
+    .calc-btn-operator {
+      background: var(--red-primary);
+      color: var(--white);
+    }
+    .calc-btn-equal {
+      background: linear-gradient(180deg, var(--red-primary), var(--red-dark));
+      color: var(--white);
+    }
+    .calc-btn-zero {
+      grid-column: span 2;
+    }
+    .calc-note {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--gray-medium);
+      text-align: center;
+    }
     .ferramentas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .ferramenta-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 20px; text-align: center; cursor: pointer; transition: var(--transition); border: 2px solid transparent; }
     .ferramenta-card:hover { border-color: var(--red-primary); transform: translateY(-2px); }
@@ -180,51 +246,34 @@
       <div class="section-card">
         <div class="section-header"><h3>🧮 Calculadora</h3></div>
         <div class="section-body">
-          <div class="calc-grid">
-            <div class="calc-item">
-              <h4>Soma</h4>
-              <div class="form-group"><input type="number" id="calcSoma1" placeholder="Primeiro valor" value="0"></div>
-              <div class="form-group"><input type="number" id="calcSoma2" placeholder="Segundo valor" value="0"></div>
-              <button class="btn btn-primary btn-sm" onclick="calcular('soma')" style="width:100%;justify-content:center;">Calcular</button>
-              <div class="calc-result" id="resSoma">0</div>
+          <div class="calc-panel">
+            <div class="calc-display">
+              <div class="calc-mode">Padrão</div>
+              <input type="text" id="calcDisplay" class="calc-screen" value="0" readonly aria-label="Display da calculadora">
             </div>
-            <div class="calc-item">
-              <h4>Subtração</h4>
-              <div class="form-group"><input type="number" id="calcSub1" placeholder="Primeiro valor" value="0"></div>
-              <div class="form-group"><input type="number" id="calcSub2" placeholder="Segundo valor" value="0"></div>
-              <button class="btn btn-primary btn-sm" onclick="calcular('subtracao')" style="width:100%;justify-content:center;">Calcular</button>
-              <div class="calc-result" id="resSub">0</div>
-            </div>
-            <div class="calc-item">
-              <h4>Multiplicação</h4>
-              <div class="form-group"><input type="number" id="calcMult1" placeholder="Primeiro valor" value="0"></div>
-              <div class="form-group"><input type="number" id="calcMult2" placeholder="Segundo valor" value="0"></div>
-              <button class="btn btn-primary btn-sm" onclick="calcular('multiplicacao')" style="width:100%;justify-content:center;">Calcular</button>
-              <div class="calc-result" id="resMult">0</div>
-            </div>
-            <div class="calc-item">
-              <h4>Divisão</h4>
-              <div class="form-group"><input type="number" id="calcDiv1" placeholder="Dividendo" value="0"></div>
-              <div class="form-group"><input type="number" id="calcDiv2" placeholder="Divisor" value="1"></div>
-              <button class="btn btn-primary btn-sm" onclick="calcular('divisao')" style="width:100%;justify-content:center;">Calcular</button>
-              <div class="calc-result" id="resDiv">0</div>
-            </div>
-            <div class="calc-item">
-              <h4>Porcentagem</h4>
-              <div class="form-group"><input type="number" id="calcPctValor" placeholder="Valor" value="0"></div>
-              <div class="form-group"><input type="number" id="calcPctPct" placeholder="Porcentagem %" value="0"></div>
-              <button class="btn btn-primary btn-sm" onclick="calcular('porcentagem')" style="width:100%;justify-content:center;">Calcular</button>
-              <div class="calc-result" id="resPct">0</div>
-            </div>
-            <div class="calc-item">
-              <h4>Juros Simples</h4>
-              <div class="form-group"><input type="number" id="calcJurosCapital" placeholder="Capital" value="0"></div>
-              <div class="form-group"><input type="number" id="calcJurosTaxa" placeholder="Taxa % ao mês" value="0"></div>
-              <div class="form-group"><input type="number" id="calcJurosTempo" placeholder="Meses" value="0"></div>
-              <button class="btn btn-primary btn-sm" onclick="calcular('juros')" style="width:100%;justify-content:center;">Calcular</button>
-              <div class="calc-result" id="resJuros">0</div>
+            <div class="calc-buttons">
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcClearAll()">CE</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcDelete()">⌫</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcPercent()">%</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('÷')">÷</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('7')">7</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('8')">8</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('9')">9</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('×')">×</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('4')">4</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('5')">5</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('6')">6</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('-')">−</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('1')">1</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('2')">2</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('3')">3</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('+')">+</button>
+              <button type="button" class="calc-btn calc-btn-zero" onclick="calcInput('0')">0</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('.')">.</button>
+              <button type="button" class="calc-btn calc-btn-equal" onclick="calcEqual()">=</button>
             </div>
           </div>
+          <div class="calc-note">Interface tipo Windows com cores do site.</div>
         </div>
       </div>
     </div>
