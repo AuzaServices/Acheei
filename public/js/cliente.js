@@ -122,13 +122,13 @@ async function ativarNotificacoesCadastro() {
 }
 
 function mostrarAuth() {
-  document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('authScreen').style.setProperty('display', 'flex', 'important');
+  document.getElementById('dashboard').style.setProperty('display', 'none', 'important');
 }
 
 function mostrarDashboard() {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('authScreen').style.setProperty('display', 'none', 'important');
+  document.getElementById('dashboard').style.setProperty('display', 'block', 'important');
 }
 
 // ============================================
@@ -152,10 +152,11 @@ async function login(event) {
   btn.disabled = false;
   btn.innerHTML = 'Entrar';
 
-  if (result && result.success) {
+if (result && result.success) {
     token = result.data.token;
     localStorage.setItem('acheei_cliente_token', token);
     clienteData = result.data.cliente;
+    salvarClienteCache(clienteData);
     document.getElementById('clienteName').textContent = clienteData.nome;
     mostrarDashboard();
     carregarDados();
@@ -203,11 +204,12 @@ async function cadastrar(event) {
     body: JSON.stringify({ nome: nome, email: email, senha: senha, telefone: telefone })
   });
 
-  if (result && result.success) {
+if (result && result.success) {
     document.getElementById('cadastroSuccess').style.display = 'block';
     token = result.data.token;
     localStorage.setItem('acheei_cliente_token', token);
     clienteData = result.data.cliente;
+    salvarClienteCache(clienteData);
     document.getElementById('clienteName').textContent = clienteData.nome;
     setTimeout(function() {
       mostrarDashboard();
@@ -227,6 +229,7 @@ async function cadastrar(event) {
 // ============================================
 function logout() {
   localStorage.removeItem('acheei_cliente_token');
+  salvarClienteCache(null);
   token = null;
   clienteData = null;
   mostrarAuth();
@@ -453,18 +456,55 @@ async function enviarMensagemCliente() {
 }
 
 // ============================================
+// Cache do cliente (compartilhado com o index via localStorage)
+// ============================================
+function carregarClienteCache() {
+  try {
+    return JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
+  } catch (e) {
+    return null;
+  }
+}
+
+function salvarClienteCache(cliente) {
+  if (cliente) {
+    localStorage.setItem('acheei_cliente_cache', JSON.stringify({
+      nome: cliente.nome,
+      foto: cliente.foto || cliente.foto_perfil || null,
+      id: cliente.id
+    }));
+  } else {
+    localStorage.removeItem('acheei_cliente_cache');
+  }
+}
+
+// ============================================
 // Verificar Token
 // ============================================
 async function verificarToken() {
   if (!token) { mostrarAuth(); return; }
+
+  // Estado otimista: se houver cache, mostra o dashboard imediatamente
+  // (sem flash da tela de login) enquanto a verificação assíncrona ocorre.
+  var cache = carregarClienteCache();
+  if (cache) {
+    clienteData = { id: cache.id, nome: cache.nome, foto: cache.foto };
+    document.getElementById('clienteName').textContent = cache.nome;
+    mostrarDashboard();
+  }
+
   var result = await apiRequest(API_BASE + '/clientes/me');
   if (result && result.success) {
     clienteData = result.data;
+    salvarClienteCache(result.data);
     document.getElementById('clienteName').textContent = clienteData.nome;
     mostrarDashboard();
     await carregarDados();
   } else {
-    mostrarAuth();
+    // Se a verificação falhar por erro de rede, mantém o cache (não derruba o login)
+    if (!cache) {
+      mostrarAuth();
+    }
   }
 }
 

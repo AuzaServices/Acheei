@@ -8,8 +8,10 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
-  <style>
+<style>
+    /* Ambos ocultos por padrão; o JS decide qual exibir (evita flash) */
     .cliente-body { background: #f0f0f0; }
+    #authScreen, #dashboard { display: none !important; }
     .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
     .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
     .auth-card .logo { text-align: center; margin-bottom: 24px; }

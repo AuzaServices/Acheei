@@ -41,13 +41,51 @@
           <span data-icon="hard-hat"></span> Área do Profissional
         </a>
       </div>
-      <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+<button class="hamburger" id="hamburgerBtn" aria-label="Menu">
         <span></span>
         <span></span>
         <span></span>
       </button>
     </nav>
   </header>
+
+  <script>
+    // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
+    // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
+    (function() {
+      try {
+        var cache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
+        var token = localStorage.getItem('acheei_cliente_token');
+        var userArea = document.getElementById('userArea');
+        var btnAreaCliente = document.getElementById('btnAreaCliente');
+        var mobileUserArea = document.getElementById('mobileUserArea');
+        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+
+        if (cache && token) {
+          if (userArea) userArea.style.display = 'flex';
+          if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+          if (mobileUserArea) mobileUserArea.style.display = 'flex';
+          if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+          if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+          if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
+          if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || 'Cliente';
+          if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || 'Cliente';
+          var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
+          if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
+          if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+        } else {
+          if (userArea) userArea.style.display = 'none';
+          if (btnAreaCliente) btnAreaCliente.style.display = '';
+          if (mobileUserArea) mobileUserArea.style.display = 'none';
+          if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+          if (btnAreaProfissional) btnAreaProfissional.style.display = '';
+          if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- Mobile Menu Overlay -->
   <div class="mobile-menu-overlay" id="menuOverlay"></div>
