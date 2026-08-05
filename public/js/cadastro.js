@@ -233,9 +233,11 @@ function validateStep(step) {
     });
   }
 
-  if (step === 3) {
+if (step === 3) {
     const nomePerfil = document.getElementById('nome_perfil');
     const profissao = document.getElementById('profissao');
+    const fotoPerfilUpload = document.getElementById('fotoPerfilUpload');
+    const fotoPerfilError = document.getElementById('fotoPerfilError');
 
     if (!nomePerfil.value.trim()) {
       nomePerfil.classList.add('error');
@@ -249,6 +251,16 @@ function validateStep(step) {
       valid = false;
     } else {
       profissao.classList.remove('error');
+    }
+
+    // Foto de perfil é obrigatória
+    if (!formData.foto_perfil) {
+      if (fotoPerfilUpload) fotoPerfilUpload.style.borderColor = '#dc3545';
+      if (fotoPerfilError) fotoPerfilError.classList.add('show');
+      valid = false;
+    } else {
+      if (fotoPerfilUpload) fotoPerfilUpload.style.borderColor = '';
+      if (fotoPerfilError) fotoPerfilError.classList.remove('show');
     }
   }
 
@@ -279,6 +291,10 @@ function setupPhotoUpload() {
         uploadArea.querySelector('.upload-icon').style.display = 'none';
         uploadArea.querySelector('p').textContent = 'Clique para alterar a foto';
         formData.foto_perfil = resizedImage;
+        // Foto adicionada: remove estado de erro
+        uploadArea.style.borderColor = '';
+        const fotoPerfilError = document.getElementById('fotoPerfilError');
+        if (fotoPerfilError) fotoPerfilError.classList.remove('show');
       } catch (error) {
         console.error('Erro ao processar imagem:', error);
         showToast('Erro ao processar imagem', 'error');

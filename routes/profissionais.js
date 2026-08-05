@@ -305,8 +305,12 @@ module.exports = function(db, dbConnected) {
       email, senha
     } = req.body;
 
-    if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !cep || !nome_perfil || !profissao) {
+if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !cep || !nome_perfil || !profissao) {
       return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos' });
+    }
+
+    if (!foto_perfil) {
+      return res.status(400).json({ success: false, message: 'A foto de perfil é obrigatória' });
     }
 
     if (!email || !senha) {
