@@ -277,12 +277,17 @@ function sairClienteHome() {
 // ============================================
 var pushNoticeAceito = localStorage.getItem('acheei_notificacoes') === 'true';
 
-function abrirModalSolicitacao(id, nome, profissao) {
+async function abrirModalSolicitacao(id, nome, profissao) {
   document.getElementById('modalProfissionalId').value = id;
   document.getElementById('modalProfissionalNome').textContent = nome;
   document.getElementById('modalProfissionalProfissao').textContent = profissao;
   document.getElementById('solicitacaoModal').classList.add('active');
   document.body.style.overflow = 'hidden';
+
+  // Garante que o estado de login foi verificado antes de decidir como renderizar o modal
+  try {
+    await verificarLoginCliente();
+  } catch (e) { /* ignora erro e segue */ }
 
   // Se o cliente está logado, mostrar modal simples (só descrição)
   var cadastroSection = document.querySelector('.modal-cadastro-section');
@@ -373,9 +378,13 @@ async function enviarSolicitacao(event) {
     return;
   }
 
-  try {
+try {
+    // Decide se o cliente está logado (seção de cadastro oculta) para enviar direto
+    var cadastroSection = document.querySelector('.modal-cadastro-section');
+    var usarClienteLogado = clienteLogado && cadastroSection && cadastroSection.classList.contains('hidden');
+
     // Caso o cliente já esteja logado: envia direto sem cadastrar
-    if (clienteLogado) {
+    if (usarClienteLogado) {
       submitBtn.innerHTML = '<span class="spinner"></span> Enviando solicitação...';
       const data = {
         descricao: descricao,
