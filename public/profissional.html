@@ -204,7 +204,38 @@
     .config-save-bar.active { display: flex; justify-content: flex-end; gap: 10px; }
     .config-modal { max-height: 90vh; display: flex; flex-direction: column; }
     .config-modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
-    @media (max-width: 768px) { .calc-grid, .ferramentas-grid { grid-template-columns: 1fr; } .dashboard-tab { min-width: 80px; font-size: 12px; padding: 12px 8px; } .solicitacao-card .info-grid { grid-template-columns: 1fr; } .config-grid { grid-template-columns: 1fr; } .config-foto-servicos { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 768px) { .calc-grid, .ferramentas-grid { grid-template-columns: 1fr; } .dashboard-tab { min-width: 80px; font-size: 12px; padding: 12px 8px; } .solicitacao-card .info-grid { grid-template-columns: 1fr; } .config-grid { grid-template-columns: 1fr; } .config-foto-servicos { grid-template-columns: repeat(3, 1fr); } .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; } }
+    /* Widget de Chat Flutuante (Messenger) - espelhado do cliente */
+    .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none; }
+    .chat-widget.active { display: block; }
+    .chat-bubble { width: 60px; height: 60px; border-radius: 50%; background: var(--red-primary); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-lg); transition: var(--transition); border: none; position: relative; }
+    .chat-bubble:hover { transform: scale(1.1); background: var(--red-dark); }
+    .chat-bubble.pulse { animation: pulseBubble 1.5s ease-in-out infinite; }
+    @keyframes pulseBubble { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,0,0,0.5); } 50% { box-shadow: 0 0 0 20px rgba(255,0,0,0); } }
+    .chat-badge { position: absolute; top: -5px; right: -5px; background: #ffc107; color: #000; font-size: 12px; font-weight: 700; min-width: 22px; height: 22px; border-radius: 11px; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
+    .chat-badge.show { display: flex; }
+    .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; max-width: calc(100vw - 40px); max-height: 500px; background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; display: none; flex-direction: column; animation: slideUpChat 0.3s ease; z-index: 9998; }
+    .chat-panel.open { display: flex; }
+    @keyframes slideUpChat { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--red-primary); color: var(--white); }
+    .chat-panel-header h4 { font-size: 16px; font-weight: 700; }
+    .chat-panel-header button { background: none; border: none; color: var(--white); font-size: 20px; cursor: pointer; padding: 4px; }
+    .chat-panel-body { flex: 1; overflow-y: auto; padding: 12px; min-height: 300px; max-height: 350px; }
+    .chat-panel-empty { text-align: center; padding: 40px 20px; color: var(--gray-medium); font-size: 14px; }
+    .chat-panel-empty .icon { font-size: 48px; display: block; margin-bottom: 12px; }
+    .chat-panel-footer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--gray-lighter); }
+    .chat-panel-footer input { flex: 1; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
+    .chat-panel-footer input:focus { outline: none; border-color: var(--red-primary); }
+    .chat-panel-footer .btn { padding: 10px 16px; }
+    .chat-panel-msg { margin-bottom: 12px; }
+    .chat-panel-msg .bubble { max-width: 85%; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.4; }
+    .chat-panel-msg.profissional { display: flex; justify-content: flex-end; }
+    .chat-panel-msg.profissional .bubble { background: var(--red-primary); color: var(--white); border-bottom-right-radius: 4px; }
+    .chat-panel-msg.cliente .bubble { background: var(--gray-bg); color: var(--black-primary); border-bottom-left-radius: 4px; }
+    .chat-panel-msg .time { font-size: 10px; color: var(--gray-light); margin-top: 4px; }
+    .chat-panel-msg.profissional .time { text-align: right; color: rgba(255,255,255,0.7); }
+    .chat-panel-select { padding: 12px; border-bottom: 1px solid var(--gray-lighter); }
+    .chat-panel-select select { width: 100%; padding: 10px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 13px; }
   </style>
 </head>
 <body class="prof-body">
@@ -248,7 +279,11 @@
             <span class="user-name" id="userName">Profissional</span>
             <span class="user-caret" data-icon="chevron-down"></span>
           </button>
-          <div class="user-dropdown-menu" id="userDropdownMenu">
+<div class="user-dropdown-menu" id="userDropdownMenu">
+            <a href="/" class="user-dropdown-item">
+              <span data-icon="home"></span> Início
+            </a>
+            <div class="user-dropdown-divider"></div>
             <button type="button" class="user-dropdown-item" onclick="abrirConfiguracoes()">
               <span data-icon="settings"></span> Configurações
             </button>
@@ -477,6 +512,35 @@
     <div class="modal-body config-modal-body">
       <div id="configBody"></div>
     </div>
+  </div>
+</div>
+
+<!-- Widget de Chat Flutuante (Messenger) -->
+<div class="chat-widget" id="chatWidget">
+  <button class="chat-bubble" id="chatBubble" onclick="toggleChatPainel()">
+    💬
+    <span class="chat-badge" id="chatBadge">0</span>
+  </button>
+</div>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-panel-header">
+    <h4>💬 Conversas</h4>
+    <button onclick="toggleChatPainel()">&times;</button>
+  </div>
+  <div class="chat-panel-select">
+    <select id="widgetChatSelect" onchange="widgetCarregarChat()">
+      <option value="">Selecione uma conversa...</option>
+    </select>
+  </div>
+  <div class="chat-panel-body" id="widgetChatBody">
+    <div class="chat-panel-empty">
+      <span class="icon">💬</span>
+      <p>Selecione uma conversa acima</p>
+    </div>
+  </div>
+  <div class="chat-panel-footer" id="widgetChatFooter" style="display:none;">
+    <input type="text" id="widgetChatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') widgetEnviarMensagem()">
+    <button class="btn btn-primary" onclick="widgetEnviarMensagem()">Enviar</button>
   </div>
 </div>
 

@@ -186,11 +186,13 @@ function mostrarLogin() {
   document.getElementById('dashboard').style.display = 'none';
   document.getElementById('loginForm').reset();
   document.getElementById('loginError').style.display = 'none';
+  atualizarWidgetChatVisibilidade();
 }
 
 function mostrarDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashboard').style.display = 'block';
+  atualizarWidgetChatVisibilidade();
 }
 
 // ============================================
@@ -1103,12 +1105,139 @@ if (resp.success) {
 }
 
 // ============================================
+// Widget de Chat Flutuante (Messenger)
+// ============================================
+let widgetChatTimer = null;
+let widgetChatAtivo = false;
+
+// Mostra o widget apenas quando o profissional está logado (dashboard visível)
+function atualizarWidgetChatVisibilidade() {
+  var dashboard = document.getElementById('dashboard');
+  var widget = document.getElementById('chatWidget');
+  if (!widget) return;
+  if (dashboard && dashboard.style.display === 'block') {
+    widget.classList.add('active');
+  } else {
+    widget.classList.remove('active');
+  }
+}
+
+// Preenche o select do widget com as solicitações pagas (chat liberado)
+async function widgetCarregarSolicitacoes() {
+  if (!profissional) return;
+  var select = document.getElementById('widgetChatSelect');
+  if (!select) return;
+  select.innerHTML = '<option value="">Selecione uma conversa...</option>';
+  var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
+  if (result && result.success) {
+    for (var i = 0; i < result.data.length; i++) {
+      var sol = result.data[i];
+      if (sol.status_pagamento === 'pago') {
+        var opt = document.createElement('option');
+        opt.value = sol.id;
+        opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome;
+        select.appendChild(opt);
+      }
+    }
+  }
+}
+
+function toggleChatPainel() {
+  var panel = document.getElementById('chatPanel');
+  var widget = document.getElementById('chatWidget');
+  if (!panel) return;
+  var abrindo = !panel.classList.contains('open');
+  panel.classList.toggle('open');
+  if (abrindo) {
+    widgetChatAtivo = true;
+    widgetCarregarSolicitacoes();
+    var badge = document.getElementById('chatBadge');
+    if (badge) badge.classList.remove('show');
+    // Fecha o dropdown do usuário se estiver aberto
+    fecharDropdown();
+    // Para o polling de novas mensagens quando abre
+    if (widgetChatTimer) { clearInterval(widgetChatTimer); widgetChatTimer = null; }
+  } else {
+    widgetChatAtivo = false;
+    if (widgetChatTimer) { clearInterval(widgetChatTimer); widgetChatTimer = null; }
+  }
+}
+
+function widgetCarregarChat() {
+  var select = document.getElementById('widgetChatSelect');
+  var id = select ? select.value : '';
+  if (!id) {
+    document.getElementById('widgetChatBody').innerHTML =
+      '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa acima</p></div>';
+    document.getElementById('widgetChatFooter').style.display = 'none';
+    if (widgetChatTimer) { clearInterval(widgetChatTimer); widgetChatTimer = null; }
+    return;
+  }
+  document.getElementById('widgetChatFooter').style.display = 'flex';
+  widgetCarregarMensagens(id);
+  if (widgetChatTimer) clearInterval(widgetChatTimer);
+  widgetChatTimer = setInterval(function() { widgetCarregarMensagens(id); }, 5000);
+}
+
+async function widgetCarregarMensagens(solicitacaoId) {
+  var result = await apiRequest(API_BASE + '/mensagens/' + solicitacaoId);
+  if (result && result.success) {
+    widgetRenderizarMensagens(result.data);
+  }
+}
+
+function widgetRenderizarMensagens(mensagens) {
+  var body = document.getElementById('widgetChatBody');
+  body.innerHTML = '';
+  if (mensagens.length === 0) {
+    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Nenhuma mensagem ainda. Envie a primeira mensagem para o cliente!</p></div>';
+    return;
+  }
+  for (var i = 0; i < mensagens.length; i++) {
+    var msg = mensagens[i];
+    var classe = msg.remetente === 'profissional' ? 'profissional' : 'cliente';
+    var label = msg.remetente === 'profissional' ? 'Você' : 'Cliente';
+    var div = document.createElement('div');
+    div.className = 'chat-panel-msg ' + classe;
+    div.innerHTML =
+      '<div class="bubble">' + msg.texto + '</div>' +
+      '<div class="time">' + label + ' - ' + new Date(msg.data_envio).toLocaleTimeString('pt-BR') + '</div>';
+    body.appendChild(div);
+  }
+  body.scrollTop = body.scrollHeight;
+}
+
+async function widgetEnviarMensagem() {
+  var input = document.getElementById('widgetChatInput');
+  var texto = input.value.trim();
+  var select = document.getElementById('widgetChatSelect');
+  var solicitacaoId = select ? select.value : '';
+  if (!texto || !solicitacaoId) return;
+  input.value = '';
+  var result = await apiRequest(API_BASE + '/mensagens', {
+    method: 'POST',
+    body: JSON.stringify({
+      solicitacao_id: parseInt(solicitacaoId),
+      remetente: 'profissional',
+      texto: texto
+    })
+  });
+  if (result && result.success) {
+    widgetCarregarMensagens(solicitacaoId);
+    // Recarrega também a lista do chat principal (aba), se aberta
+    if (document.getElementById('chatSolicitacaoSelect') && document.getElementById('chatSolicitacaoSelect').value === solicitacaoId) {
+      carregarMensagens(solicitacaoId);
+    }
+  }
+}
+
+// ============================================
 // Initialize
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('loginForm').addEventListener('submit', login);
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') { fecharModalOrcamento(); fecharConfiguracoes(); }
+    if (e.key === 'Escape') { fecharModalOrcamento(); fecharConfiguracoes(); fecharChatPainelEsc(); }
   });
   document.getElementById('orcamentoModal').addEventListener('click', function(e) {
     if (e.target === this) fecharModalOrcamento();
@@ -1120,3 +1249,13 @@ document.getElementById('configModal').addEventListener('click', function(e) {
   verificarToken();
   verificarRetornoPagamento();
 });
+
+// Fecha o painel de chat flutuante com ESC (sem conflitar com outros fechamentos)
+function fecharChatPainelEsc() {
+  var panel = document.getElementById('chatPanel');
+  if (panel && panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    widgetChatAtivo = false;
+    if (widgetChatTimer) { clearInterval(widgetChatTimer); widgetChatTimer = null; }
+  }
+}
