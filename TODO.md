@@ -1,14 +1,18 @@
-# TODO - Profissional logado no header do index.html
+# TODO - Implementação de Geolocalização Automática
 
 ## Objetivo
-Exibir o profissional logado no header do `index.html` (nome, avatar, dropdown "Minha Área" apontando para `profissional.html` e botão Sair), da mesma forma que já acontece para o cliente.
+Quando o usuário entrar no site, pedir a geolocalização para preencher automaticamente
+Cidade e Estado nos campos de busca de serviço do index.html.
 
-## Tarefas
-- [ ] `public/index.html`: tornar o link "Minha Área" do dropdown e do menu mobile dinâmicos (id para o link e texto).
-- [ ] `public/index.html`: atualizar o script otimista inline para também considerar o cache do profissional (`acheei_prof_cache` + `acheei_prof_token`).
-- [ ] `public/js/main.js`: adicionar funções de cache do profissional (`carregarProfissionalCache`, `salvarProfissionalCache`, `limparProfissionalCache`).
-- [ ] `public/js/main.js`: adicionar `verificarLoginProfissional()` (consulta `/api/profissionais/me`).
-- [ ] `public/js/main.js`: adicionar `atualizarHeaderProfissional()` e coordenar o header (cliente OU profissional).
-- [ ] `public/js/main.js`: criar `sairUsuarioHome()` unificado que limpa token/cache de cliente e profissional.
-- [ ] `public/js/main.js`: chamar `verificarLoginProfissional()` no `DOMContentLoaded`.
-- [ ] `public/js/profissional.js`: (já pronto) salvar/limpar cache no login, `verificarToken`, logout e 401.
+## Passos
+- [x] Analisar o projeto (index.html, main.js, server.js, package.json)
+- [x] Criar o plano e aprovar com o usuário
+
+## Implementação
+- [x] Adicionar função de geolocalização + reverse geocoding em `public/js/main.js`
+- [x] Chamar a função no carregamento da página (DOMContentLoaded)
+
+## Validação
+- [ ] Testar permissão concedida (campos preenchidos)
+- [ ] Testar permissão negada (campos vazios, sem erro)
+- [ ] Testar falha de reverse geocoding (campos vazios)

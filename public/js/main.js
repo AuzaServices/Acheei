@@ -693,9 +693,139 @@ try {
 }
 
 // ============================================
+// Geolocalização Automática (preencher Cidade/Estado)
+// ============================================
+var GEO_CACHE_KEY = 'acheei_geo_cache';
+
+function obterGeoCidadeCache() {
+  try {
+    var cache = JSON.parse(localStorage.getItem(GEO_CACHE_KEY) || 'null');
+    return cache;
+  } catch (e) {
+    return null;
+  }
+}
+
+function salvarGeoCidadeCache(cidade, estado) {
+  try {
+    localStorage.setItem(GEO_CACHE_KEY, JSON.stringify({ cidade: cidade, estado: estado, time: Date.now() }));
+  } catch (e) { /* ignora erro de armazenamento */ }
+}
+
+// Preenche os campos Cidade e Estado com os valores informados
+function preencherCamposLocalizacao(cidade, estado) {
+  var cidadeInput = document.getElementById('cidade');
+  var estadoSelect = document.getElementById('estado');
+  if (cidade && cidadeInput) cidadeInput.value = cidade;
+  if (estado && estadoSelect) {
+    // Seleciona a sigla correspondente no select (caso exista)
+    var sigla = estado.toUpperCase().substring(0, 2);
+    var found = false;
+    for (var i = 0; i < estadoSelect.options.length; i++) {
+      if (estadoSelect.options[i].value === sigla) {
+        estadoSelect.selectedIndex = i;
+        found = true;
+        break;
+      }
+    }
+    // Se o estado não for reconhecido, não força seleção
+    if (!found) return;
+  }
+}
+
+// Reverse geocoding via OpenStreetMap/Nominatim (gratuito, sem chave)
+async function reverseGeocoding(lat, lon) {
+  var url = 'https://nominatim.openstreetmap.org/reverse' +
+    '?format=jsonv2&lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) +
+    '&accept-language=pt-BR&zoom=10';
+
+  try {
+    var response = await fetch(url, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) return null;
+    var data = await response.json();
+    if (!data || !data.address) return null;
+
+    var cidade = null;
+    // Campos possíveis: city, town, village, municipality, county, etc.
+    cidade = data.address.city || data.address.town || data.address.village ||
+             data.address.municipality || data.address.county || null;
+
+    // Estado (region/state) - ex: "São Paulo" -> "SP"
+    var estado = data.address.state || data.address.region || data.address.state_district || null;
+
+    return { cidade: cidade, estado: estado };
+  } catch (e) {
+    console.error('Erro no reverse geocoding:', e);
+    return null;
+  }
+}
+
+// Converte o nome do estado para a sigla (UF) usando a lista do select
+function estadoParaSigla(nomeEstado) {
+  if (!nomeEstado) return null;
+  var nome = nomeEstado.toLowerCase().trim();
+  var estados = {
+    'acre': 'AC','alagoas': 'AL','amapá': 'AP','amazonas': 'AM','bahia': 'BA',
+    'ceará': 'CE','distrito federal': 'DF','espírito santo': 'ES','goiás': 'GO',
+    'maranhão': 'MA','mato grosso': 'MT','mato grosso do sul': 'MS','minas gerais': 'MG',
+    'pará': 'PA','paraíba': 'PB','paraná': 'PR','pernambuco': 'PE','piauí': 'PI',
+    'rio de janeiro': 'RJ','rio grande do norte': 'RN','rio grande do sul': 'RS',
+    'rondônia': 'RO','roraima': 'RR','santa catarina': 'SC','são paulo': 'SP',
+    'sergipe': 'SE','tocantins': 'TO'
+  };
+  return estados[nome] || null;
+}
+
+// Função principal: pede a geolocalização e preenche os campos
+function preencherLocalizacaoAutomatica() {
+  var cidadeInput = document.getElementById('cidade');
+  var estadoSelect = document.getElementById('estado');
+  if (!cidadeInput || !estadoSelect) return;
+
+  // Se já houver um valor preenchido, não sobrescreve
+  if (cidadeInput.value.trim() !== '' || estadoSelect.value !== '') return;
+
+  // Usa cache para não re-pedir permissão a cada visita
+  var cache = obterGeoCidadeCache();
+  if (cache && cache.cidade) {
+    preencherCamposLocalizacao(cache.cidade, cache.estado || '');
+    return;
+  }
+
+  // Verifica se a API de geolocalização está disponível
+  if (!('geolocation' in navigator)) {
+    console.log('Geolocalização não suportada pelo navegador');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async function(position) {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      var geo = await reverseGeocoding(lat, lon);
+      if (geo && geo.cidade) {
+        var sigla = estadoParaSigla(geo.estado);
+        preencherCamposLocalizacao(geo.cidade, sigla || '');
+        salvarGeoCidadeCache(geo.cidade, sigla || '');
+      }
+    },
+    function(error) {
+      // Permissão negada ou indisponível: mantém os campos vazios (sem erro intrusivo)
+      console.log('Permissão de localização negada ou indisponível:', error.code);
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+  );
+}
+
+// ============================================
 // Event Listeners
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
+  // Preencher Cidade/Estado automaticamente via geolocalização
+  preencherLocalizacaoAutomatica();
+
   // Verificar se o cliente está logado e atualizar o header
   verificarLoginCliente();
   // Verificar se o profissional está logado e atualizar o header
