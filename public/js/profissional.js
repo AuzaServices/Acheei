@@ -33,6 +33,24 @@ function formatarMoeda(valor) {
 }
 
 // ============================================
+// Cache do profissional (para refletir o estado
+// logado no header da home "index.html")
+// ============================================
+function salvarProfissionalCache(prof) {
+  if (prof) {
+    localStorage.setItem('acheei_prof_cache', JSON.stringify({
+      nome: prof.nome_perfil,
+      foto: prof.foto_perfil || null,
+      id: prof.id
+    }));
+  }
+}
+
+function limparProfissionalCache() {
+  localStorage.removeItem('acheei_prof_cache');
+}
+
+// ============================================
 // API Request com token
 // ============================================
 async function apiRequest(url, options) {
@@ -49,8 +67,9 @@ async function apiRequest(url, options) {
     var response = await fetch(url, opts);
     var result = await response.json();
     if (!response.ok) {
-      if (response.status === 401) {
+if (response.status === 401) {
         localStorage.removeItem('acheei_prof_token');
+        limparProfissionalCache();
         token = null;
         mostrarLogin();
         showToast('Sessao expirada. Faca login novamente.', 'error');
@@ -93,10 +112,11 @@ async function login(event) {
   btn.disabled = false;
   btn.innerHTML = 'Entrar na Área';
 
-  if (result && result.success) {
+if (result && result.success) {
     token = result.data.token;
     profissional = result.data.profissional;
     localStorage.setItem('acheei_prof_token', token);
+    salvarProfissionalCache(profissional);
     document.getElementById('profNome').textContent = profissional.nome_perfil;
     // Foto
     var fotoHtml = '';
@@ -116,6 +136,7 @@ async function login(event) {
 
 function logout() {
   localStorage.removeItem('acheei_prof_token');
+  limparProfissionalCache();
   token = null;
   profissional = null;
   mostrarLogin();
@@ -752,6 +773,7 @@ async function verificarToken() {
   var result = await apiRequest(API_BASE + '/profissionais/me');
   if (result && result.success) {
     profissional = result.data;
+    salvarProfissionalCache(profissional);
     document.getElementById('profNome').textContent = profissional.nome_perfil;
     var fotoHtml = '';
     if (profissional.foto_perfil) {
