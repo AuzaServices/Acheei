@@ -127,9 +127,12 @@ const fotoPerfil = prof.foto_perfil
           ${fotosHtml}
         </div>
       </div>
-      <div class="card-footer">
+<div class="card-footer">
         <button class="btn btn-primary" onclick="abrirModalSolicitacao(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}')">
           <span data-icon="send"></span> Solicitar Serviço
+        </button>
+        <button class="btn btn-outline btn-share-card" onclick="abrirCompartilhar(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}', '${prof.cidade}', '${prof.estado}', '${prof.foto_perfil || ''}')" title="Compartilhar">
+          <span data-icon="share"></span> Compartilhar
         </button>
       </div>
     `;
@@ -820,11 +823,140 @@ function preencherLocalizacaoAutomatica() {
 }
 
 // ============================================
+// Compartilhar Profissional
+// ============================================
+var profissionalCompartilhado = null;
+
+function obterLinkProfissional() {
+  var id = document.getElementById('compartilharProfissionalId').value;
+  return window.location.origin + '/?profissional=' + id;
+}
+
+function montarTextoCompartilhamento() {
+  if (!profissionalCompartilhado) return '';
+  var p = profissionalCompartilhado;
+  var texto = 'Conheça ' + p.nome + ' no Acheei! 🛠️\n';
+  texto += 'Profissão: ' + p.profissao + '\n';
+  if (p.cidade && p.estado) texto += 'Localização: ' + p.cidade + '/' + p.estado + '\n';
+  texto += 'Solicite um serviço: ' + obterLinkProfissional();
+  return texto;
+}
+
+function abrirCompartilhar(id, nome, profissao, cidade, estado, foto) {
+  profissionalCompartilhado = {
+    id: id, nome: nome, profissao: profissao, cidade: cidade, estado: estado, foto: foto || ''
+  };
+
+  document.getElementById('compartilharProfissionalId').value = id;
+  document.getElementById('compartilharNome').textContent = nome;
+  document.getElementById('compartilharProfissao').textContent = profissao;
+  document.getElementById('compartilharCidadeEstado').textContent = (cidade && estado) ? cidade + '/' + estado : 'Localização não informada';
+
+  // Foto do profissional
+  var fotoContainer = document.getElementById('compartilharFoto');
+  if (foto) {
+    fotoContainer.innerHTML = '<img src="' + foto + '" alt="' + nome + '" style="width:100%;height:100%;object-fit:cover;">';
+  } else {
+    fotoContainer.innerHTML = '<span data-icon="user"></span>';
+  }
+
+  // Abre o modal
+  document.getElementById('compartilharModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharCompartilhar() {
+  document.getElementById('compartilharModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Tenta usar a Web Share API nativa (mobile moderno); senão abre o modal
+async function compartilharProfissional() {
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: profissionalCompartilhado ? 'Acheei - ' + profissionalCompartilhado.nome : 'Acheei',
+        text: montarTextoCompartilhamento(),
+        url: obterLinkProfissional()
+      });
+      return;
+    } catch (err) {
+      // Usuário cancelou ou erro; segue para opções manuais
+    }
+  }
+  // Fallback: mantém o modal de compartilhamento aberto para opções manuais
+}
+
+function compartilharWhatsApp() {
+  var url = 'https://wa.me/?text=' + encodeURIComponent(montarTextoCompartilhamento());
+  window.open(url, '_blank');
+}
+
+function compartilharFacebook() {
+  var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(obterLinkProfissional());
+  window.open(url, '_blank');
+}
+
+function compartilharTwitter() {
+  var texto = profissionalCompartilhado ? 'Conheça ' + profissionalCompartilhado.nome + ' no Acheei! 🛠️' : 'Acheei';
+  var url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(texto) + '&url=' + encodeURIComponent(obterLinkProfissional());
+  window.open(url, '_blank');
+}
+
+function copiarLinkProfissional() {
+  var link = obterLinkProfissional();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(function() {
+      showToast('Link copiado!', 'success');
+    }).catch(function() {
+      copiarLinkFallback(link);
+    });
+  } else {
+    copiarLinkFallback(link);
+  }
+}
+
+function copiarLinkFallback(link) {
+  var temp = document.createElement('textarea');
+  temp.value = link;
+  document.body.appendChild(temp);
+  temp.select();
+  try {
+    document.execCommand('copy');
+    showToast('Link copiado!', 'success');
+  } catch (e) {
+    showToast('Não foi possível copiar o link', 'error');
+  }
+  document.body.removeChild(temp);
+}
+
+// Ao abrir o site via link compartilhado (?profissional=ID), busca o profissional e abre o modal
+async function abrirProfissionalPorLink() {
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get('profissional');
+  if (!id) return;
+
+  try {
+    var response = await fetch(API_BASE + '/profissionais/' + id);
+    var result = await response.json();
+    if (result.success && result.data) {
+      var p = result.data;
+      abrirCompartilhar(p.id, p.nome_perfil, p.profissao, p.cidade, p.estado, p.foto_perfil || '');
+    }
+  } catch (e) {
+    console.error('Erro ao carregar profissional por link:', e);
+  }
+}
+
+// ============================================
 // Event Listeners
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
   // Preencher Cidade/Estado automaticamente via geolocalização
   preencherLocalizacaoAutomatica();
+
+  // Se veio por link compartilhado, abre o modal do profissional
+  abrirProfissionalPorLink();
 
   // Verificar se o cliente está logado e atualizar o header
   verificarLoginCliente();
@@ -835,8 +967,30 @@ document.addEventListener('DOMContentLoaded', function() {
   carregarCategorias();
   setupAutocomplete();
 
-  // Dropdown do usuário (avatar + nome)
+// Dropdown do usuário (avatar + nome)
   setupUserDropdown();
+
+  // Botão "Solicitar Serviço" do modal de compartilhamento
+  var compartilharSolicitarBtn = document.getElementById('compartilharSolicitarBtn');
+  if (compartilharSolicitarBtn) {
+    compartilharSolicitarBtn.addEventListener('click', function() {
+      if (!profissionalCompartilhado) return;
+      var p = profissionalCompartilhado;
+      fecharCompartilhar();
+      abrirModalSolicitacao(p.id, p.nome, p.profissao);
+    });
+  }
+
+  // Fechar modal de compartilhamento clicando fora ou com ESC
+  var compartilharModal = document.getElementById('compartilharModal');
+  if (compartilharModal) {
+    compartilharModal.addEventListener('click', function(e) {
+      if (e.target === this) fecharCompartilhar();
+    });
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharCompartilhar();
+  });
 
   // Formulário de busca
   document.getElementById('searchForm').addEventListener('submit', function(e) {

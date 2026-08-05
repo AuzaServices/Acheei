@@ -295,7 +295,47 @@
     </div>
   </section>
 
-<div id="solicitacaoModal" class="modal-overlay">
+<div id="compartilharModal" class="modal-overlay">
+    <div class="modal share-modal">
+      <div class="modal-header">
+        <h3><span data-icon="share"></span> Compartilhar Profissional</h3>
+        <button class="modal-close" onclick="fecharCompartilhar()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="compartilharProfInfo" class="share-prof-info" style="background: var(--gray-bg); padding: 20px; border-radius: var(--radius-md); margin-bottom: 20px; text-align: center;">
+          <div id="compartilharFoto" class="share-avatar" style="width:80px;height:80px;border-radius:50%;margin:0 auto 12px;overflow:hidden;background:var(--gray-lighter);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--gray-medium);">
+            <span data-icon="user"></span>
+          </div>
+          <p id="compartilharNome" style="font-weight:700;font-size:20px;margin-bottom:4px;"></p>
+          <p id="compartilharProfissao" style="color:var(--red-primary);font-weight:600;margin-bottom:8px;"></p>
+          <p id="compartilharLocalizacao" style="color:var(--gray-medium);font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <span data-icon="map-pin"></span> <span id="compartilharCidadeEstado"></span>
+          </p>
+        </div>
+        <button class="btn btn-primary" id="compartilharSolicitarBtn" style="width:100%;justify-content:center;margin-bottom:16px;">
+          <span data-icon="send"></span> Solicitar Serviço
+        </button>
+        <div class="share-divider" style="text-align:center;font-size:13px;color:var(--gray-medium);margin-bottom:16px;">ou compartilhe</div>
+        <div class="share-options" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <button class="btn btn-outline" onclick="compartilharWhatsApp()" style="justify-content:center;">
+            <span data-icon="chat"></span> WhatsApp
+          </button>
+          <button class="btn btn-outline" onclick="compartilharFacebook()" style="justify-content:center;">
+            <span data-icon="users"></span> Facebook
+          </button>
+          <button class="btn btn-outline" onclick="compartilharTwitter()" style="justify-content:center;">
+            <span data-icon="send"></span> Twitter/X
+          </button>
+          <button class="btn btn-outline" onclick="copiarLinkProfissional()" style="justify-content:center;">
+            <span data-icon="clipboard"></span> Copiar Link
+          </button>
+        </div>
+      </div>
+      <input type="hidden" id="compartilharProfissionalId">
+    </div>
+  </div>
+
+  <div id="solicitacaoModal" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">
         <h3>Solicitar Serviço</h3>

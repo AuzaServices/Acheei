@@ -1,21 +1,27 @@
-# TODO - Cabeçalho Mobile (Dropdown Avatar+Nome) nas Áreas Cliente/Profissional
+# TODO - Botão "Compartilhar" e Melhorias de Navegação
 
 ## Objetivo
-Focar no mobile, tornando as áreas do cliente e do profissional 100% responsivas.
-Padronizar o cabeçalho com o dropdown de Avatar + Nome + seta (padrão do index.html),
-contendo "Sair" e "Configurações" (profissional) ou apenas "Sair" (cliente).
+1. Remover emojis do `public/contato.html` e substituí-los pelos ícones SVG do sistema (`public/js/icons.js`).
+2. Adicionar botão "Início" no dropdown do Avatar-Nome em `public/cliente.html` (igual à página do profissional).
+3. Adicionar botão "Compartilhar" moderno nos cards de profissionais, permitindo compartilhar o link
+   do profissional via WhatsApp, Facebook, Twitter/X e copiar link. O link abre o modal com
+   nome, profissão, cidade e estado, e botão "Solicitar Serviço".
 
 ## Passos
-- [x] Analisar projeto (cliente.html/js, profissional.html/js, index.html/js, style.css)
+- [x] Analisar projeto (contato.html, cliente.html, index.html, main.js, icons.js, profissionais.js)
 - [x] Criar plano e aprovar com o usuário
 
 ## Implementação
-- [ ] cliente.html: substituir cabeçalho por dropdown Avatar+Nome+Seta (apenas "Sair")
-- [ ] cliente.js: adicionar setupUserDropdown + popular avatar + chamar no DOMContentLoaded
-- [ ] profissional.html: substituir cabeçalho por dropdown Avatar+Nome+Seta (Configurações + Sair)
-- [ ] profissional.js: adicionar setupUserDropdown + popular avatar + chamar no DOMContentLoaded
-- [ ] style.css: estilizar dropdown no cabeçalho do dashboard (mobile e desktop)
+- [x] contato.html: substituir emojis por ícones SVG (chat, mail, phone, map-pin, check-circle, clock, help-circle)
+- [x] cliente.html: remover botão inferior "Início" e mover "Início" para o dropdown do Avatar-Nome
+- [x] icons.js: adicionar ícone `share`
+- [x] index.html: criar modal `#compartilharModal` (nome, profissão, cidade/estado, Solicitar Serviço, baotoes WhatsApp/Facebook/Twitter/Copiar)
+- [x] main.js: adicionar botão "Compartilhar" nos cards; funções abrirCompartilhar, compartilharWhatsApp,
+       compartilharFacebook, compartilharTwitter, copiarLinkProfissional; detectar `?profissional=ID` na URL
 
 ## Validação
-- [ ] Testar em mobile (DevTools)
-- [ ] Testar em desktop
+- [ ] Testar botão "Compartilhar" nos cards (modal abre com dados do profissional)
+- [ ] Testar link `?profissional=ID` abre o modal ao ser acessado
+- [ ] Testar compartilhamento via WhatsApp/Facebook/Twitter e copiar link
+- [ ] Testar botão "Solicitar Serviço" dentro do modal de compartilhamento
+</content>
