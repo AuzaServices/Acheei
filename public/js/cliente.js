@@ -157,7 +157,7 @@ if (result && result.success) {
     localStorage.setItem('acheei_cliente_token', token);
     clienteData = result.data.cliente;
     salvarClienteCache(clienteData);
-    document.getElementById('clienteName').textContent = clienteData.nome;
+    aplicarHeaderCliente(clienteData.nome, clienteData.foto || clienteData.foto_perfil);
     mostrarDashboard();
     carregarDados();
     showToast('Login realizado com sucesso!', 'success');
@@ -208,9 +208,9 @@ if (result && result.success) {
     document.getElementById('cadastroSuccess').style.display = 'block';
     token = result.data.token;
     localStorage.setItem('acheei_cliente_token', token);
-    clienteData = result.data.cliente;
+clienteData = result.data.cliente;
     salvarClienteCache(clienteData);
-    document.getElementById('clienteName').textContent = clienteData.nome;
+    aplicarHeaderCliente(clienteData.nome, clienteData.foto || clienteData.foto_perfil);
     setTimeout(function() {
       mostrarDashboard();
       carregarDados();
@@ -456,6 +456,51 @@ async function enviarMensagemCliente() {
 }
 
 // ============================================
+// Header - Dropdown Avatar + Nome
+// ============================================
+function aplicarHeaderCliente(nome, foto) {
+  var nameEl = document.getElementById('userName');
+  var avatarEl = document.getElementById('userAvatar');
+  if (nameEl) nameEl.textContent = nome || 'Cliente';
+  if (avatarEl) {
+    avatarEl.innerHTML = foto
+      ? '<img src="' + foto + '" alt="Foto">'
+      : '👤';
+  }
+}
+
+function setupUserDropdown() {
+  var trigger = document.getElementById('userDropdownTrigger');
+  var dropdown = document.getElementById('userDropdown');
+  if (!trigger || !dropdown) return;
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isActive = dropdown.classList.toggle('active');
+    trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+  });
+
+  // Fecha ao clicar fora
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target)) {
+      fecharDropdown();
+    }
+  });
+
+  // Fecha com Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharDropdown();
+  });
+}
+
+function fecharDropdown() {
+  var dropdown = document.getElementById('userDropdown');
+  var trigger = document.getElementById('userDropdownTrigger');
+  if (dropdown) dropdown.classList.remove('active');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+
+// ============================================
 // Cache do cliente (compartilhado com o index via localStorage)
 // ============================================
 function carregarClienteCache() {
@@ -486,10 +531,10 @@ async function verificarToken() {
 
   // Estado otimista: se houver cache, mostra o dashboard imediatamente
   // (sem flash da tela de login) enquanto a verificação assíncrona ocorre.
-  var cache = carregarClienteCache();
+var cache = carregarClienteCache();
   if (cache) {
     clienteData = { id: cache.id, nome: cache.nome, foto: cache.foto };
-    document.getElementById('clienteName').textContent = cache.nome;
+    aplicarHeaderCliente(cache.nome, cache.foto);
     mostrarDashboard();
   }
 
@@ -497,7 +542,7 @@ async function verificarToken() {
   if (result && result.success) {
     clienteData = result.data;
     salvarClienteCache(result.data);
-    document.getElementById('clienteName').textContent = clienteData.nome;
+    aplicarHeaderCliente(clienteData.nome, clienteData.foto || clienteData.foto_perfil);
     mostrarDashboard();
     await carregarDados();
   } else {
@@ -759,6 +804,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('cadastroTelefone').addEventListener('input', function(e) {
     e.target.value = formatTelefone(e.target.value);
   });
+
+  // Dropdown do usuário (avatar + nome)
+  setupUserDropdown();
 
   // Inicializar push
   if ('Notification' in window && Notification.permission === 'granted') {

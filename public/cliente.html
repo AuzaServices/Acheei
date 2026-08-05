@@ -189,9 +189,19 @@
           <a href="/" class="nav-link">Início</a>
           <a href="/#categorias" class="nav-link">Categorias</a>
         </div>
-        <div class="cliente-info">
-          <span id="clienteName">Cliente</span>
-          <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
+        <div class="user-area" id="userArea">
+          <div class="user-dropdown" id="userDropdown">
+            <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
+              <span class="user-avatar" id="userAvatar">👤</span>
+              <span class="user-name" id="userName">Cliente</span>
+              <span class="user-caret" data-icon="chevron-down"></span>
+            </button>
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+              <button type="button" class="user-dropdown-item" onclick="logout()">
+                <span data-icon="log-out"></span> Sair
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

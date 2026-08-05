@@ -1,24 +1,21 @@
-# TODO - Alinhamento Perfeito dos Botões
+# TODO - Cabeçalho Mobile (Dropdown Avatar+Nome) nas Áreas Cliente/Profissional
 
 ## Objetivo
-Ajustar todos os botões de ação (Próximo, Voltar, Avançar, Pagar, Enviar, Buscar,
-Cancelar, Salvar, Aprovar etc.) para ficarem perfeitamente alinhados em seus lugares,
-com tamanho, fonte e posicionamento consistentes, tanto no mobile quanto no desktop.
+Focar no mobile, tornando as áreas do cliente e do profissional 100% responsivas.
+Padronizar o cabeçalho com o dropdown de Avatar + Nome + seta (padrão do index.html),
+contendo "Sair" e "Configurações" (profissional) ou apenas "Sair" (cliente).
 
 ## Passos
-- [x] Analisar o projeto (style.css, index.html, cliente.html, profissional.html, cadastro.html, painel.html e JS)
-- [x] Criar o plano e aprovar com o usuário
+- [x] Analisar projeto (cliente.html/js, profissional.html/js, index.html/js, style.css)
+- [x] Criar plano e aprovar com o usuário
 
 ## Implementação
-- [x] Padronizar `.btn`, `.btn-sm`, `.btn-lg` (min-height, centralização, line-height)
-- [x] Definir `.modal-footer` (desktop: flex-end; mobile: coluna)
-- [x] Alinhar `.form-navigation` do cadastro (Voltar/Próximo/Cadastrar)
-- [x] Alinhar `.btn-search` à altura dos inputs de busca
-- [x] Padronizar botões de chat (Enviar)
-- [x] Padronizar botões de ação do admin (Aprovar/Reprovar/Ver)
-- [x] Padronizar botões de cards (Solicitar Serviço, Pagar)
-- [x] Adicionar regras responsivas (mobile)
+- [ ] cliente.html: substituir cabeçalho por dropdown Avatar+Nome+Seta (apenas "Sair")
+- [ ] cliente.js: adicionar setupUserDropdown + popular avatar + chamar no DOMContentLoaded
+- [ ] profissional.html: substituir cabeçalho por dropdown Avatar+Nome+Seta (Configurações + Sair)
+- [ ] profissional.js: adicionar setupUserDropdown + popular avatar + chamar no DOMContentLoaded
+- [ ] style.css: estilizar dropdown no cabeçalho do dashboard (mobile e desktop)
 
 ## Validação
-- [x] Testar em desktop
-- [x] Testar em mobile (DevTools)
+- [ ] Testar em mobile (DevTools)
+- [ ] Testar em desktop
