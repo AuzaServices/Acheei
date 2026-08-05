@@ -137,6 +137,16 @@ card.innerHTML = `
       </div>
     `;
 
+    // Substitui os placeholders [data-icon] pelos SVGs reais
+    // (necessário pois os cards são criados dinamicamente após o DOMContentLoaded do icons.js)
+    card.querySelectorAll('[data-icon]').forEach(function(el) {
+      var svg = icon(el.getAttribute('data-icon'));
+      if (svg) {
+        el.innerHTML = svg;
+        el.classList.add('icon-wrap');
+      }
+    });
+
     grid.appendChild(card);
   });
 }
