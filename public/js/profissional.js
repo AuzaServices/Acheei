@@ -51,6 +51,51 @@ function limparProfissionalCache() {
 }
 
 // ============================================
+// Header - Dropdown Avatar + Nome
+// ============================================
+function aplicarHeaderProfissional(nome, foto) {
+  var nameEl = document.getElementById('userName');
+  var avatarEl = document.getElementById('userAvatar');
+  if (nameEl) nameEl.textContent = nome || 'Profissional';
+  if (avatarEl) {
+    avatarEl.innerHTML = foto
+      ? '<img src="' + foto + '" alt="Foto">'
+      : '👤';
+  }
+}
+
+function setupUserDropdown() {
+  var trigger = document.getElementById('userDropdownTrigger');
+  var dropdown = document.getElementById('userDropdown');
+  if (!trigger || !dropdown) return;
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isActive = dropdown.classList.toggle('active');
+    trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+  });
+
+  // Fecha ao clicar fora
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target)) {
+      fecharDropdown();
+    }
+  });
+
+  // Fecha com Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharDropdown();
+  });
+}
+
+function fecharDropdown() {
+  var dropdown = document.getElementById('userDropdown');
+  var trigger = document.getElementById('userDropdownTrigger');
+  if (dropdown) dropdown.classList.remove('active');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+
+// ============================================
 // API Request com token
 // ============================================
 async function apiRequest(url, options) {
@@ -117,15 +162,8 @@ if (result && result.success) {
     profissional = result.data.profissional;
     localStorage.setItem('acheei_prof_token', token);
     salvarProfissionalCache(profissional);
-    document.getElementById('profNome').textContent = profissional.nome_perfil;
-    // Foto
-    var fotoHtml = '';
-    if (profissional.foto_perfil) {
-      fotoHtml = '<img src="' + profissional.foto_perfil + '" alt="Foto" class="foto-mini">';
-    } else {
-      fotoHtml = '<div class="foto-mini-placeholder">👤</div>';
-    }
-    document.getElementById('profFotoMini').innerHTML = fotoHtml;
+    // Atualiza o header (avatar + nome) com o novo padrão
+    aplicarHeaderProfissional(profissional.nome_perfil, profissional.foto_perfil);
     mostrarDashboard();
     carregarDados();
     showToast('Login realizado com sucesso!', 'success');
@@ -771,17 +809,10 @@ async function enviarMensagem() {
 async function verificarToken() {
   if (!token) { mostrarLogin(); return; }
   var result = await apiRequest(API_BASE + '/profissionais/me');
-  if (result && result.success) {
+if (result && result.success) {
     profissional = result.data;
     salvarProfissionalCache(profissional);
-    document.getElementById('profNome').textContent = profissional.nome_perfil;
-    var fotoHtml = '';
-    if (profissional.foto_perfil) {
-      fotoHtml = '<img src="' + profissional.foto_perfil + '" alt="Foto" class="foto-mini">';
-    } else {
-      fotoHtml = '<div class="foto-mini-placeholder">👤</div>';
-    }
-    document.getElementById('profFotoMini').innerHTML = fotoHtml;
+    aplicarHeaderProfissional(profissional.nome_perfil, profissional.foto_perfil);
     mostrarDashboard();
     await carregarDados();
   } else {
@@ -1051,15 +1082,11 @@ async function salvarConfiguracoes() {
     });
     var resp = await result.json();
 
-    if (resp.success) {
+if (resp.success) {
       showToast('Dados atualizados com sucesso!', 'success');
       fecharConfiguracoes();
-      // Atualiza o nome/foto no header
-      if (payload.nome_perfil) document.getElementById('profNome').textContent = payload.nome_perfil;
-      var fotoMini = document.getElementById('profFotoMini');
-      if (novaFotoPerfil) {
-        fotoMini.innerHTML = '<img src="' + novaFotoPerfil + '" alt="Foto" class="foto-mini">';
-      }
+      // Atualiza o header com o novo nome/foto
+      if (payload.nome_perfil) aplicarHeaderProfissional(payload.nome_perfil, novaFotoPerfil || configDados.foto_perfil || '');
       // Atualiza o global
       await verificarToken();
     } else {
@@ -1086,9 +1113,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('orcamentoModal').addEventListener('click', function(e) {
     if (e.target === this) fecharModalOrcamento();
   });
-  document.getElementById('configModal').addEventListener('click', function(e) {
+document.getElementById('configModal').addEventListener('click', function(e) {
     if (e.target === this) fecharConfiguracoes();
   });
+  setupUserDropdown();
   verificarToken();
   verificarRetornoPagamento();
 });
