@@ -211,12 +211,38 @@ function setupAutocomplete() {
 // ============================================
 let clienteLogado = null;
 
+// Estado otimista: usa dados em cache para exibir o header logado imediatamente,
+// sem "flash" de deslogado enquanto a verificação assíncrona ocorre.
+function carregarClienteCache() {
+  try {
+    var cache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
+    return cache;
+  } catch (e) {
+    return null;
+  }
+}
+
+function salvarClienteCache(cliente) {
+  if (cliente) {
+    localStorage.setItem('acheei_cliente_cache', JSON.stringify({ nome: cliente.nome, foto: cliente.foto || cliente.foto_perfil || null, id: cliente.id }));
+  } else {
+    localStorage.removeItem('acheei_cliente_cache');
+  }
+}
+
 async function verificarLoginCliente() {
   const token = localStorage.getItem('acheei_cliente_token');
   if (!token) {
     clienteLogado = null;
+    salvarClienteCache(null);
     atualizarHeaderCliente();
     return;
+  }
+  // Renderiza imediatamente com dados em cache para evitar flash de deslogado
+  const cache = carregarClienteCache();
+  if (cache) {
+    clienteLogado = { nome: cache.nome, id: cache.id, foto: cache.foto };
+    atualizarHeaderCliente();
   }
   try {
     const response = await fetch(`${API_BASE}/clientes/me`, {
@@ -225,12 +251,14 @@ async function verificarLoginCliente() {
     const result = await response.json();
     if (result.success) {
       clienteLogado = result.data;
+      salvarClienteCache(result.data);
     } else {
       clienteLogado = null;
+      salvarClienteCache(null);
     }
   } catch (error) {
     console.error('Erro ao verificar login do cliente:', error);
-    clienteLogado = null;
+    // Mantém o estado em cache (não derruba o login por erro de rede)
   }
   atualizarHeaderCliente();
 }
@@ -274,6 +302,7 @@ function atualizarHeaderCliente() {
 
 function sairClienteHome() {
   localStorage.removeItem('acheei_cliente_token');
+  salvarClienteCache(null);
   clienteLogado = null;
   atualizarHeaderCliente();
   fecharMenuMobile();
@@ -326,54 +355,55 @@ async function abrirModalSolicitacao(id, nome, profissao) {
   document.getElementById('modalProfissionalId').value = id;
   document.getElementById('modalProfissionalNome').textContent = nome;
   document.getElementById('modalProfissionalProfissao').textContent = profissao;
-  document.getElementById('solicitacaoModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
+
+  // Oculta o modal até renderizarmos o estado correto, evitando "flash" do formulário completo
+  var modal = document.getElementById('solicitacaoModal');
+  var cadastroSection = document.querySelector('.modal-cadastro-section');
+  var descricaoGroup = document.querySelector('#solicitacaoForm .form-group:last-of-type');
+  var pushNotice = document.querySelector('.push-notice-modal');
+  var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
+
+  if (cadastroSection) cadastroSection.classList.remove('hidden');
 
   // Garante que o estado de login foi verificado antes de decidir como renderizar o modal
   try {
     await verificarLoginCliente();
   } catch (e) { /* ignora erro e segue */ }
 
-  // Se o cliente está logado, mostrar modal simples (só descrição)
-  var cadastroSection = document.querySelector('.modal-cadastro-section');
-  var descricaoGroup = document.querySelector('#solicitacaoForm .form-group:last-of-type');
-  var pushNotice = document.querySelector('.push-notice-modal');
-  var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
-
   if (clienteLogado) {
-    // Esconde cadastro e aviso push
+    // Cliente logado: modal simples (só descrição)
     if (cadastroSection) cadastroSection.classList.add('hidden');
     if (pushNotice) pushNotice.style.display = 'none';
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.classList.remove('btn-disabled');
+      submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
     }
-    // Ajusta o título do botão
-    if (submitBtn) submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
-    return;
-  }
+  } else {
+    // Não logado: manter modal completo (cadastro embutido)
+    if (cadastroSection) cadastroSection.classList.remove('hidden');
 
-  // Não logado: manter modal completo (cadastro embutido)
-  if (cadastroSection) cadastroSection.classList.remove('hidden');
+    // Bloquear envio até o usuário aceitar as notificações push
+    var notificaoSuportada = typeof Notification !== 'undefined';
+    var notificacoesOk = pushNoticeAceito || (notificaoSuportada && Notification.permission === 'granted');
 
-  // Bloquear envio até o usuário aceitar as notificações push
-  var notificaoSuportada = typeof Notification !== 'undefined';
-  var notificacoesOk = pushNoticeAceito || (notificaoSuportada && Notification.permission === 'granted');
-
-  if (pushNotice && descricaoGroup) {
-    // move push notice para antes da descricao (já está no modal-cadastro-section)
-  }
-  if (pushNotice) {
-    if (!notificaoSuportada) {
-      pushNotice.style.display = 'none';
-    } else {
-      pushNotice.style.display = notificacoesOk ? 'none' : 'block';
+    if (pushNotice) {
+      if (!notificaoSuportada) {
+        pushNotice.style.display = 'none';
+      } else {
+        pushNotice.style.display = notificacoesOk ? 'none' : 'block';
+      }
+    }
+    if (submitBtn) {
+      submitBtn.disabled = notificaoSuportada ? !notificacoesOk : false;
+      submitBtn.classList.toggle('btn-disabled', notificaoSuportada && !notificacoesOk);
+      if (submitBtn.disabled) submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
     }
   }
-  if (submitBtn) {
-    submitBtn.disabled = notificaoSuportada ? !notificacoesOk : false;
-    submitBtn.classList.toggle('btn-disabled', notificaoSuportada && !notificacoesOk);
-  }
+
+  // Agora sim, exibe o modal já renderizado corretamente
+  if (modal) modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
 }
 
 function fecharModal() {
