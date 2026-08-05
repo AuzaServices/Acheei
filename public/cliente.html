@@ -34,9 +34,12 @@
     .dashboard-header { background: var(--white); box-shadow: var(--shadow-sm); padding: 0 20px; position: sticky; top: 0; z-index: 100; }
     .dashboard-nav { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
     .dashboard-nav .logo { font-size: 22px; font-weight: 800; color: var(--red-primary); }
-    .dashboard-nav .cliente-info { display: flex; align-items: center; gap: 16px; }
+.dashboard-nav .cliente-info { display: flex; align-items: center; gap: 16px; }
     .dashboard-nav .cliente-info span { color: var(--gray-medium); font-size: 14px; }
     .dashboard-nav .cliente-info .btn { padding: 8px 16px; font-size: 13px; }
+    .dashboard-nav-links { display: flex; align-items: center; gap: 20px; }
+    .dashboard-nav-links .nav-link { text-decoration: none; color: var(--gray-medium); font-size: 14px; font-weight: 600; transition: color 0.3s ease; }
+    .dashboard-nav-links .nav-link:hover { color: var(--red-primary); }
     .dashboard-content { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
     .dashboard-tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--white); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
     .dashboard-tab { flex: 1; padding: 16px 24px; text-align: center; font-weight: 600; font-size: 14px; color: var(--gray-medium); cursor: pointer; transition: var(--transition); border: none; background: none; border-bottom: 3px solid transparent; }
@@ -176,8 +179,12 @@
 
 <div class="dashboard" id="dashboard">
   <header class="dashboard-header">
-    <div class="dashboard-nav">
+<div class="dashboard-nav">
       <div class="logo">Acheei Cliente</div>
+      <div class="dashboard-nav-links">
+        <a href="/" class="nav-link">Início</a>
+        <a href="/#categorias" class="nav-link">Categorias</a>
+      </div>
       <div class="cliente-info">
         <span id="clienteName">Cliente</span>
         <button class="btn btn-outline btn-sm" onclick="logout()">Sair</button>
