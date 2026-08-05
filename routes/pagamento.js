@@ -261,11 +261,13 @@ module.exports = function(db, dbConnected) {
             preferenceData.auto_return = 'approved';
           }
 
-          const result = await mp.preference.create({ body: preferenceData });
+const result = await mp.preference.create({ body: preferenceData });
 
+          // Salva o preference_id juntamente com o external_reference exato
+          // para permitir a verificação segura pelo ref salvo.
           db.query(
             'UPDATE solicitacoes SET preference_id = ? WHERE id = ?',
-            ['preference:' + result.id, solicitacao_id],
+            ['preference:' + result.id + '|ref:' + preferenceData.external_reference, solicitacao_id],
             (updateErr) => {
               if (updateErr) console.error('Erro ao salvar preference_id:', updateErr);
             }
@@ -336,7 +338,7 @@ module.exports = function(db, dbConnected) {
         if (results.length === 0) {
           return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
         }
-        const sol = results[0];
+const sol = results[0];
         if (sol.status_pagamento === 'pago') {
           return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: true } });
         }
@@ -348,114 +350,74 @@ module.exports = function(db, dbConnected) {
           });
         }
 
-        // Se tivermos o payment/preference ID guardado, verifica esse pagamento diretamente primeiro.
-        if (sol.preference_id) {
-          const storedId = sol.preference_id.toString();
-          const parts = storedId.split('|ref:');
-          const idPart = parts[0];
-          const refPart = parts[1] || '';
-
-          if (idPart.startsWith('payment:') && mp.payment) {
-            try {
-              const paymentId = idPart.replace('payment:', '');
-              const paymentResult = await mp.payment.get({ id: paymentId });
-              if (paymentResult && paymentResult.status === 'approved') {
-                const valorPago = parseFloat(paymentResult.transaction_amount || 0);
-                if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
-                  db.query(
-                    'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
-                    [solicitacaoId],
-                    (updateErr) => {
-                      if (updateErr) console.error('Erro ao liberar chat:', updateErr);
-                    }
-                  );
-                  console.log(`✅ Pagamento verificado e chat liberado para solicitacao #${solicitacaoId}`);
-                  return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
-                }
-              }
-            } catch (paymentErr) {
-              console.warn('Não conseguiu verificar pagamento direto pelo payment_id:', paymentErr.message || paymentErr);
-            }
-          }
-
-          if (idPart.startsWith('preference:') && refPart && mp.payment) {
-            try {
-              const searchResult = await mp.payment.search({
-                options: {
-                  external_reference: refPart,
-                  sort: 'date_created',
-criteria: 'desc',
-                  limit: 5
-                }
-              });
-              const payments = searchResult.results || searchResult.body?.results || [];
-              let approved = false;
-              for (const payment of payments) {
-                const valorPago = parseFloat(payment.transaction_amount || 0);
-                if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
-                  approved = true;
-                  break;
-                }
-              }
-              if (approved) {
-                db.query(
-                  'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
-                  [solicitacaoId],
-                  (updateErr) => {
-                    if (updateErr) console.error('Erro ao liberar chat:', updateErr);
-                  }
-                );
-                console.log(`✅ Pagamento verificado e chat liberado para solicitacao #${solicitacaoId}`);
-                return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
-              }
-            } catch (searchErr) {
-              console.warn('Erro ao buscar pagamento por preference_id:', searchErr.message || searchErr);
-            }
-          }
-        }
-
         if (!mp.payment) {
           return res.json({ success: true, data: { status_pagamento: 'pendente' } });
         }
 
-        try {
-          const searchResult = await mp.payment.search({
-            options: {
-              external_reference: `solicitacao_${solicitacaoId}`,
-              sort: 'date_created',
-              criteria: 'desc',
-              limit: 5
+        // ============================================
+        // Verificação SEGURA: somente consulta o pagamento
+        // associado à solicitação (payment_id ou ref exato).
+        // NUNCA usa uma busca genérica que possa casar com
+        // pagamentos de outros fluxos (causa do bug de
+        // liberação indevida).
+        // ============================================
+        const storedId = sol.preference_id ? sol.preference_id.toString() : '';
+        const parts = storedId.split('|ref:');
+        const idPart = parts[0];
+        const refPart = parts[1] || '';
+
+        // 1) Pagamento PIX direto (payment:<id>|ref:<ref>)
+        if (idPart.startsWith('payment:')) {
+          try {
+            const paymentId = idPart.replace('payment:', '');
+            const paymentResult = await mp.payment.get({ id: paymentId });
+            const status = paymentResult && paymentResult.status;
+            const valorPago = parseFloat((paymentResult && paymentResult.transaction_amount) || 0);
+            if (status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+              liberarChat(solicitacaoId);
+              return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
             }
-          });
-
-          const payments = searchResult.results || searchResult.body?.results || [];
-          let approved = false;
-
-          for (const payment of payments) {
-            const valorPago = parseFloat(payment.transaction_amount || 0);
-            if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
-              approved = true;
-              break;
-            }
+            // Pagamento ainda não aprovado -> continua pendente
+            return res.json({ success: true, data: { status_pagamento: 'pendente' } });
+          } catch (paymentErr) {
+            console.warn('Não conseguiu verificar pagamento direto pelo payment_id:', paymentErr.message || paymentErr);
+            return res.json({ success: true, data: { status_pagamento: 'pendente' } });
           }
-
-          if (approved) {
-            db.query(
-              'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
-              [solicitacaoId],
-              (updateErr) => {
-                if (updateErr) console.error('Erro ao liberar chat:', updateErr);
-              }
-            );
-            console.log(`✅ Pagamento verificado e chat liberado para solicitação #${solicitacaoId}`);
-            return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
-          }
-
-          return res.json({ success: true, data: { status_pagamento: 'pendente' } });
-        } catch (error) {
-          console.error('Erro ao verificar pagamento:', error.message || error);
-          return res.status(500).json({ success: false, message: 'Erro ao verificar pagamento no Mercado Pago' });
         }
+
+        // 2) Checkout Pro (preference:<id>|ref:<ref>) - busca pelo REF EXATO salvo
+        if (idPart.startsWith('preference:') && refPart) {
+          try {
+            const searchResult = await mp.payment.search({
+              options: {
+                external_reference: refPart,
+                sort: 'date_created',
+                criteria: 'desc',
+                limit: 5
+              }
+            });
+            const payments = searchResult.results || searchResult.body?.results || [];
+            let aprovado = false;
+            for (const payment of payments) {
+              const valorPago = parseFloat(payment.transaction_amount || 0);
+              if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                aprovado = true;
+                break;
+              }
+            }
+            if (aprovado) {
+              liberarChat(solicitacaoId);
+              return res.json({ success: true, data: { status_pagamento: 'pago', ja_estava_pago: false } });
+            }
+            return res.json({ success: true, data: { status_pagamento: 'pendente' } });
+          } catch (searchErr) {
+            console.warn('Erro ao buscar pagamento por preference_id:', searchErr.message || searchErr);
+            return res.json({ success: true, data: { status_pagamento: 'pendente' } });
+          }
+        }
+
+        // 3) Sem payment/preference salvo -> não há como confirmar, segue pendente
+        return res.json({ success: true, data: { status_pagamento: 'pendente' } });
       }
     );
   });
@@ -533,64 +495,47 @@ criteria: 'desc',
           if (err) return reject(err);
           if (results.length === 0) return resolve('pendente');
 
-          const sol = results[0];
+const sol = results[0];
           if (sol.status_pagamento === 'pago') return resolve('pago');
           if (!mp.isConfigured) return resolve('pendente');
+          if (!mp.payment) return resolve('pendente');
 
-          // 1) Se tivermos um payment_id salvo, consulta direto
-          if (sol.preference_id) {
-            const storedId = sol.preference_id.toString();
-            const parts = storedId.split('|ref:');
-            const idPart = parts[0];
-            const refPart = parts[1] || '';
+          // ============================================
+          // Verificação SEGURA: só consulta o pagamento
+          // associado à solicitação (payment_id ou ref exato).
+          // NUNCA usa busca genérica que possa casar com
+          // pagamentos de outros fluxos.
+          // ============================================
+          const storedId = sol.preference_id ? sol.preference_id.toString() : '';
+          const parts = storedId.split('|ref:');
+          const idPart = parts[0];
+          const refPart = parts[1] || '';
 
-            if (idPart.startsWith('payment:') && mp.payment) {
-              try {
-                const paymentId = idPart.replace('payment:', '');
-                const paymentResult = await mp.payment.get({ id: paymentId });
-                if (paymentResult && paymentResult.status === 'approved') {
-                  const valorPago = parseFloat(paymentResult.transaction_amount || 0);
-                  if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
-                    liberarChat(solicitacaoId);
-                    return resolve('pago');
-                  }
+          // 1) Pagamento PIX direto (payment:<id>|ref:<ref>)
+          if (idPart.startsWith('payment:')) {
+            try {
+              const paymentId = idPart.replace('payment:', '');
+              const paymentResult = await mp.payment.get({ id: paymentId });
+              if (paymentResult && paymentResult.status === 'approved') {
+                const valorPago = parseFloat(paymentResult.transaction_amount || 0);
+                if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                  liberarChat(solicitacaoId);
+                  return resolve('pago');
                 }
-              } catch (e) {
-                console.warn('Falha ao consultar payment_id direto:', e.message || e);
               }
-            }
-
-            // 2) preference_id com ref -> busca pelo external_reference
-            if (idPart.startsWith('preference:') && refPart && mp.payment) {
-              try {
-                const searchResult = await mp.payment.search({
-                  options: {
-                    external_reference: refPart,
-                    sort: 'date_created',
-                    criteria: 'desc',
-                    limit: 5
-                  }
-                });
-                const payments = searchResult.results || searchResult.body?.results || [];
-                for (const payment of payments) {
-                  const valorPago = parseFloat(payment.transaction_amount || 0);
-                  if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
-                    liberarChat(solicitacaoId);
-                    return resolve('pago');
-                  }
-                }
-              } catch (e) {
-                console.warn('Falha ao buscar por preference ref:', e.message || e);
-              }
+              return resolve('pendente');
+            } catch (e) {
+              console.warn('Falha ao consultar payment_id direto:', e.message || e);
+              return resolve('pendente');
             }
           }
 
-          // 3) Busca genérica pelo external_reference padrão
-          if (mp.payment) {
+          // 2) Checkout Pro (preference:<id>|ref:<ref>) - busca pelo REF EXATO
+          if (idPart.startsWith('preference:') && refPart) {
             try {
               const searchResult = await mp.payment.search({
                 options: {
-                  external_reference: `solicitacao_${solicitacaoId}`,
+                  external_reference: refPart,
                   sort: 'date_created',
                   criteria: 'desc',
                   limit: 5
@@ -604,11 +549,14 @@ criteria: 'desc',
                   return resolve('pago');
                 }
               }
+              return resolve('pendente');
             } catch (e) {
-              console.warn('Falha na busca genérica de pagamento:', e.message || e);
+              console.warn('Falha ao buscar por preference ref:', e.message || e);
+              return resolve('pendente');
             }
           }
 
+          // 3) Sem payment/preference salvo -> não há como confirmar, segue pendente
           return resolve('pendente');
         }
       );
@@ -649,8 +597,9 @@ criteria: 'desc',
 
       console.log(`Pagamento ${paymentId}: status=${status}, external_reference=${externalReference}`);
 
-      if (status === 'approved' && externalReference) {
-        const match = externalReference.match(/^solicitacao_(\d+)$/);
+if (status === 'approved' && externalReference) {
+        // Aceita "solicitacao_<id>" e "solicitacao_<id>_<timestamp>"
+        const match = externalReference.match(/^solicitacao_(\d+)(_\d+)?$/);
         if (match) {
           const solicitacaoId = match[1];
 

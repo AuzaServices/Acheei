@@ -1,31 +1,19 @@
-# TODO - Upgrade Chat com Notificações Push e Widget Messenger
+# TODO - Correção do Bug de Pagamento (Liberação indevida do chat)
 
 ## Objetivo
-Implementar notificações push (Chrome/Google), bloquear cadastro/solicitação até aceitar notificações, e criar chat estilo Messenger com bolha pulsante.
+Só marcar a solicitação como `pago` (e liberar o chat) quando o Mercado Pago confirmar um pagamento com status `approved` e valor correto (R$ 14,99). Impedir que o sistema libere sem pagamento real.
 
-## Backend
-- [ ] 1. Instalar `web-push` (npm)
-- [ ] 2. Criar `config/push.js` (configuração VAPID + helpers)
-- [ ] 3. Adicionar coluna `push_subscription` na tabela `clientes` (schema.sql + migration)
-- [ ] 4. `routes/clientes.js`: endpoint `POST /api/clientes/push-subscription`
-- [ ] 5. `routes/mensagens.js`: enviar notificação push quando profissional enviar mensagem
-
-## Frontend - Notificações
-- [ ] 6. Criar `public/sw.js` (service worker para exibir notificações)
-- [ ] 7. Criar `public/js/push.js` (register, subscribe, save subscription)
-- [ ] 8. `public/cliente.html`: botão "Criar Conta" travado até aceitar notificações
-- [ ] 9. `public/js/cliente.js`: fluxo de aceitar notificações antes do cadastro
-- [ ] 10. `public/index.html`: botão "Enviar Solicitação" travado até aceitar notificações
-- [ ] 11. `public/js/main.js`: pedir permissão e liberar botão
-
-## Frontend - Chat Messenger
-- [ ] 12. `public/cliente.html`: widget de chat flutuante (bolha mínimizada + painel)
-- [ ] 13. `public/js/cliente.js`: polling de novas mensagens + bolha pulsante
-- [ ] 14. `public/css/style.css`: estilos do widget de chat flutuante
-
-## Testes
-- [ ] 15. Testar cadastro exige aceitar notificações
-- [ ] 16. Testar envio de solicitação exige aceitar notificações
-- [ ] 17. Testar notificação push ao profissional enviar mensagem
-- [ ] 18. Testar widget de chat Messenger pulsando com nova mensagem
-
+## Passos
+- [x] 1. Corrigir endpoint `POST /api/pagamento/verificar/:id`:
+  - [x] Usar somente o `payment_id`/`preference_id` armazenado (lookup exato).
+  - [x] Se não `approved`, retornar `pendente` sem cair na busca genérica.
+  - [x] Remover busca genérica por `solicitacao_${id}` (causa falso positivo).
+- [x] 2. Corrigir `consultarStatusPagamento()` (usado no `/confirmar`):
+  - [x] Aplicar mesma lógica segura (lookup exato pelo ref armazenado).
+  - [x] Remover busca genérica solta.
+- [x] 3. Corrigir `processarPagamento()` (webhook):
+  - [x] Aceitar `solicitacao_ID` e `solicitacao_ID_timestamp`.
+  - [x] Exigir `status === 'approved'` + valor correto.
+- [x] 4. Corrigir `/preferencia` para salvar `|ref:` exato (consistência na verificação).
+- [x] 5. Revisar frontend `profissional.js` (polling 5s) - confirmar que só libera com status real.
+- [ ] 6. Testar o fluxo completo (requer ambiente com Mercado Pago configurado).
