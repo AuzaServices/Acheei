@@ -399,11 +399,25 @@ async function enviarSolicitacao(event) {
       return;
     }
 
-    // ===== Não logado: cadastro + login automático =====
+// ===== Não logado: cadastro + login automático =====
     const nome = document.getElementById('clienteNome').value.trim();
     const email = document.getElementById('clienteEmail').value.trim();
     const senha = document.getElementById('clienteSenha').value;
     const telefone = document.getElementById('clienteTelefone').value.trim();
+
+    // Validação manual dos campos de cadastro (já que não usamos 'required' p/ não bloquear quando logado)
+    if (!nome || !email || !senha || !telefone) {
+      showToast('Preencha nome, email, senha e telefone para criar sua conta', 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+      return;
+    }
+    if (senha.length < 6) {
+      showToast('A senha deve ter no mínimo 6 caracteres', 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+      return;
+    }
 
     let clienteId = null;
     let foiCadastroNovo = false;

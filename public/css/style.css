@@ -1248,23 +1248,6 @@ img {
   margin: 18px 0 12px;
 }
 
-.section-title {
-  margin-top: 20px;
-  margin-bottom: 14px;
-  font-size: 18px;
-  font-weight: 700;
-  background: rgba(0,0,0,0.55);
-  color: var(--white);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 10px 16px;
-  transition: background 0.2s ease;
-}
-
 .photo-delete-btn:hover {
   background: rgba(0,0,0,0.75);
 }
@@ -1570,9 +1553,9 @@ img {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 4px 12px 4px 4px;
   background: var(--gray-bg);
-  border-radius: var(--radius-full);
+  border-radius: 999px;
   border: 1px solid var(--gray-lighter);
 }
 
