@@ -240,12 +240,17 @@ function atualizarHeaderCliente() {
   var btnAreaCliente = document.getElementById('btnAreaCliente');
   var mobileUserArea = document.getElementById('mobileUserArea');
   var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+  var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+  var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
 
   if (clienteLogado) {
     if (userArea) userArea.style.display = 'flex';
     if (btnAreaCliente) btnAreaCliente.style.display = 'none';
     if (mobileUserArea) mobileUserArea.style.display = 'flex';
     if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+    // Oculta o botão "Área do Profissional" quando o cliente está logado
+    if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
 
     // Nome
     var nome = clienteLogado.nome || 'Cliente';
@@ -261,6 +266,9 @@ function atualizarHeaderCliente() {
     if (btnAreaCliente) btnAreaCliente.style.display = '';
     if (mobileUserArea) mobileUserArea.style.display = 'none';
     if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+    // Restaura o botão "Área do Profissional" quando o cliente não está logado
+    if (btnAreaProfissional) btnAreaProfissional.style.display = '';
+    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
   }
 }
 
