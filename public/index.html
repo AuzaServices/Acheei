@@ -184,7 +184,13 @@
 
   <section class="hero">
     <div class="hero-content">
-      <h1>Encontre o <span class="highlight">Profissional</span> Ideal para seu Serviço</h1>
+<h1 class="hero-title">
+        <span class="hero-line">Está buscando por</span>
+        <span class="hero-typed">
+          <span id="typedWord" class="typed-word"></span><span class="typed-cursor" aria-hidden="true"></span>
+        </span>
+        <span class="hero-line">aqui tem!</span>
+      </h1>
       <p>Conectamos você aos melhores profissionais da sua região. Rápido, fácil e sem burocracia.</p>
       <a href="#busca" class="btn btn-primary btn-lg">Solicitar Serviço Agora</a>
     </div>
@@ -435,12 +441,62 @@
       overlay.addEventListener('click', toggleMenu);
     });
 
-    function fecharMenuMobile() {
+function fecharMenuMobile() {
       document.getElementById('hamburgerBtn').classList.remove('active');
       document.getElementById('mobileMenu').classList.remove('active');
       document.getElementById('menuOverlay').classList.remove('active');
       document.body.style.overflow = '';
     }
+  </script>
+
+  <script>
+    // Efeito de digitação do hero (Está buscando por <profissão> aqui tem!)
+    (function() {
+      var palavras = [
+        'Pedreiro', 'Pintor', 'Eletricista', 'Encanador',
+        'Frete e Mudanças', 'Marceneiro', 'Jardineiro', 'Diarista',
+        'Mecânico', 'Chaveiro', 'Técnico em TI', 'Personal Trainer',
+        'Fotógrafo', 'Cozinheiro', 'Motorista', 'Babá',
+        'Cuidador de Idosos', 'Segurança', 'Advogado', 'Contador',
+        'Arquiteto', 'Designer de Interiores', 'Professor Particular',
+        'Cabeleireiro', 'Manicure', 'Massagista', 'Técnico em Ar Condicionado'
+      ];
+
+      var el = document.getElementById('typedWord');
+      if (!el) return;
+
+      var palavraIndex = 0;
+      var charIndex = 0;
+      var apagando = false;
+
+      function digitar() {
+        var palavraAtual = palavras[palavraIndex];
+        if (!apagando) {
+          // Digitando
+          charIndex++;
+          el.textContent = palavraAtual.substring(0, charIndex);
+          if (charIndex === palavraAtual.length) {
+            apagando = true;
+            setTimeout(digitar, 1800); // pausa com a palavra completa
+          } else {
+            setTimeout(digitar, 90);
+          }
+        } else {
+          // Apagando
+          charIndex--;
+          el.textContent = palavraAtual.substring(0, charIndex);
+          if (charIndex === 0) {
+            apagando = false;
+            palavraIndex = (palavraIndex + 1) % palavras.length;
+            setTimeout(digitar, 400); // pausa antes de digitar a próxima
+          } else {
+            setTimeout(digitar, 50);
+          }
+        }
+      }
+
+      digitar();
+    })();
   </script>
 </body>
 </html>
