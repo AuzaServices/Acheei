@@ -230,6 +230,120 @@ function salvarClienteCache(cliente) {
   }
 }
 
+// Estado otimista do profissional (mesmo padrão do cliente)
+let profissionalLogado = null;
+
+function carregarProfissionalCache() {
+  try {
+    var cache = JSON.parse(localStorage.getItem('acheei_prof_cache') || 'null');
+    return cache;
+  } catch (e) {
+    return null;
+  }
+}
+
+function salvarProfissionalCache(prof) {
+  if (prof) {
+    localStorage.setItem('acheei_prof_cache', JSON.stringify({ nome: prof.nome_perfil, foto: prof.foto_perfil || null, id: prof.id }));
+  } else {
+    localStorage.removeItem('acheei_prof_cache');
+  }
+}
+
+function limparProfissionalCache() {
+  localStorage.removeItem('acheei_prof_cache');
+}
+
+async function verificarLoginProfissional() {
+  const token = localStorage.getItem('acheei_prof_token');
+  if (!token) {
+    profissionalLogado = null;
+    limparProfissionalCache();
+    atualizarHeaderProfissional();
+    return;
+  }
+  // Renderiza imediatamente com dados em cache para evitar flash de deslogado
+  const cache = carregarProfissionalCache();
+  if (cache) {
+    profissionalLogado = { nome: cache.nome, id: cache.id, foto: cache.foto };
+    atualizarHeaderProfissional();
+  }
+  try {
+    const response = await fetch(`${API_BASE}/profissionais/me`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const result = await response.json();
+    if (result.success) {
+      profissionalLogado = result.data;
+      salvarProfissionalCache(result.data);
+    } else {
+      profissionalLogado = null;
+      limparProfissionalCache();
+    }
+  } catch (error) {
+    console.error('Erro ao verificar login do profissional:', error);
+    // Mantém o estado em cache (não derruba o login por erro de rede)
+  }
+  atualizarHeaderProfissional();
+}
+
+function atualizarHeaderProfissional() {
+  var userArea = document.getElementById('userArea');
+  var btnAreaCliente = document.getElementById('btnAreaCliente');
+  var mobileUserArea = document.getElementById('mobileUserArea');
+  var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+  var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+  var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+  var userAreaLink = document.getElementById('userAreaLink');
+  var userAreaLinkText = document.getElementById('userAreaLinkText');
+  var mobileUserAreaLink = document.getElementById('mobileUserAreaLink');
+  var mobileUserAreaLinkText = document.getElementById('mobileUserAreaLinkText');
+
+  // Prioridade: cliente logado > profissional logado > deslogado
+  if (clienteLogado) {
+    if (userArea) userArea.style.display = 'flex';
+    if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+    if (mobileUserArea) mobileUserArea.style.display = 'flex';
+    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+    if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
+    if (userAreaLink) userAreaLink.href = 'cliente.html';
+    if (mobileUserAreaLink) mobileUserAreaLink.href = 'cliente.html';
+    if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
+    if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
+    var nome = clienteLogado.nome || 'Cliente';
+    if (document.getElementById('userName')) document.getElementById('userName').textContent = nome;
+    if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = nome;
+    var avatarHtml = clienteLogado.foto ? '<img src="' + clienteLogado.foto + '" alt="Foto">' : '👤';
+    if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
+    if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+  } else if (profissionalLogado) {
+    if (userArea) userArea.style.display = 'flex';
+    if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+    if (mobileUserArea) mobileUserArea.style.display = 'flex';
+    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+    if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
+    if (userAreaLink) userAreaLink.href = 'profissional.html';
+    if (mobileUserAreaLink) mobileUserAreaLink.href = 'profissional.html';
+    if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
+    if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
+    var pnome = profissionalLogado.nome_perfil || profissionalLogado.nome || 'Profissional';
+    if (document.getElementById('userName')) document.getElementById('userName').textContent = pnome;
+    if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = pnome;
+    var pavatarHtml = profissionalLogado.foto_perfil || profissionalLogado.foto ? '<img src="' + (profissionalLogado.foto_perfil || profissionalLogado.foto) + '" alt="Foto">' : '👤';
+    if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = pavatarHtml;
+    if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = pavatarHtml;
+  } else {
+    if (userArea) userArea.style.display = 'none';
+    if (btnAreaCliente) btnAreaCliente.style.display = '';
+    if (mobileUserArea) mobileUserArea.style.display = 'none';
+    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+    if (btnAreaProfissional) btnAreaProfissional.style.display = '';
+    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
+  }
+}
+
 async function verificarLoginCliente() {
   const token = localStorage.getItem('acheei_cliente_token');
   if (!token) {
@@ -264,47 +378,24 @@ async function verificarLoginCliente() {
 }
 
 function atualizarHeaderCliente() {
-  var userArea = document.getElementById('userArea');
-  var btnAreaCliente = document.getElementById('btnAreaCliente');
-  var mobileUserArea = document.getElementById('mobileUserArea');
-  var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
-  var btnAreaProfissional = document.getElementById('btnAreaProfissional');
-  var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
-
-  if (clienteLogado) {
-    if (userArea) userArea.style.display = 'flex';
-    if (btnAreaCliente) btnAreaCliente.style.display = 'none';
-    if (mobileUserArea) mobileUserArea.style.display = 'flex';
-    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
-    // Oculta o botão "Área do Profissional" quando o cliente está logado
-    if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
-    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
-
-    // Nome
-    var nome = clienteLogado.nome || 'Cliente';
-    if (document.getElementById('userName')) document.getElementById('userName').textContent = nome;
-    if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = nome;
-
-    // Avatar (foto ou placeholder)
-    var avatarHtml = clienteLogado.foto ? '<img src="' + clienteLogado.foto + '" alt="Foto">' : '👤';
-    if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
-    if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
-  } else {
-    if (userArea) userArea.style.display = 'none';
-    if (btnAreaCliente) btnAreaCliente.style.display = '';
-    if (mobileUserArea) mobileUserArea.style.display = 'none';
-    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
-    // Restaura o botão "Área do Profissional" quando o cliente não está logado
-    if (btnAreaProfissional) btnAreaProfissional.style.display = '';
-    if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
-  }
+  // Delega para o renderizador unificado (que considera cliente E profissional)
+  atualizarHeaderProfissional();
 }
 
 function sairClienteHome() {
+  sairUsuarioHome();
+}
+
+function sairUsuarioHome() {
+  // Limpa cliente
   localStorage.removeItem('acheei_cliente_token');
   salvarClienteCache(null);
   clienteLogado = null;
-  atualizarHeaderCliente();
+  // Limpa profissional
+  localStorage.removeItem('acheei_prof_token');
+  limparProfissionalCache();
+  profissionalLogado = null;
+  atualizarHeaderProfissional();
   fecharMenuMobile();
   fecharDropdownUsuario();
   showToast('Sessão encerrada', 'info');
@@ -607,6 +698,8 @@ try {
 document.addEventListener('DOMContentLoaded', function() {
   // Verificar se o cliente está logado e atualizar o header
   verificarLoginCliente();
+  // Verificar se o profissional está logado e atualizar o header
+  verificarLoginProfissional();
 
 // Carregar categorias para autocomplete
   carregarCategorias();

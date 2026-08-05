@@ -24,11 +24,11 @@
               <span class="user-name" id="userName">Cliente</span>
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
-            <div class="user-dropdown-menu" id="userDropdownMenu">
-              <a href="cliente.html" class="user-dropdown-item">
-                <span data-icon="user"></span> Minha Área
+<div class="user-dropdown-menu" id="userDropdownMenu">
+              <a href="cliente.html" class="user-dropdown-item" id="userAreaLink">
+                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
               </a>
-<button type="button" class="user-dropdown-item" onclick="sairClienteHome()">
+<button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
                 <span data-icon="log-out"></span> Sair
               </button>
             </div>
@@ -49,13 +49,45 @@
     </nav>
   </header>
 
-  <script>
+<script>
     // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
     // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
     (function() {
-      try {
-        var cache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
-        var token = localStorage.getItem('acheei_cliente_token');
+      function aplicarUsuarioLogado(cache, ehProfissional) {
+        var userArea = document.getElementById('userArea');
+        var btnAreaCliente = document.getElementById('btnAreaCliente');
+        var mobileUserArea = document.getElementById('mobileUserArea');
+        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+        var userAreaLink = document.getElementById('userAreaLink');
+        var userAreaLinkText = document.getElementById('userAreaLinkText');
+        var mobileUserAreaLink = document.getElementById('mobileUserAreaLink');
+        var mobileUserAreaLinkText = document.getElementById('mobileUserAreaLinkText');
+
+        var mine = ehProfissional ? 'profissional.html' : 'cliente.html';
+        var label = ehProfissional ? 'Minha Área' : 'Minha Área';
+
+        if (userArea) userArea.style.display = 'flex';
+        if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+        if (mobileUserArea) mobileUserArea.style.display = 'flex';
+        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+        if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
+
+        if (userAreaLink) userAreaLink.href = mine;
+        if (userAreaLinkText) userAreaLinkText.textContent = label;
+        if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
+        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = label;
+
+        if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
+        if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
+        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
+        if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
+        if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+      }
+
+      function aplicarDeslogado() {
         var userArea = document.getElementById('userArea');
         var btnAreaCliente = document.getElementById('btnAreaCliente');
         var mobileUserArea = document.getElementById('mobileUserArea');
@@ -63,25 +95,26 @@
         var btnAreaProfissional = document.getElementById('btnAreaProfissional');
         var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
 
-        if (cache && token) {
-          if (userArea) userArea.style.display = 'flex';
-          if (btnAreaCliente) btnAreaCliente.style.display = 'none';
-          if (mobileUserArea) mobileUserArea.style.display = 'flex';
-          if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
-          if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
-          if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
-          if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || 'Cliente';
-          if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || 'Cliente';
-          var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
-          if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
-          if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+        if (userArea) userArea.style.display = 'none';
+        if (btnAreaCliente) btnAreaCliente.style.display = '';
+        if (mobileUserArea) mobileUserArea.style.display = 'none';
+        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+        if (btnAreaProfissional) btnAreaProfissional.style.display = '';
+        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
+      }
+
+      try {
+        var clienteCache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
+        var clienteToken = localStorage.getItem('acheei_cliente_token');
+        var profCache = JSON.parse(localStorage.getItem('acheei_prof_cache') || 'null');
+        var profToken = localStorage.getItem('acheei_prof_token');
+
+        if (clienteCache && clienteToken) {
+          aplicarUsuarioLogado(clienteCache, false);
+        } else if (profCache && profToken) {
+          aplicarUsuarioLogado(profCache, true);
         } else {
-          if (userArea) userArea.style.display = 'none';
-          if (btnAreaCliente) btnAreaCliente.style.display = '';
-          if (mobileUserArea) mobileUserArea.style.display = 'none';
-          if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
-          if (btnAreaProfissional) btnAreaProfissional.style.display = '';
-          if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
+          aplicarDeslogado();
         }
       } catch (e) {}
     })();
@@ -93,15 +126,15 @@
 <!-- Mobile Menu Panel -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="menu-items">
-      <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
+<div class="mobile-user-area" id="mobileUserArea" style="display: none;">
         <div class="user-info">
           <span class="user-avatar" id="mobileUserAvatar">👤</span>
           <span class="user-name" id="mobileUserName">Cliente</span>
         </div>
-        <a href="cliente.html" class="btn btn-primary btn-sm" style="justify-content:center;">
-          <span data-icon="user"></span> Minha Área
+        <a href="cliente.html" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
+          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
         </a>
-        <button type="button" class="btn btn-outline btn-sm" onclick="sairClienteHome()" style="justify-content:center;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
           Sair
         </button>
       </div>
