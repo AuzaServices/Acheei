@@ -1741,3 +1741,169 @@ img {
   color: var(--red-dark);
 }
 
+/* ============================================
+   Alinhamento Perfeito de Botões
+   Centraliza e padroniza tamanho/altura de todos
+   os botões de ação (Buscar, Próximo, Voltar,
+   Pagar, Enviar, Cancelar, Salvar, Aprovar etc.)
+   ============================================ */
+
+/* Padronização global dos botões de ação */
+.btn,
+button.btn,
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-success,
+.btn-danger,
+.btn-search,
+.modal-footer .btn,
+.form-navigation .btn {
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1.4;
+  min-height: 44px;
+  vertical-align: middle;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.btn-sm {
+  min-height: 36px;
+  padding: 8px 16px;
+}
+
+.btn-lg {
+  min-height: 52px;
+  padding: 16px 32px;
+}
+
+/* Botões em formulários (Buscar, Enviar) alinhados aos inputs */
+button[type="submit"],
+button[type="button"] {
+  font-family: var(--font-primary);
+}
+
+/* ==================== Modal Footer ==================== */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid var(--gray-lighter);
+  background: var(--gray-bg);
+}
+
+.modal-footer .btn {
+  min-width: 140px;
+}
+
+/* ==================== Busca (index) ==================== */
+.search-box .btn-search {
+  height: 50px;
+  min-height: 50px;
+  padding: 0 28px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* ==================== Cadastro (form-navigation) ==================== */
+.form-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 32px;
+  border-top: 1px solid var(--gray-lighter);
+}
+
+.form-navigation .btn {
+  min-width: 140px;
+  min-height: 48px;
+}
+
+/* ==================== Chat (Enviar) ==================== */
+.chat-input-area .btn,
+.chat-panel-footer .btn,
+.chat-container .chat-input button {
+  min-width: 90px;
+  height: 48px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* ==================== Cards (Solicitar Serviço, Pagar) ==================== */
+.profissional-card .card-footer .btn {
+  width: 100%;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.solicitacao-card .card-footer .btn,
+.orcamento-card .orc-footer .btn {
+  white-space: nowrap;
+}
+
+/* ==================== Admin (Aprovar/Reprovar/Ver) ==================== */
+.admin-table .action-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.admin-table .action-btns .btn {
+  min-height: 36px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* ==================== Auth (Entrar/Cadastrar) ==================== */
+.auth-form .btn,
+.login-card .btn,
+.login-container .btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 48px;
+}
+
+/* ==================== Responsivo - Modal footer & Cadastro ==================== */
+@media (max-width: 600px) {
+  .modal-footer,
+  .form-navigation {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 16px 20px;
+  }
+
+  .modal-footer .btn,
+  .form-navigation .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .chat-input-area,
+  .chat-panel-footer,
+  .chat-container .chat-input {
+    flex-wrap: wrap;
+  }
+
+  .chat-input-area .btn,
+  .chat-panel-footer .btn,
+  .chat-container .chat-input button {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* ==================== Responsivo - Busca ==================== */
+@media (max-width: 768px) {
+  .search-box .btn-search {
+    width: 100%;
+    height: 50px;
+  }
+}
+
