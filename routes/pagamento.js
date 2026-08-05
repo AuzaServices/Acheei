@@ -384,11 +384,12 @@ module.exports = function(db, dbConnected) {
                 options: {
                   external_reference: refPart,
                   sort: 'date_created',
-                  criteria: 'desc',
+criteria: 'desc',
                   limit: 5
                 }
               });
               const payments = searchResult.results || searchResult.body?.results || [];
+              let approved = false;
               for (const payment of payments) {
                 const valorPago = parseFloat(payment.transaction_amount || 0);
                 if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
@@ -482,10 +483,12 @@ module.exports = function(db, dbConnected) {
     res.status(200).json({ success: true, message: 'Webhook ativo' });
   });
 
-  // ============================================
+// ============================================
   // POST /api/pagamento/confirmar (fallback manual)
+  // NÃO libera o chat sem antes consultar o Mercado Pago.
+  // Apenas marca como pago se houver um pagamento APROVADO com o valor correto.
   // ============================================
-  router.post('/confirmar', (req, res) => {
+  router.post('/confirmar', async (req, res) => {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
@@ -493,26 +496,139 @@ module.exports = function(db, dbConnected) {
     if (!solicitacao_id) {
       return res.status(400).json({ success: false, message: 'solicitacao_id é obrigatório' });
     }
-    db.query(
-      'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
-      [solicitacao_id],
-      (err, result) => {
-        if (err) {
-          console.error('Erro ao confirmar pagamento:', err);
-          return res.status(500).json({ success: false, message: 'Erro ao confirmar pagamento' });
-        }
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
-        }
-        console.log(`Pagamento confirmado manualmente para solicitação #${solicitacao_id}`);
-        res.json({
+
+    try {
+      const status = await consultarStatusPagamento(solicitacao_id);
+      if (status === 'pago') {
+        console.log(`Pagamento confirmado após verificação no Mercado Pago para solicitação #${solicitacao_id}`);
+        return res.json({
           success: true,
           message: 'Pagamento confirmado! O chat com o cliente foi liberado.',
           data: { id: parseInt(solicitacao_id), status_pagamento: 'pago' }
         });
       }
-    );
+      return res.status(400).json({
+        success: false,
+        message: 'Pagamento não confirmado no Mercado Pago. O chat só é liberado após a confirmação do pagamento.'
+      });
+    } catch (error) {
+      console.error('Erro ao confirmar pagamento:', error.message || error);
+      return res.status(500).json({ success: false, message: 'Erro ao confirmar pagamento no Mercado Pago' });
+    }
   });
+
+// ============================================
+  // Função: Consultar status real do pagamento no Mercado Pago
+  // Retorna 'pago' somente se houver um pagamento APROVADO com o valor correto (R$14,99).
+  // Se confirmar, marca a solicitação como paga no banco.
+  // ============================================
+  async function consultarStatusPagamento(solicitacaoId) {
+    return new Promise((resolve, reject) => {
+      if (!dbConnected()) return resolve('pendente');
+
+      db.query(
+        'SELECT status_pagamento, preference_id FROM solicitacoes WHERE id = ?',
+        [solicitacaoId],
+        async (err, results) => {
+          if (err) return reject(err);
+          if (results.length === 0) return resolve('pendente');
+
+          const sol = results[0];
+          if (sol.status_pagamento === 'pago') return resolve('pago');
+          if (!mp.isConfigured) return resolve('pendente');
+
+          // 1) Se tivermos um payment_id salvo, consulta direto
+          if (sol.preference_id) {
+            const storedId = sol.preference_id.toString();
+            const parts = storedId.split('|ref:');
+            const idPart = parts[0];
+            const refPart = parts[1] || '';
+
+            if (idPart.startsWith('payment:') && mp.payment) {
+              try {
+                const paymentId = idPart.replace('payment:', '');
+                const paymentResult = await mp.payment.get({ id: paymentId });
+                if (paymentResult && paymentResult.status === 'approved') {
+                  const valorPago = parseFloat(paymentResult.transaction_amount || 0);
+                  if (Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                    liberarChat(solicitacaoId);
+                    return resolve('pago');
+                  }
+                }
+              } catch (e) {
+                console.warn('Falha ao consultar payment_id direto:', e.message || e);
+              }
+            }
+
+            // 2) preference_id com ref -> busca pelo external_reference
+            if (idPart.startsWith('preference:') && refPart && mp.payment) {
+              try {
+                const searchResult = await mp.payment.search({
+                  options: {
+                    external_reference: refPart,
+                    sort: 'date_created',
+                    criteria: 'desc',
+                    limit: 5
+                  }
+                });
+                const payments = searchResult.results || searchResult.body?.results || [];
+                for (const payment of payments) {
+                  const valorPago = parseFloat(payment.transaction_amount || 0);
+                  if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                    liberarChat(solicitacaoId);
+                    return resolve('pago');
+                  }
+                }
+              } catch (e) {
+                console.warn('Falha ao buscar por preference ref:', e.message || e);
+              }
+            }
+          }
+
+          // 3) Busca genérica pelo external_reference padrão
+          if (mp.payment) {
+            try {
+              const searchResult = await mp.payment.search({
+                options: {
+                  external_reference: `solicitacao_${solicitacaoId}`,
+                  sort: 'date_created',
+                  criteria: 'desc',
+                  limit: 5
+                }
+              });
+              const payments = searchResult.results || searchResult.body?.results || [];
+              for (const payment of payments) {
+                const valorPago = parseFloat(payment.transaction_amount || 0);
+                if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
+                  liberarChat(solicitacaoId);
+                  return resolve('pago');
+                }
+              }
+            } catch (e) {
+              console.warn('Falha na busca genérica de pagamento:', e.message || e);
+            }
+          }
+
+          return resolve('pendente');
+        }
+      );
+    });
+  }
+
+  // Marca a solicitação como paga no banco
+  function liberarChat(solicitacaoId) {
+    db.query(
+      'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
+      [solicitacaoId],
+      (updateErr) => {
+        if (updateErr) {
+          console.error('Erro ao liberar chat:', updateErr);
+        } else {
+          console.log(`✅ Chat liberado para solicitação #${solicitacaoId}`);
+        }
+      }
+    );
+  }
 
   // ============================================
   // Função: Processar pagamento (consultar no MP e liberar)

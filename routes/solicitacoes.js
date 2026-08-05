@@ -86,32 +86,17 @@ router.post('/', (req, res) => {
     );
   });
 
-  // ============================================
+// ============================================
   // PUT /api/solicitacoes/:id/pagar
-  // Marcar solicitação como paga (R$14,99)
+  // DESATIVADO: este endpoint liberava o chat sem verificar o pagamento real.
+  // O chat agora SÓ é liberado após confirmação do Mercado Pago (POST /api/pagamento/confirmar
+  // ou verificação em /api/pagamento/verificar/:id).
   // ============================================
   router.put('/:id/pagar', (req, res) => {
-    if (!dbConnected()) {
-      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
-    }
-    db.query(
-      'UPDATE solicitacoes SET status_pagamento = "pago" WHERE id = ?',
-      [req.params.id],
-      (err, result) => {
-        if (err) {
-          console.error('Erro ao processar pagamento:', err);
-          return res.status(500).json({ success: false, message: 'Erro ao processar pagamento' });
-        }
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
-        }
-        res.json({
-          success: true,
-          message: 'Pagamento realizado com sucesso! O chat com o cliente foi liberado.',
-          data: { id: parseInt(req.params.id), status_pagamento: 'pago' }
-        });
-      }
-    );
+    return res.status(403).json({
+      success: false,
+      message: 'Pagamento não pode ser confirmado por este método. Realize o pagamento via Mercado Pago para liberar o chat.'
+    });
   });
 
   // ============================================

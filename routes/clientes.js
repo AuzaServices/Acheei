@@ -262,9 +262,9 @@ module.exports = function(db, dbConnected) {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-    // Verificar se a solicitação pertence ao cliente
+    // Verificar se a solicitação pertence ao cliente e se o pagamento foi feito
     db.query(
-      'SELECT id FROM solicitacoes WHERE id = ? AND cliente_id = ?',
+      'SELECT id, status_pagamento FROM solicitacoes WHERE id = ? AND cliente_id = ?',
       [req.params.solicitacao_id, req.cliente.id],
       (err, results) => {
         if (err) {
@@ -272,6 +272,13 @@ module.exports = function(db, dbConnected) {
         }
         if (results.length === 0) {
           return res.status(403).json({ success: false, message: 'Solicitação não encontrada ou não pertence a você' });
+        }
+        // O chat só é liberado quando o profissional confirma o pagamento
+        if (results[0].status_pagamento !== 'pago') {
+          return res.status(403).json({
+            success: false,
+            message: 'O chat ainda não foi liberado. O profissional precisa concluir o pagamento para liberar a conversa.'
+          });
         }
 
         db.query(
@@ -306,9 +313,9 @@ module.exports = function(db, dbConnected) {
       return res.status(400).json({ success: false, message: 'Campos obrigatórios: solicitacao_id, texto' });
     }
 
-    // Verificar se a solicitação pertence ao cliente
+// Verificar se a solicitação pertence ao cliente e se o pagamento foi feito
     db.query(
-      'SELECT id FROM solicitacoes WHERE id = ? AND cliente_id = ?',
+      'SELECT id, status_pagamento FROM solicitacoes WHERE id = ? AND cliente_id = ?',
       [solicitacao_id, req.cliente.id],
       (err, results) => {
         if (err) {
@@ -316,6 +323,13 @@ module.exports = function(db, dbConnected) {
         }
         if (results.length === 0) {
           return res.status(403).json({ success: false, message: 'Solicitação não encontrada ou não pertence a você' });
+        }
+        // O chat só é liberado quando o profissional confirma o pagamento
+        if (results[0].status_pagamento !== 'pago') {
+          return res.status(403).json({
+            success: false,
+            message: 'O chat ainda não foi liberado. O profissional precisa concluir o pagamento para liberar a conversa.'
+          });
         }
 
         db.query(

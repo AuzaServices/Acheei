@@ -16,19 +16,38 @@ module.exports = function(db, dbConnected) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
     db.query(
-      'SELECT * FROM mensagens WHERE solicitacao_id = ? ORDER BY data_envio ASC',
+      'SELECT status_pagamento FROM solicitacoes WHERE id = ?',
       [req.params.solicitacao_id],
-      (err, results) => {
+      (err, solResults) => {
         if (err) {
-          console.error('Erro ao buscar mensagens:', err);
-          return res.status(500).json({ success: false, message: 'Erro ao buscar mensagens' });
+          console.error('Erro ao verificar solicitação:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao verificar solicitação' });
         }
-        // Marcar como lidas
+        if (solResults.length === 0) {
+          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
+        }
+        if (solResults[0].status_pagamento !== 'pago') {
+          return res.status(403).json({
+            success: false,
+            message: 'O chat só é liberado após o pagamento de R$14,99 ser confirmado.'
+          });
+        }
         db.query(
-          'UPDATE mensagens SET lida = TRUE WHERE solicitacao_id = ? AND remetente != "profissional"',
-          [req.params.solicitacao_id]
+          'SELECT * FROM mensagens WHERE solicitacao_id = ? ORDER BY data_envio ASC',
+          [req.params.solicitacao_id],
+          (err, results) => {
+            if (err) {
+              console.error('Erro ao buscar mensagens:', err);
+              return res.status(500).json({ success: false, message: 'Erro ao buscar mensagens' });
+            }
+            // Marcar como lidas
+            db.query(
+              'UPDATE mensagens SET lida = TRUE WHERE solicitacao_id = ? AND remetente != "profissional"',
+              [req.params.solicitacao_id]
+            );
+            res.json({ success: true, data: results, total: results.length });
+          }
         );
-        res.json({ success: true, data: results, total: results.length });
       }
     );
   });
