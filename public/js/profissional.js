@@ -490,43 +490,104 @@ async function excluirOrcamento(id) {
 }
 
 // ============================================
-// Calculadora
+// Calculadora (interface tipo Windows)
 // ============================================
-function calcular(tipo) {
-  var res = 0;
-  if (tipo === 'soma') {
-    var a = parseFloat(document.getElementById('calcSoma1').value) || 0;
-    var b = parseFloat(document.getElementById('calcSoma2').value) || 0;
-    res = a + b;
-    document.getElementById('resSoma').textContent = res;
-  } else if (tipo === 'subtracao') {
-    var a = parseFloat(document.getElementById('calcSub1').value) || 0;
-    var b = parseFloat(document.getElementById('calcSub2').value) || 0;
-    res = a - b;
-    document.getElementById('resSub').textContent = res;
-  } else if (tipo === 'multiplicacao') {
-    var a = parseFloat(document.getElementById('calcMult1').value) || 0;
-    var b = parseFloat(document.getElementById('calcMult2').value) || 0;
-    res = a * b;
-    document.getElementById('resMult').textContent = res;
-  } else if (tipo === 'divisao') {
-    var a = parseFloat(document.getElementById('calcDiv1').value) || 0;
-    var b = parseFloat(document.getElementById('calcDiv2').value) || 1;
-    if (b === 0) { showToast('Divisão por zero!', 'error'); return; }
-    res = a / b;
-    document.getElementById('resDiv').textContent = res.toFixed(2);
-  } else if (tipo === 'porcentagem') {
-    var valor = parseFloat(document.getElementById('calcPctValor').value) || 0;
-    var pct = parseFloat(document.getElementById('calcPctPct').value) || 0;
-    res = (valor * pct) / 100;
-    document.getElementById('resPct').textContent = res.toFixed(2);
-  } else if (tipo === 'juros') {
-    var capital = parseFloat(document.getElementById('calcJurosCapital').value) || 0;
-    var taxa = parseFloat(document.getElementById('calcJurosTaxa').value) || 0;
-    var tempo = parseFloat(document.getElementById('calcJurosTempo').value) || 0;
-    res = capital * (taxa / 100) * tempo;
-    document.getElementById('resJuros').textContent = 'Juros: R$ ' + res.toFixed(2).replace('.', ',') + ' | Total: R$ ' + (capital + res).toFixed(2).replace('.', ',');
+let calcCorrente = '0';
+let calcAnterior = null;     // operando anterior
+let calcOperador = null;     // operador pendente
+let calcNovoNumero = true;   // se o próximo dígito inicia um novo número
+
+function atualizarDisplayCalc() {
+  var el = document.getElementById('calcDisplay');
+  if (el) el.value = calcCorrente;
+}
+
+function calcInput(valor) {
+  if (valor === '.' || valor === ',') {
+    if (calcNovoNumero) {
+      calcCorrente = '0.';
+      calcNovoNumero = false;
+    } else {
+      if (calcCorrente.indexOf('.') === -1) calcCorrente += '.';
+    }
+    atualizarDisplayCalc();
+    return;
   }
+  // Operadores
+  if (valor === '+' || valor === '-' || valor === '×' || valor === '÷' || valor === '÷') {
+    var op = valor;
+    if (op === '×') op = '*';
+    if (op === '÷') op = '/';
+    if (calcOperador !== null && !calcNovoNumero) {
+      calcIgual();
+    }
+    calcAnterior = parseFloat(calcCorrente);
+    calcOperador = op;
+    calcNovoNumero = true;
+    return;
+  }
+  // Dígitos
+  if (calcNovoNumero) {
+    calcCorrente = valor;
+    calcNovoNumero = false;
+  } else {
+    if (calcCorrente === '0') {
+      calcCorrente = valor;
+    } else {
+      calcCorrente += valor;
+    }
+  }
+  atualizarDisplayCalc();
+}
+
+function calcClearAll() {
+  calcCorrente = '0';
+  calcAnterior = null;
+  calcOperador = null;
+  calcNovoNumero = true;
+  atualizarDisplayCalc();
+}
+
+function calcDelete() {
+  if (calcNovoNumero) return;
+  if (calcCorrente.length <= 1) {
+    calcCorrente = '0';
+    calcNovoNumero = true;
+  } else {
+    calcCorrente = calcCorrente.substring(0, calcCorrente.length - 1);
+  }
+  atualizarDisplayCalc();
+}
+
+function calcPercent() {
+  var val = parseFloat(calcCorrente) || 0;
+  calcCorrente = String(val / 100);
+  atualizarDisplayCalc();
+}
+
+function calcIgual() {
+  if (calcOperador === null || calcAnterior === null) return;
+  var a = parseFloat(calcAnterior);
+  var b = parseFloat(calcCorrente);
+  var res = 0;
+  switch (calcOperador) {
+    case '+': res = a + b; break;
+    case '-': res = a - b; break;
+    case '*': res = a * b; break;
+    case '/':
+      if (b === 0) { showToast('Divisão por zero!', 'error'); calcClearAll(); return; }
+      res = a / b; break;
+    default: return;
+  }
+  calcCorrente = String(parseFloat(res.toPrecision(12)));
+  calcAnterior = null;
+  calcOperador = null;
+  calcNovoNumero = true;
+  atualizarDisplayCalc();
+}
+
+function calcEqual() {
+  calcIgual();
 }
 
 // ============================================
