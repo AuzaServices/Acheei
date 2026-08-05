@@ -1893,17 +1893,76 @@ button[type="button"] {
     min-width: 0;
   }
 
-  .chat-input-area,
+.chat-input-area,
   .chat-panel-footer,
   .chat-container .chat-input {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .chat-input-area .btn,
   .chat-panel-footer .btn,
   .chat-container .chat-input button {
-    flex: 1;
+    flex: 0 0 auto;
     min-width: 0;
+    width: 88px;
+    white-space: nowrap;
+  }
+
+  .chat-input-area input,
+  .chat-panel-footer input,
+  .chat-container .chat-input input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 0;
+  }
+}
+
+/* ==================== Chat mobile - correção do rodapé cortado ==================== */
+@media (max-width: 767px) {
+  .chat-panel {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    bottom: 80px;
+    max-height: calc(100vh - 120px);
+  }
+
+  .chat-panel-body {
+    max-height: none;
+    min-height: 200px;
+    flex: 1 1 auto;
+  }
+
+  .chat-panel-footer,
+  .chat-input-area,
+  .chat-container .chat-input {
+    gap: 8px;
+    padding: 10px;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .chat-panel-footer input,
+  .chat-input-area input,
+  .chat-container .chat-input input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .chat-panel-footer .btn,
+  .chat-input-area .btn,
+  .chat-container .chat-input button {
+    flex: 0 0 auto;
+    width: 88px;
+    min-width: 88px;
+    height: 44px;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+
+  .chat-widget {
+    bottom: 16px;
+    right: 16px;
   }
 }
 

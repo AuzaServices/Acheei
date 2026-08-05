@@ -19,10 +19,15 @@ module.exports = function(db, dbConnected) {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-    const { nome, email, senha, telefone } = req.body;
+const { nome, email, senha, telefone } = req.body;
 
-    if (!nome || !email || !senha) {
-      return res.status(400).json({ success: false, message: 'Nome, email e senha são obrigatórios' });
+    if (!nome || !email || !senha || !telefone) {
+      return res.status(400).json({ success: false, message: 'Nome, email, senha e telefone são obrigatórios' });
+    }
+    // Telefone deve ter ao menos 10 dígitos (DDD + número) para ser válido
+    const telefoneLimpo = String(telefone).replace(/\D/g, '');
+    if (telefoneLimpo.length < 10) {
+      return res.status(400).json({ success: false, message: 'Informe um telefone válido com DDD para WhatsApp' });
     }
     if (senha.length < 6) {
       return res.status(400).json({ success: false, message: 'A senha deve ter pelo menos 6 caracteres' });

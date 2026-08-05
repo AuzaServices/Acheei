@@ -178,13 +178,23 @@ async function cadastrar(event) {
   document.getElementById('cadastroError').style.display = 'none';
   document.getElementById('cadastroSuccess').style.display = 'none';
 
-  var nome = document.getElementById('cadastroNome').value.trim();
+var nome = document.getElementById('cadastroNome').value.trim();
   var email = document.getElementById('cadastroEmail').value.trim();
   var senha = document.getElementById('cadastroSenha').value;
   var telefone = document.getElementById('cadastroTelefone').value.trim();
 
-  if (!nome || !email || !senha) {
-    document.getElementById('cadastroError').textContent = 'Preencha todos os campos obrigatórios';
+  if (!nome || !email || !senha || !telefone) {
+    document.getElementById('cadastroError').textContent = 'Preencha todos os campos obrigatórios, incluindo o WhatsApp';
+    document.getElementById('cadastroError').style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = 'Criar Conta';
+    return;
+  }
+
+  // Telefone deve ter ao menos 10 dígitos (DDD + número) para WhatsApp
+  var telefoneDigitos = telefone.replace(/\D/g, '');
+  if (telefoneDigitos.length < 10) {
+    document.getElementById('cadastroError').textContent = 'Informe um telefone válido com DDD para o WhatsApp';
     document.getElementById('cadastroError').style.display = 'block';
     btn.disabled = false;
     btn.innerHTML = 'Criar Conta';
