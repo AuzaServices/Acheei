@@ -25,3 +25,30 @@
 - [x] Atualizar o header (nome/foto) e o global após salvar.
 - [x] Modal com scroll interno para não estourar a tela.
 - [ ] Testar fluxo completo no navegador.
+
+## Tarefa 4 - Corrigir mensagem repetida infinitamente no chat do cliente (Concluída)
+- [x] Identificar a causa: o backend `routes/clientes.js` retorna 403 "O chat ainda não foi liberado..." quando o pagamento não foi feito, e o frontend `cliente.js` spammava o toast de erro a cada polling de 5s.
+- [x] `apiRequest` em `cliente.js`: tratar 403 como resposta normal (sem lançar exceção) para não disparar toast repetidamente.
+- [x] `carregarChat()`: quando o chat está bloqueado (403), exibir a mensagem fixa no corpo do chat e NÃO iniciar o polling (evita repetição infinita).
+- [x] `widgetCarregarMensagens()`: quando o widget está bloqueado (403), exibir a mensagem fixa no painel sem repetir toast.
+- [ ] Testar fluxo completo no navegador.
+
+## Tarefa 5 - Fluxo integrado de cadastro/solicitação do cliente na home (Em andamento)
+### 5.1 Header da home com área do usuário logado
+- [x] Adicionar bloco `#userArea` no header do `index.html` (foto + nome + botão Sair).
+- [x] `verificarLoginCliente()` em `main.js` consulta `/api/clientes/me` e renderiza área do usuário.
+- [x] `sairClienteHome()` remove token e recarrega.
+- [x] Atualizar o menu mobile para incluir a área do usuário.
+- [x] Adicionar CSS para `.user-area`, `.user-avatar`, `.user-name`, `.mobile-user-area` e `.modal-cadastro-section`.
+
+### 5.2 Modal de solicitação simples para cliente logado
+- [x] Na abertura do modal, detectar se o usuário está logado.
+- [x] Se logado: esconder campos de cadastro (nome, email, senha, telefone, aviso push) e mostrar só a descrição.
+- [x] Se não logado: manter o modal completo atual (cadastro embutido).
+
+### 5.3 Envio de solicitação e redirecionamento
+- [x] `enviarSolicitacao()`: quando logado, enviar apenas `{descricao, profissional_id, cliente_id}`.
+- [x] `routes/solicitacoes.js` POST `/`: aceitar `cliente_id` e buscar nome/telefone do cliente no banco.
+- [x] Após cadastro novo, redirecionar para `cliente.html` (já logado).
+- [x] Após login (conta existente), permanecer na página (comportamento atual).
+- [ ] Testar fluxo completo no navegador.

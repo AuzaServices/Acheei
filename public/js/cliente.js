@@ -46,6 +46,11 @@ async function apiRequest(url, options) {
         mostrarAuth();
         return null;
       }
+      // Erro de chat bloqueado (403): retorna o objeto com success:false
+      // sem lançar exceção, para não spammar o toast de erro a cada polling.
+      if (response.status === 403) {
+        return { success: false, status: 403, message: result.message || 'Ação bloqueada' };
+      }
       throw new Error(result.message || 'Erro na requisicao');
     }
     return result;
@@ -380,12 +385,21 @@ async function carregarChat() {
     return;
   }
 
-  document.getElementById('chatEmptyState').style.display = 'none';
+document.getElementById('chatEmptyState').style.display = 'none';
   document.getElementById('chatContainer').style.display = 'block';
 
   var result = await apiRequest(API_BASE + '/clientes/mensagens/' + solicitacaoId);
   if (result && result.success) {
     renderizarChat(result.data);
+  } else if (result && result.status === 403) {
+    // Chat bloqueado (pagamento não liberado): mostra mensagem fixa no corpo,
+    // sem repetir toast a cada polling.
+    document.getElementById('chatMessages').innerHTML =
+      '<div class="chat-locked" style="text-align:center;padding:40px;">' +
+        '<span class="icon" style="font-size:48px;display:block;margin-bottom:12px;">🔒</span>' +
+        '<p>' + (result.message || 'O chat ainda não foi liberado. O profissional precisa concluir o pagamento para liberar a conversa.') + '</p>' +
+      '</div>';
+    return; // não inicia o polling quando o chat está bloqueado
   }
 
   // Auto-refresh a cada 5s
@@ -567,7 +581,18 @@ function widgetCarregarChat() {
 
 async function widgetCarregarMensagens(solicitacaoId) {
   var result = await apiRequest(API_BASE + '/clientes/mensagens/' + solicitacaoId);
-  if (!result || !result.success) return;
+  if (!result || !result.success) {
+    // Chat bloqueado (403): mostra mensagem fixa no widget, sem repetir toast.
+    var body = document.getElementById('widgetChatBody');
+    if (result && result.status === 403 && body) {
+      body.innerHTML =
+        '<div class="chat-panel-empty" style="text-align:center;padding:30px;">' +
+          '<span class="icon" style="font-size:40px;display:block;margin-bottom:8px;">🔒</span>' +
+          '<p>' + (result.message || 'O chat ainda não foi liberado. O profissional precisa concluir o pagamento para liberar a conversa.') + '</p>' +
+        '</div>';
+    }
+    return;
+  }
 
   var body = document.getElementById('widgetChatBody');
   var mensagens = result.data;

@@ -16,53 +16,84 @@ router.post('/', (req, res) => {
     }
     const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id } = req.body;
 
-    if (!cliente_nome || !cliente_telefone || !descricao || !profissional_id) {
+    if (!descricao || !profissional_id) {
       return res.status(400).json({
         success: false,
-        message: 'Todos os campos são obrigatórios: nome, telefone, descrição e profissional'
+        message: 'Campos obrigatórios: descrição e profissional'
       });
     }
 
-    if (cliente_nome.trim().length < 3) {
-      return res.status(400).json({
-        success: false,
-        message: 'O nome deve ter pelo menos 3 caracteres'
-      });
-    }
-
-    db.query(
-      "SELECT id, nome_perfil, profissao FROM profissionais WHERE id = ? AND status_aprovacao = 'aprovado'",
-      [profissional_id],
-      (err, profResults) => {
-        if (err) {
-          console.error('Erro ao verificar profissional:', err);
-          return res.status(500).json({ success: false, message: 'Erro ao verificar profissional' });
-        }
-        if (profResults.length === 0) {
-          return res.status(404).json({ success: false, message: 'Profissional não encontrado ou não está disponível' });
-        }
-
-        db.query(
-          'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, status_pagamento) VALUES (?, ?, ?, ?, ?, ?)',
-          [cliente_nome.trim(), cliente_telefone.trim(), descricao.trim(), profissional_id, cliente_id || null, 'pendente'],
-          (err, result) => {
-            if (err) {
-              console.error('Erro ao criar solicitação:', err);
-              return res.status(500).json({ success: false, message: 'Erro ao enviar solicitação' });
-            }
-            res.status(201).json({
-              success: true,
-              message: `Solicitação enviada com sucesso para ${profResults[0].nome_perfil}!`,
-              data: {
-                id: result.insertId,
-                profissional: profResults[0].nome_perfil,
-                profissional_id: profissional_id
-              }
-            });
-          }
-        );
+    // Função auxiliar para validar o profissional e inserir a solicitação
+    function inserirSolicitacao(nomeFinal, telefoneFinal, clienteIdFinal) {
+      if (!nomeFinal || nomeFinal.trim().length < 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'O nome do cliente deve ter pelo menos 3 caracteres'
+        });
       }
-    );
+      db.query(
+        "SELECT id, nome_perfil, profissao FROM profissionais WHERE id = ? AND status_aprovacao = 'aprovado'",
+        [profissional_id],
+        (err, profResults) => {
+          if (err) {
+            console.error('Erro ao verificar profissional:', err);
+            return res.status(500).json({ success: false, message: 'Erro ao verificar profissional' });
+          }
+          if (profResults.length === 0) {
+            return res.status(404).json({ success: false, message: 'Profissional não encontrado ou não está disponível' });
+          }
+
+          db.query(
+            'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, status_pagamento) VALUES (?, ?, ?, ?, ?, ?)',
+            [(nomeFinal || '').trim(), (telefoneFinal || '').trim(), (descricao || '').trim(), profissional_id, clienteIdFinal || null, 'pendente'],
+            (err, result) => {
+              if (err) {
+                console.error('Erro ao criar solicitação:', err);
+                return res.status(500).json({ success: false, message: 'Erro ao enviar solicitação' });
+              }
+              res.status(201).json({
+                success: true,
+                message: `Solicitação enviada com sucesso para ${profResults[0].nome_perfil}!`,
+                data: {
+                  id: result.insertId,
+                  profissional: profResults[0].nome_perfil,
+                  profissional_id: profissional_id
+                }
+              });
+            }
+          );
+        }
+      );
+    }
+
+    // Se o cliente está logado (enviou cliente_id), busca nome/telefone do banco
+    if (cliente_id) {
+      db.query(
+        'SELECT id, nome, email, telefone FROM clientes WHERE id = ?',
+        [cliente_id],
+        (err, clienteResults) => {
+          if (err) {
+            console.error('Erro ao buscar cliente:', err);
+            return res.status(500).json({ success: false, message: 'Erro ao buscar dados do cliente' });
+          }
+          if (clienteResults.length === 0) {
+            return res.status(404).json({ success: false, message: 'Cliente não encontrado' });
+          }
+          const c = clienteResults[0];
+          inserirSolicitacao(c.nome, c.telefone || '', cliente_id);
+        }
+      );
+      return;
+    }
+
+    // Cliente não logado: usa dados enviados no formulário
+    if (!cliente_nome || !cliente_telefone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campos obrigatórios: nome e telefone do cliente'
+      });
+    }
+    inserirSolicitacao(cliente_nome, cliente_telefone, null);
   });
 
   // ============================================

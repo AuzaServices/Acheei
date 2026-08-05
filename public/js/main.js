@@ -207,6 +207,72 @@ function setupAutocomplete() {
 }
 
 // ============================================
+// Área do Usuário (Cliente logado no header)
+// ============================================
+let clienteLogado = null;
+
+async function verificarLoginCliente() {
+  const token = localStorage.getItem('acheei_cliente_token');
+  if (!token) {
+    clienteLogado = null;
+    atualizarHeaderCliente();
+    return;
+  }
+  try {
+    const response = await fetch(`${API_BASE}/clientes/me`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const result = await response.json();
+    if (result.success) {
+      clienteLogado = result.data;
+    } else {
+      clienteLogado = null;
+    }
+  } catch (error) {
+    console.error('Erro ao verificar login do cliente:', error);
+    clienteLogado = null;
+  }
+  atualizarHeaderCliente();
+}
+
+function atualizarHeaderCliente() {
+  var userArea = document.getElementById('userArea');
+  var btnAreaCliente = document.getElementById('btnAreaCliente');
+  var mobileUserArea = document.getElementById('mobileUserArea');
+  var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+
+  if (clienteLogado) {
+    if (userArea) userArea.style.display = 'flex';
+    if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+    if (mobileUserArea) mobileUserArea.style.display = 'flex';
+    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+
+    // Nome
+    var nome = clienteLogado.nome || 'Cliente';
+    if (document.getElementById('userName')) document.getElementById('userName').textContent = nome;
+    if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = nome;
+
+    // Avatar (foto ou placeholder)
+    var avatarHtml = clienteLogado.foto ? '<img src="' + clienteLogado.foto + '" alt="Foto">' : '👤';
+    if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
+    if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+  } else {
+    if (userArea) userArea.style.display = 'none';
+    if (btnAreaCliente) btnAreaCliente.style.display = '';
+    if (mobileUserArea) mobileUserArea.style.display = 'none';
+    if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+  }
+}
+
+function sairClienteHome() {
+  localStorage.removeItem('acheei_cliente_token');
+  clienteLogado = null;
+  atualizarHeaderCliente();
+  fecharMenuMobile();
+  showToast('Sessão encerrada', 'info');
+}
+
+// ============================================
 // Modal de Solicitação
 // ============================================
 var pushNoticeAceito = localStorage.getItem('acheei_notificacoes') === 'true';
@@ -218,14 +284,36 @@ function abrirModalSolicitacao(id, nome, profissao) {
   document.getElementById('solicitacaoModal').classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // Bloquear envio até o usuário aceitar as notificações push
-  var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
+  // Se o cliente está logado, mostrar modal simples (só descrição)
+  var cadastroSection = document.querySelector('.modal-cadastro-section');
+  var descricaoGroup = document.querySelector('#solicitacaoForm .form-group:last-of-type');
   var pushNotice = document.querySelector('.push-notice-modal');
+  var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
+
+  if (clienteLogado) {
+    // Esconde cadastro e aviso push
+    if (cadastroSection) cadastroSection.classList.add('hidden');
+    if (pushNotice) pushNotice.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('btn-disabled');
+    }
+    // Ajusta o título do botão
+    if (submitBtn) submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+    return;
+  }
+
+  // Não logado: manter modal completo (cadastro embutido)
+  if (cadastroSection) cadastroSection.classList.remove('hidden');
+
+  // Bloquear envio até o usuário aceitar as notificações push
   var notificaoSuportada = typeof Notification !== 'undefined';
   var notificacoesOk = pushNoticeAceito || (notificaoSuportada && Notification.permission === 'granted');
 
+  if (pushNotice && descricaoGroup) {
+    // move push notice para antes da descricao (já está no modal-cadastro-section)
+  }
   if (pushNotice) {
-    // Se o navegador não suporta notificações, não bloqueia o envio
     if (!notificaoSuportada) {
       pushNotice.style.display = 'none';
     } else {
@@ -273,16 +361,53 @@ async function enviarSolicitacao(event) {
   const form = event.target;
   const submitBtn = form.querySelector('button[type="submit"]');
   submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner"></span> Criando conta...';
+  submitBtn.innerHTML = '<span class="spinner"></span> Enviando...';
 
-  const nome = document.getElementById('clienteNome').value.trim();
-  const email = document.getElementById('clienteEmail').value.trim();
-  const senha = document.getElementById('clienteSenha').value;
-  const telefone = document.getElementById('clienteTelefone').value.trim();
   const descricao = document.getElementById('descricao').value.trim();
   const profissional_id = parseInt(document.getElementById('modalProfissionalId').value);
 
+  if (!descricao) {
+    showToast('Descreva o serviço que você precisa', 'error');
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+    return;
+  }
+
   try {
+    // Caso o cliente já esteja logado: envia direto sem cadastrar
+    if (clienteLogado) {
+      submitBtn.innerHTML = '<span class="spinner"></span> Enviando solicitação...';
+      const data = {
+        descricao: descricao,
+        profissional_id: profissional_id,
+        cliente_id: clienteLogado.id
+      };
+      const response = await fetch(`${API_BASE}/solicitacoes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (result.success) {
+        showToast('Solicitação enviada! Acesse a Área do Cliente para acompanhar.', 'success');
+        fecharModal();
+      } else {
+        showToast(result.message, 'error');
+      }
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+      return;
+    }
+
+    // ===== Não logado: cadastro + login automático =====
+    const nome = document.getElementById('clienteNome').value.trim();
+    const email = document.getElementById('clienteEmail').value.trim();
+    const senha = document.getElementById('clienteSenha').value;
+    const telefone = document.getElementById('clienteTelefone').value.trim();
+
+    let clienteId = null;
+    let foiCadastroNovo = false;
+
     // 1. Tenta cadastrar o cliente
     submitBtn.innerHTML = '<span class="spinner"></span> Criando sua conta...';
     let cadastroResponse = await fetch(`${API_BASE}/clientes/cadastro`, {
@@ -291,13 +416,13 @@ async function enviarSolicitacao(event) {
       body: JSON.stringify({ nome, email, senha, telefone })
     });
     let cadastroResult = await cadastroResponse.json();
-    let clienteId = null;
     let clienteToken = null;
 
-if (cadastroResult.success) {
+    if (cadastroResult.success) {
       // Cadastro novo
       clienteId = cadastroResult.data.cliente.id;
       clienteToken = cadastroResult.data.token;
+      foiCadastroNovo = true;
       // Salvar token do cliente
       localStorage.setItem('acheei_cliente_token', clienteToken);
       // Salvar a assinatura push que foi aceita antes do login/cadastro
@@ -323,7 +448,7 @@ if (cadastroResult.success) {
             salvarAssinaturaPendente();
           }
         } else {
-showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error');
+          showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error');
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
           return;
@@ -355,15 +480,24 @@ showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error'
     const result = await response.json();
 
     if (result.success) {
-      showToast('Solicitação enviada! Acesse a Área do Cliente para acompanhar.', 'success');
-      fecharModal();
+      // Redireciona para a área do cliente APENAS quando é cadastro novo
+      if (foiCadastroNovo) {
+        showToast('Conta criada! Solicitação enviada. Direcionando para sua área...', 'success');
+        fecharModal();
+        setTimeout(function() {
+          window.location.href = 'cliente.html';
+        }, 1200);
+      } else {
+        showToast('Solicitação enviada! Acesse a Área do Cliente para acompanhar.', 'success');
+        fecharModal();
+      }
     } else {
       showToast(result.message, 'error');
     }
   } catch (error) {
     console.error('Erro ao enviar solicitação:', error);
     showToast('Erro ao conectar com o servidor', 'error');
-} finally {
+  } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
   }
@@ -373,6 +507,9 @@ showToast('Email já cadastrado, mas senha incorreta. Tente novamente.', 'error'
 // Event Listeners
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
+  // Verificar se o cliente está logado e atualizar o header
+  verificarLoginCliente();
+
   // Carregar categorias para autocomplete
   carregarCategorias();
   setupAutocomplete();
