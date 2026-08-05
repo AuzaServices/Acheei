@@ -269,7 +269,44 @@ function sairClienteHome() {
   clienteLogado = null;
   atualizarHeaderCliente();
   fecharMenuMobile();
+  fecharDropdownUsuario();
   showToast('Sessão encerrada', 'info');
+}
+
+// ============================================
+// Dropdown do usuário (avatar + nome)
+// ============================================
+function setupUserDropdown() {
+  var trigger = document.getElementById('userDropdownTrigger');
+  var dropdown = document.getElementById('userDropdown');
+  if (!trigger || !dropdown) return;
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isActive = dropdown.classList.toggle('active');
+    trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+  });
+
+  // Fecha ao clicar fora
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target)) {
+      fecharDropdownUsuario();
+    }
+  });
+
+  // Fecha com Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      fecharDropdownUsuario();
+    }
+  });
+}
+
+function fecharDropdownUsuario() {
+  var dropdown = document.getElementById('userDropdown');
+  var trigger = document.getElementById('userDropdownTrigger');
+  if (dropdown) dropdown.classList.remove('active');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
 }
 
 // ============================================
@@ -533,9 +570,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Verificar se o cliente está logado e atualizar o header
   verificarLoginCliente();
 
-  // Carregar categorias para autocomplete
+// Carregar categorias para autocomplete
   carregarCategorias();
   setupAutocomplete();
+
+  // Dropdown do usuário (avatar + nome)
+  setupUserDropdown();
 
   // Formulário de busca
   document.getElementById('searchForm').addEventListener('submit', function(e) {

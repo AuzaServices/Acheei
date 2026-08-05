@@ -1546,10 +1546,14 @@ img {
 .user-area {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
 
-.user-area .user-info {
+/* Dropdown do usuário (avatar + nome) */
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropdown .user-info {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1557,9 +1561,17 @@ img {
   background: var(--gray-bg);
   border-radius: 999px;
   border: 1px solid var(--gray-lighter);
+  cursor: pointer;
+  font-family: var(--font-primary);
+  transition: var(--transition);
 }
 
-.user-area .user-avatar {
+.user-dropdown .user-info:hover {
+  border-color: var(--red-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-dropdown .user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -1574,13 +1586,13 @@ img {
   flex-shrink: 0;
 }
 
-.user-area .user-avatar img {
+.user-dropdown .user-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.user-area .user-name {
+.user-dropdown .user-name {
   font-size: 14px;
   font-weight: 600;
   color: var(--gray-dark);
@@ -1590,8 +1602,75 @@ img {
   text-overflow: ellipsis;
 }
 
-.user-area .btn {
-  white-space: nowrap;
+.user-dropdown .user-caret {
+  font-size: 12px;
+  color: var(--gray-medium);
+  display: inline-flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.user-dropdown.active .user-caret {
+  transform: rotate(180deg);
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-lighter);
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  z-index: 1100;
+  overflow: hidden;
+}
+
+.user-dropdown.active .user-dropdown-menu {
+  display: flex;
+  animation: dropdownIn 0.18s ease;
+}
+
+@keyframes dropdownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-dark);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.user-dropdown-item:hover {
+  background: var(--gray-bg);
+  color: var(--red-primary);
+}
+
+.user-dropdown-item .icon-svg {
+  font-size: 16px;
 }
 
 /* Mobile User Area */

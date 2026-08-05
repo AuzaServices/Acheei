@@ -17,17 +17,22 @@
 <div class="nav-links">
         <a href="/">Início</a>
         <a href="#categorias">Categorias</a>
-        <div class="user-area" id="userArea" style="display: none;">
-          <div class="user-info">
-            <span class="user-avatar" id="userAvatar">👤</span>
-            <span class="user-name" id="userName">Cliente</span>
+<div class="user-area" id="userArea" style="display: none;">
+          <div class="user-dropdown" id="userDropdown">
+            <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
+              <span class="user-avatar" id="userAvatar">👤</span>
+              <span class="user-name" id="userName">Cliente</span>
+              <span class="user-caret" data-icon="chevron-down"></span>
+            </button>
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+              <a href="cliente.html" class="user-dropdown-item">
+                <span data-icon="user"></span> Minha Área
+              </a>
+<button type="button" class="user-dropdown-item" onclick="sairClienteHome()">
+                <span data-icon="log-out"></span> Sair
+              </button>
+            </div>
           </div>
-          <a href="cliente.html" class="btn btn-primary btn-sm">
-            <span data-icon="user"></span> Minha Área
-          </a>
-          <button type="button" class="btn btn-outline btn-sm" onclick="sairClienteHome()">
-            Sair
-          </button>
         </div>
         <a href="cliente.html" class="btn btn-primary" id="btnAreaCliente">
           <span data-icon="user"></span> Área do Cliente
