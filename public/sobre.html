@@ -78,7 +78,10 @@
     .step-card { background: #fff; border-radius: var(--radius-lg); padding: 30px 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-lighter); position: relative; transition: var(--transition); }
     .step-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
     .step-card .step-num { position: absolute; top: -18px; left: 24px; width: 38px; height: 38px; border-radius: 50%; background: var(--red-primary); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: var(--shadow-md); }
-    .step-card .icon { font-size: 36px; margin: 10px 0 16px; display: block; }
+.step-card .icon { font-size: 36px; margin: 10px 0 16px; display: flex; align-items: center; justify-content: center; }
+    .step-card .icon .icon-svg { width: 36px; height: 36px; }
+    .mvv-card .icon .icon-svg { width: 30px; height: 30px; }
+    .value-item .v-icon .icon-svg { width: 22px; height: 22px; }
     .step-card h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
     .step-card p { color: var(--gray-medium); font-size: 14px; line-height: 1.6; }
 
@@ -151,7 +154,7 @@
   <!-- Hero -->
   <section class="sobre-hero">
     <div class="container">
-      <span class="badge">🚀 Nossa História</span>
+<span class="badge"><span data-icon="rocket" style="width:16px;height:16px;display:inline-flex;"></span> Nossa História</span>
       <h1>Conectando você aos <span class="hl">melhores profissionais</span> do Brasil</h1>
       <p>A Acheei nasceu com uma missão simples: acabar com a dificuldade de encontrar profissionais de confiança perto de você. De forma rápida, fácil e sem burocracia.</p>
       <div class="cta-row">
@@ -180,17 +183,17 @@
     </div>
     <div class="mvv-grid">
       <div class="mvv-card">
-        <div class="icon">🎯</div>
+        <div class="icon"><span data-icon="target"></span></div>
         <h3>Nossa Missão</h3>
         <p>Conectar clientes e profissionais da sua região de forma rápida, transparente e segura, gerando oportunidades e simplificando o dia a dia de todos.</p>
       </div>
       <div class="mvv-card">
-        <div class="icon">🔭</div>
+        <div class="icon"><span data-icon="eye"></span></div>
         <h3>Nossa Visão</h3>
         <p>Ser a maior e mais confiável plataforma de intermediação de serviços do Brasil, sendo referência em qualidade e inovação.</p>
       </div>
       <div class="mvv-card">
-        <div class="icon">💡</div>
+        <div class="icon"><span data-icon="lightbulb"></span></div>
         <h3>Nossos Valores</h3>
         <p>Confiança, transparência, qualidade, comprometimento e tecnologia a serviço das pessoas. É assim que fazemos a diferença todos os dias.</p>
       </div>
@@ -207,25 +210,25 @@
     <div class="steps">
       <div class="step-card">
         <span class="step-num">1</span>
-        <span class="icon">🔎</span>
+        <span class="icon"><span data-icon="search"></span></span>
         <h4>Busque o Serviço</h4>
         <p>Digite o serviço que você precisa e escolha sua cidade e estado.</p>
       </div>
       <div class="step-card">
         <span class="step-num">2</span>
-        <span class="icon">👨‍🔧</span>
+        <span class="icon"><span data-icon="hard-hat"></span></span>
         <h4>Escolha o Profissional</h4>
         <p>Compare perfis, fotos e avaliações dos profissionais da sua região.</p>
       </div>
       <div class="step-card">
         <span class="step-num">3</span>
-        <span class="icon">📩</span>
+        <span class="icon"><span data-icon="mail"></span></span>
         <h4>Solicite o Orçamento</h4>
         <p>Descreva seu serviço e receba orçamentos diretamente no chat.</p>
       </div>
       <div class="step-card">
         <span class="step-num">4</span>
-        <span class="icon">✅</span>
+        <span class="icon"><span data-icon="check-circle"></span></span>
         <h4>Conclua com Segurança</h4>
         <p>Combine a entrega, pague com segurança e avalie o serviço.</p>
       </div>
@@ -238,13 +241,13 @@
       <div class="eyebrow">Nossas Verdades</div>
       <h2>O que valorizamos todos os dias</h2>
     </div>
-    <div class="values-grid">
-      <div class="value-item"><div class="v-icon">🤝</div><div><h5>Confiança</h5><p>Cada profissional passa por um processo de verificação para garantir que você está contratando alguém de verdade.</p></div></div>
-      <div class="value-item"><div class="v-icon">🛡️</div><div><h5>Segurança</h5><p>Pagamentos protegidos e comunicação centralizada na plataforma para a sua tranquilidade.</p></div></div>
-      <div class="value-item"><div class="v-icon">⚡</div><div><h5>Agilidade</h5><p>Receba orçamentos e respostas em minutos para não perder tempo.</p></div></div>
-      <div class="value-item"><div class="v-icon">⭐</div><div><h5>Qualidade</h5><p>Filtramos e acompanhamos a qualidade dos serviços prestados por nossos profissionais.</p></div></div>
-      <div class="value-item"><div class="v-icon">💬</div><div><h5>Comunicação</h5><p>Chat direto e integrado para você conversar com o profissional sem complicação.</p></div></div>
-      <div class="value-item"><div class="v-icon">🌎</div><div><h5>Proximidade</h5><p>Focamos em profissionais da sua região, garantindo atendimento perto de você.</p></div></div>
+<div class="values-grid">
+      <div class="value-item"><div class="v-icon"><span data-icon="users"></span></div><div><h5>Confiança</h5><p>Cada profissional passa por um processo de verificação para garantir que você está contratando alguém de verdade.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="shield"></span></div><div><h5>Segurança</h5><p>Pagamentos protegidos e comunicação centralizada na plataforma para a sua tranquilidade.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="zap"></span></div><div><h5>Agilidade</h5><p>Receba orçamentos e respostas em minutos para não perder tempo.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="star"></span></div><div><h5>Qualidade</h5><p>Filtramos e acompanhamos a qualidade dos serviços prestados por nossos profissionais.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="chat"></span></div><div><h5>Comunicação</h5><p>Chat direto e integrado para você conversar com o profissional sem complicação.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="globe"></span></div><div><h5>Proximidade</h5><p>Focamos em profissionais da sua região, garantindo atendimento perto de você.</p></div></div>
     </div>
   </section>
 
