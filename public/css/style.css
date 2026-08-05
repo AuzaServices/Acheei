@@ -845,6 +845,38 @@ img {
   margin-top: 4px;
 }
 
+.profissional-card .card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profissional-card .btn-share-icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--black-primary);
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  transition: var(--transition);
+}
+
+.profissional-card .btn-share-icon:hover {
+  background: var(--gray-bg);
+  transform: scale(1.1);
+}
+
+.profissional-card .btn-share-icon .icon-svg {
+  width: 20px;
+  height: 20px;
+}
+
 .profissional-card .card-body {
   padding: 16px 20px;
 }

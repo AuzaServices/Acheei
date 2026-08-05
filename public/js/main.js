@@ -113,7 +113,7 @@ const fotoPerfil = prof.foto_perfil
       `;
     }
 
-    card.innerHTML = `
+card.innerHTML = `
       <div class="card-header">
         ${fotoPerfil}
         <div class="card-info">
@@ -121,6 +121,9 @@ const fotoPerfil = prof.foto_perfil
           <p class="profissao">${prof.profissao}</p>
           <p class="localizacao"><span data-icon="map-pin"></span> ${prof.cidade}/${prof.estado}</p>
         </div>
+        <button type="button" class="btn-share-icon" onclick="abrirCompartilhar(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}', '${prof.cidade}', '${prof.estado}', '${prof.foto_perfil || ''}')" title="Compartilhar">
+          <span data-icon="share"></span>
+        </button>
       </div>
       <div class="card-body">
         <div class="fotos-servicos">
@@ -130,9 +133,6 @@ const fotoPerfil = prof.foto_perfil
 <div class="card-footer">
         <button class="btn btn-primary" onclick="abrirModalSolicitacao(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}')">
           <span data-icon="send"></span> Solicitar Serviço
-        </button>
-        <button class="btn btn-outline btn-share-card" onclick="abrirCompartilhar(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}', '${prof.cidade}', '${prof.estado}', '${prof.foto_perfil || ''}')" title="Compartilhar">
-          <span data-icon="share"></span> Compartilhar
         </button>
       </div>
     `;
