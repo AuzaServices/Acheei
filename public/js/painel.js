@@ -207,12 +207,116 @@ async function deletarProfissional(id) {
   }
 }
 
+// Estado de edição atual no modal de detalhes
+let detalhesEditId = null;
+
+// Gera um item editável do grid no modal de detalhes
+function detalhesItemEditavel(label, campo, valor, extraCls) {
+  var valorHtml = (valor !== undefined && valor !== null && valor !== '') ? valor : '—';
+  return '<div class="detalhes-item" data-campo="' + campo + '" id="detalhe-' + campo + '">' +
+    '<button type="button" class="edit-btn" title="Editar ' + label + '" data-campo="' + campo + '">' + icon('edit') + '</button>' +
+    '<div class="label">' + label + '</div>' +
+    '<div class="value">' + valorHtml + '</div>' +
+  '</div>';
+}
+
+// Abre o modo de edição de um campo específico
+function editarCampo(campo) {
+  var item = document.getElementById('detalhe-' + campo);
+  if (!item) return;
+  var prof = null;
+  for (var i = 0; i < profissionaisData.length; i++) {
+    if (profissionaisData[i].id === detalhesEditId) { prof = profissionaisData[i]; break; }
+  }
+  if (!prof) return;
+
+  var valorAtual = prof[campo] !== undefined && prof[campo] !== null ? prof[campo] : '';
+  var input = '';
+
+  if (campo === 'data_nascimento') {
+    var d = valorAtual ? new Date(valorAtual) : null;
+    var iso = d && !isNaN(d.getTime()) ? d.toISOString().split('T')[0] : '';
+    input = '<input type="date" class="edit-input" id="edit-' + campo + '" value="' + iso + '">';
+  } else if (campo === 'estado') {
+    input = '<input type="text" class="edit-input edit-input-sm" id="edit-' + campo + '" value="' + valorAtual + '" maxlength="2" placeholder="UF" style="text-transform:uppercase;">';
+  } else if (campo === 'cep') {
+    input = '<input type="text" class="edit-input edit-input-cep" id="edit-' + campo + '" value="' + valorAtual + '" maxlength="9" placeholder="00000-000">';
+  } else if (campo === 'numero') {
+    input = '<input type="text" class="edit-input edit-input-sm" id="edit-' + campo + '" value="' + valorAtual + '" placeholder="Nº">';
+  } else if (campo === 'endereco') {
+    input = '<input type="text" class="edit-input" id="edit-' + campo + '" value="' + valorAtual + '" placeholder="Rua, avenida...">';
+  } else {
+    input = '<input type="text" class="edit-input" id="edit-' + campo + '" value="' + valorAtual + '">';
+  }
+
+  item.classList.add('editando');
+  item.querySelector('.value').innerHTML = input;
+  item.querySelector('.edit-btn').style.display = 'none';
+
+  // Ao digitar, mostra a barra de salvar
+  var inp = document.getElementById('edit-' + campo);
+  if (inp) {
+    inp.addEventListener('input', function() {
+      document.getElementById('detalhesSaveBar').classList.add('active');
+    });
+    inp.focus();
+  }
+}
+
+// Cancela a edição atual (recarrega os dados originais do modal)
+function cancelarEdicao() {
+  if (detalhesEditId) {
+    verDetalhes(detalhesEditId);
+  }
+}
+
+// Salva as alterações feitas no modal
+async function salvarDetalhes() {
+  if (!detalhesEditId) return;
+  var camposEditaveis = ['nome_perfil', 'endereco', 'numero', 'bairro', 'cidade', 'estado', 'cep', 'data_nascimento'];
+  var dados = {};
+  var algumEditado = false;
+
+  for (var i = 0; i < camposEditaveis.length; i++) {
+    var campo = camposEditaveis[i];
+    var inp = document.getElementById('edit-' + campo);
+    if (inp) {
+      dados[campo] = inp.value.trim();
+      algumEditado = true;
+    }
+  }
+
+  if (!algumEditado) {
+    showToast('Nenhum campo foi editado', 'info');
+    return;
+  }
+
+  var btn = document.getElementById('btnSalvarDetalhes');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+  var result = await apiRequest(API_BASE + '/admin/profissional/' + detalhesEditId, {
+    method: 'PUT',
+    body: JSON.stringify(dados)
+  });
+
+  btn.disabled = false;
+  btn.innerHTML = 'Salvar Alterações';
+
+  if (result && result.success) {
+    showToast('Dados atualizados com sucesso!', 'success');
+    await carregarProfissionais();
+    verDetalhes(detalhesEditId);
+  }
+}
+
 function verDetalhes(id) {
   var prof = null;
   for (var i = 0; i < profissionaisData.length; i++) {
     if (profissionaisData[i].id === id) { prof = profissionaisData[i]; break; }
   }
   if (!prof) return;
+  detalhesEditId = id;
   var fotosServicos = [];
   if (prof.fotos_servicos) {
     if (Array.isArray(prof.fotos_servicos)) fotosServicos = prof.fotos_servicos;
@@ -228,25 +332,31 @@ function verDetalhes(id) {
   }
   var fotoPerfil = '';
   if (prof.foto_perfil) fotoPerfil = '<div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoPerfil(' + prof.id + ')">&times;</button><img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;display:block;margin:0 auto 16px;"></div>';
-  var sc = prof.status_aprovacao;
+var sc = prof.status_aprovacao;
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
+  var dataNasc = prof.data_nascimento ? new Date(prof.data_nascimento + 'T00:00:00').toLocaleDateString('pt-BR') : '—';
   document.getElementById('detalhesBody').innerHTML =
     fotoPerfil +
-    '<h3 style="text-align:center;margin-bottom:4px;">' + prof.nome_perfil + '</h3>' +
+    detalhesItemEditavel('Nome', 'nome_perfil', prof.nome_perfil) +
     '<p style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</p>' +
     '<div style="text-align:center;margin-bottom:16px;"><span class="status-badge ' + sc + '">' + sl + '</span></div>' +
     '<div class="detalhes-grid">' +
       '<div class="detalhes-item"><div class="label">CPF</div><div class="value">' + prof.cpf + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Data de Nascimento</div><div class="value">' + new Date(prof.data_nascimento).toLocaleDateString('pt-BR') + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Endereco</div><div class="value">' + prof.endereco + ', ' + (prof.numero || 'S/N') + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Bairro</div><div class="value">' + prof.bairro + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Cidade</div><div class="value">' + prof.cidade + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Estado</div><div class="value">' + prof.estado + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">CEP</div><div class="value">' + prof.cep + '</div></div>' +
+      detalhesItemEditavel('Data de Nascimento', 'data_nascimento', dataNasc) +
+      detalhesItemEditavel('Endereço', 'endereco', prof.endereco) +
+      detalhesItemEditavel('Número', 'numero', prof.numero || 'S/N') +
+      detalhesItemEditavel('Bairro', 'bairro', prof.bairro) +
+      detalhesItemEditavel('Cidade', 'cidade', prof.cidade) +
+      detalhesItemEditavel('Estado', 'estado', prof.estado) +
+      detalhesItemEditavel('CEP', 'cep', prof.cep) +
       '<div class="detalhes-item"><div class="label">Data de Cadastro</div><div class="value">' + new Date(prof.data_cadastro).toLocaleString('pt-BR') + '</div></div>' +
     '</div>' +
     '<h4 style="margin-top:24px;margin-bottom:12px;">Fotos dos Servicos</h4>' +
     '<div class="detalhes-fotos">' + fotosHtml + '</div>';
+
+  // Esconde a barra de salvar ao abrir/reabrir o modal
+  document.getElementById('detalhesSaveBar').classList.remove('active');
+
   document.getElementById('detalhesModal').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -315,6 +425,14 @@ async function verificarToken() {
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('loginForm').addEventListener('submit', login);
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') fecharDetalhes(); });
-  document.getElementById('detalhesModal').addEventListener('click', function(e) { if (e.target === this) fecharDetalhes(); });
+  document.getElementById('detalhesModal').addEventListener('click', function(e) {
+    // Clica no overlay para fechar
+    if (e.target === this) fecharDetalhes();
+    // Delegate para o botão de editar (lápis)
+    var editBtn = e.target.closest('.edit-btn');
+    if (editBtn && editBtn.dataset.campo) {
+      editarCampo(editBtn.dataset.campo);
+    }
+  });
   verificarToken();
 });

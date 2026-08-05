@@ -1,19 +1,16 @@
-# TODO - Correção do Bug de Pagamento (Liberação indevida do chat)
+# TODO Acheei
 
-## Objetivo
-Só marcar a solicitação como `pago` (e liberar o chat) quando o Mercado Pago confirmar um pagamento com status `approved` e valor correto (R$ 14,99). Impedir que o sistema libere sem pagamento real.
+## Tarefa 1 - Correção do Bug de Pagamento (Concluída)
+- [x] Corrigir endpoint `POST /api/pagamento/verificar/:id` (lookup exato, sem busca genérica).
+- [x] Corrigir `consultarStatusPagamento()` (mesma lógica segura).
+- [x] Corrigir `processarPagamento()` (webhook) - aceitar `solicitacao_ID` e `solicitacao_ID_timestamp`.
+- [x] Corrigir `/preferencia` para salvar `|ref:` exato.
+- [ ] Testar fluxo completo (requer ambiente com Mercado Pago configurado).
 
-## Passos
-- [x] 1. Corrigir endpoint `POST /api/pagamento/verificar/:id`:
-  - [x] Usar somente o `payment_id`/`preference_id` armazenado (lookup exato).
-  - [x] Se não `approved`, retornar `pendente` sem cair na busca genérica.
-  - [x] Remover busca genérica por `solicitacao_${id}` (causa falso positivo).
-- [x] 2. Corrigir `consultarStatusPagamento()` (usado no `/confirmar`):
-  - [x] Aplicar mesma lógica segura (lookup exato pelo ref armazenado).
-  - [x] Remover busca genérica solta.
-- [x] 3. Corrigir `processarPagamento()` (webhook):
-  - [x] Aceitar `solicitacao_ID` e `solicitacao_ID_timestamp`.
-  - [x] Exigir `status === 'approved'` + valor correto.
-- [x] 4. Corrigir `/preferencia` para salvar `|ref:` exato (consistência na verificação).
-- [x] 5. Revisar frontend `profissional.js` (polling 5s) - confirmar que só libera com status real.
-- [ ] 6. Testar o fluxo completo (requer ambiente com Mercado Pago configurado).
+## Tarefa 2 - Edição de dados do profissional no painel admin (Concluída)
+- [x] Adicionar endpoint `PUT /api/admin/profissional/:id` no backend (atualiza nome, endereco, numero, bairro, cidade, estado, cep, data_nascimento).
+- [x] Adicionar ícone de lápis no canto superior direito de cada container editável no modal de detalhes.
+- [x] Ao clicar no lápis, abrir formulário de edição inline no container.
+- [x] Mostrar botão "Salvar Alterações" (e "Cancelar") na parte inferior do modal quando houver edição.
+- [x] Salvar alterações no banco e recarregar para todos verem.
+- [ ] Testar fluxo completo no navegador.

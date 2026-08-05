@@ -354,6 +354,54 @@ module.exports = function(db, dbConnected) {
     });
   });
 
+// ============================================
+  // PUT /api/admin/profissional/:id
+  // Atualizar dados do profissional (admin)
+  // ============================================
+  router.put('/profissional/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+
+    const { nome_perfil, endereco, numero, bairro, cidade, estado, cep, data_nascimento } = req.body;
+
+    // Constrói o UPDATE dinamicamente com apenas os campos enviados
+    const campos = [];
+    const params = [];
+
+    if (nome_perfil !== undefined) { campos.push('nome_perfil = ?'); params.push(nome_perfil); }
+    if (endereco !== undefined) { campos.push('endereco = ?'); params.push(endereco); }
+    if (numero !== undefined) { campos.push('numero = ?'); params.push(numero); }
+    if (bairro !== undefined) { campos.push('bairro = ?'); params.push(bairro); }
+    if (cidade !== undefined) { campos.push('cidade = ?'); params.push(cidade); }
+    if (estado !== undefined) { campos.push('estado = ?'); params.push(estado.toUpperCase()); }
+    if (cep !== undefined) { campos.push('cep = ?'); params.push(cep); }
+    if (data_nascimento !== undefined) { campos.push('data_nascimento = ?'); params.push(data_nascimento); }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
+    }
+
+    params.push(req.params.id);
+    const sql = 'UPDATE profissionais SET ' + campos.join(', ') + ' WHERE id = ?';
+
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        console.error('Erro ao atualizar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar profissional' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+
+      res.json({
+        success: true,
+        message: 'Dados do profissional atualizados com sucesso!'
+      });
+    });
+  });
+
   // ============================================
   // POST /api/admin/criar
   // Criar novo administrador (protegido)
