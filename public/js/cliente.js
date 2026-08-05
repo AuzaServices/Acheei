@@ -474,11 +474,21 @@ function setupUserDropdown() {
   var dropdown = document.getElementById('userDropdown');
   if (!trigger || !dropdown) return;
 
-  trigger.addEventListener('click', function(e) {
+trigger.addEventListener('click', function(e) {
     e.stopPropagation();
     var isActive = dropdown.classList.toggle('active');
     trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
   });
+
+  // Fecha ao clicar em qualquer item do menu (ex: Início/Categorias)
+  var menu = document.getElementById('userDropdownMenu');
+  if (menu) {
+    menu.addEventListener('click', function(e) {
+      if (e.target.closest('.user-dropdown-item')) {
+        fecharDropdown();
+      }
+    });
+  }
 
   // Fecha ao clicar fora
   document.addEventListener('click', function(e) {
