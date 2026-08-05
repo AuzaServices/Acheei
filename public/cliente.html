@@ -121,7 +121,7 @@
     .chat-panel-msg .time { font-size: 10px; color: var(--gray-light); margin-top: 4px; }
     .chat-panel-msg.cliente .time { text-align: right; color: rgba(255,255,255,0.7); }
     .chat-panel-select { padding: 12px; border-bottom: 1px solid var(--gray-lighter); }
-    .chat-panel-select select { width: 100%; padding: 10px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 13px; }
+.chat-panel-select select { width: 100%; padding: 10px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 13px; }
     @media (max-width: 768px) { .dashboard-tabs { flex-direction: column; } .solicitacao-card .card-header { flex-direction: column; } .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; } }
   </style>
 </head>
@@ -195,16 +195,16 @@
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
 <div class="user-dropdown-menu" id="userDropdownMenu">
-              <a href="/" class="user-dropdown-item dropdown-nav-links-item">
+              <a href="/" class="user-dropdown-item">
                 <span data-icon="home"></span> Início
               </a>
-              <a href="/#categorias" class="user-dropdown-item dropdown-nav-links-item">
+              <a href="/#categorias" class="user-dropdown-item">
                 <span data-icon="grid"></span> Categorias
               </a>
-              <a href="contato.html" class="user-dropdown-item dropdown-nav-links-item">
+              <a href="contato.html" class="user-dropdown-item">
                 <span data-icon="send"></span> Contato
               </a>
-              <div class="user-dropdown-divider dropdown-nav-links-item"></div>
+              <div class="user-dropdown-divider"></div>
               <button type="button" class="user-dropdown-item" onclick="logout()">
                 <span data-icon="log-out"></span> Sair
               </button>
@@ -249,7 +249,7 @@
           <button class="btn btn-primary" onclick="enviarMensagemCliente()">Enviar</button>
         </div>
       </div>
-      <div id="chatEmptyState" class="empty-state">
+<div id="chatEmptyState" class="empty-state">
         <span class="icon">💬</span>
         <h3>Selecione uma solicitação</h3>
         <p>Escolha uma solicitação acima para conversar com o profissional.</p>
