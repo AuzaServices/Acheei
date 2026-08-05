@@ -14,3 +14,14 @@
 - [x] Mostrar botão "Salvar Alterações" (e "Cancelar") na parte inferior do modal quando houver edição.
 - [x] Salvar alterações no banco e recarregar para todos verem.
 - [ ] Testar fluxo completo no navegador.
+
+## Tarefa 3 - Aba de Configurações do Profissional (Concluída)
+- [x] Adicionar botão de engrenagem (configurações) no header do profissional (ao lado de "Sair").
+- [x] Criar modal de configurações para editar foto de perfil, até 3 fotos de serviços e dados de cadastro.
+- [x] Campos editáveis: nome, email, data de nascimento, endereço, número, bairro, cidade, estado, CEP.
+- [x] Campos NÃO editáveis (desabilitados): CPF e Profissão.
+- [x] Upload de imagens via Cloudinary (redimensionamento + upload) para perfil e serviços.
+- [x] Salvar tudo de uma vez via `PUT /api/profissionais/me` (protegido por JWT).
+- [x] Atualizar o header (nome/foto) e o global após salvar.
+- [x] Modal com scroll interno para não estourar a tela.
+- [ ] Testar fluxo completo no navegador.

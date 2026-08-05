@@ -158,7 +158,7 @@ module.exports = function(db, dbConnected) {
     });
   });
 
-  // ============================================
+// ============================================
   // GET /api/profissionais/me
   // Dados do profissional logado (via token)
   // ============================================
@@ -182,19 +182,90 @@ module.exports = function(db, dbConnected) {
           success: true,
           data: {
             id: prof.id,
+            cpf: prof.cpf,
             nome_perfil: prof.nome_perfil,
             email: prof.email,
             foto_perfil: prof.foto_perfil,
             profissao: prof.profissao,
+            data_nascimento: prof.data_nascimento,
+            endereco: prof.endereco,
+            numero: prof.numero,
+            bairro: prof.bairro,
             cidade: prof.cidade,
             estado: prof.estado,
-            status_aprovacao: prof.status_aprovacao
+            cep: prof.cep,
+            fotos_servicos: prof.fotos_servicos ? JSON.parse(prof.fotos_servicos) : [],
+            status_aprovacao: prof.status_aprovacao,
+            data_cadastro: prof.data_cadastro
           }
         });
       });
     } catch (err) {
       return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
     }
+  });
+
+  // ============================================
+  // PUT /api/profissionais/me
+  // Profissional atualiza os próprios dados (exceto CPF)
+  // ============================================
+  router.put('/me', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+
+    const {
+      nome_perfil, email, data_nascimento, endereco, numero, bairro,
+      cidade, estado, cep, foto_perfil, fotos_servicos
+    } = req.body;
+
+    const campos = [];
+    const params = [];
+
+    if (nome_perfil !== undefined) { campos.push('nome_perfil = ?'); params.push(nome_perfil); }
+    if (email !== undefined) { campos.push('email = ?'); params.push(email); }
+    if (data_nascimento !== undefined) { campos.push('data_nascimento = ?'); params.push(data_nascimento); }
+    if (endereco !== undefined) { campos.push('endereco = ?'); params.push(endereco); }
+    if (numero !== undefined) { campos.push('numero = ?'); params.push(numero); }
+    if (bairro !== undefined) { campos.push('bairro = ?'); params.push(bairro); }
+    if (cidade !== undefined) { campos.push('cidade = ?'); params.push(cidade); }
+    if (estado !== undefined) { campos.push('estado = ?'); params.push(estado.toUpperCase()); }
+    if (cep !== undefined) { campos.push('cep = ?'); params.push(cep); }
+    if (foto_perfil !== undefined) { campos.push('foto_perfil = ?'); params.push(foto_perfil); }
+    if (fotos_servicos !== undefined) { campos.push('fotos_servicos = ?'); params.push(JSON.stringify(fotos_servicos)); }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
+    }
+
+    params.push(decoded.id);
+    const sql = 'UPDATE profissionais SET ' + campos.join(', ') + ' WHERE id = ?';
+
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Este e-mail já está em uso por outro profissional.' });
+        }
+        console.error('Erro ao atualizar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar profissional' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+      res.json({ success: true, message: 'Dados atualizados com sucesso!' });
+    });
   });
 
   // ============================================
