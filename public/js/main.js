@@ -125,15 +125,10 @@ card.innerHTML = `
           <span data-icon="share"></span>
         </button>
       </div>
-      <div class="card-body">
+<div class="card-body">
         <div class="fotos-servicos">
           ${fotosHtml}
         </div>
-      </div>
-<div class="card-footer">
-        <button class="btn btn-primary" onclick="abrirModalSolicitacao(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}')">
-          <span data-icon="send"></span> Solicitar Serviço
-        </button>
       </div>
     `;
 
