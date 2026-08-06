@@ -11,17 +11,19 @@
 .prof-body { background: #f0f0f0; }
     .login-container { min-height: 100vh; display: flex; padding: 0; background: var(--gray-bg); }
 
-    /* ===== Painel visual à esquerda ===== */
+/* ===== Painel visual à esquerda ===== */
     .login-visual {
       flex: 1.1; display: flex; flex-direction: column; justify-content: space-between;
-      background: linear-gradient(160deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.75) 100%),
+        url('icons/foto-profissional.jpeg') center/cover no-repeat;
       color: #fff; padding: 48px; position: relative; overflow: hidden;
     }
     .login-visual::before {
       content: ''; position: absolute; inset: 0;
       background:
-        radial-gradient(circle at 15% 20%, rgba(255,0,0,0.28) 0%, transparent 45%),
-        radial-gradient(circle at 85% 80%, rgba(255,0,0,0.18) 0%, transparent 45%);
+        radial-gradient(circle at 15% 20%, rgba(255,0,0,0.22) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(0,0,0,0.25) 0%, transparent 45%);
     }
     .login-visual .vis-brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; color: #fff; position: relative; z-index: 2; }
     .login-visual .vis-brand .logo-badge { width: 44px; height: 44px; border-radius: 12px; background: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 8px 22px rgba(255,0,0,0.4); }

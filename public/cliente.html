@@ -16,17 +16,19 @@
     /* ===== Tela de Login em Split-Screen (moderna) ===== */
     .auth-container { min-height: 100vh; display: flex; padding: 0; background: var(--gray-bg); }
 
-    /* Painel visual à esquerda */
+/* Painel visual à esquerda */
     .auth-visual {
       flex: 1.1; display: flex; flex-direction: column; justify-content: space-between;
-      background: linear-gradient(160deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.75) 100%),
+        url('icons/foto-cliente.jpeg') center/cover no-repeat;
       color: #fff; padding: 48px; position: relative; overflow: hidden;
     }
     .auth-visual::before {
       content: ''; position: absolute; inset: 0;
       background:
-        radial-gradient(circle at 15% 20%, rgba(255,0,0,0.28) 0%, transparent 45%),
-        radial-gradient(circle at 85% 80%, rgba(255,0,0,0.18) 0%, transparent 45%);
+        radial-gradient(circle at 15% 20%, rgba(255,0,0,0.22) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(0,0,0,0.25) 0%, transparent 45%);
     }
     .auth-visual .vis-brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; color: #fff; position: relative; z-index: 2; }
     .auth-visual .vis-brand .logo-badge { width: 44px; height: 44px; border-radius: 12px; background: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 8px 22px rgba(255,0,0,0.4); }
@@ -194,7 +196,7 @@
   <!-- Painel visual da lateral esquerda -->
   <div class="auth-visual">
     <div class="vis-brand">
-      <div class="logo-badge">🔍</div>
+<div class="logo-badge"><span data-icon="search"></span></div>
       <span>Acheei<span class="dot">.</span></span>
     </div>
 
@@ -213,12 +215,12 @@
     <div class="vis-review">
       <p>"Encontrei um excelente eletricista em minutos. Incrível!"</p>
       <div class="who">
-        <div class="avatar">👤</div>
+<div class="avatar"><span data-icon="user"></span></div>
         <div>
           <div class="nm">Marina Souza</div>
           <div class="role">Cliente Acheei</div>
         </div>
-        <div class="stars">★★★★★</div>
+<div class="stars"><span data-icon="star"></span></div>
       </div>
     </div>
   </div>
@@ -237,7 +239,7 @@
         <h1>Acheei <span style="color:var(--red-primary);">Cliente</span></h1>
         <p>Acesse sua conta para gerenciar seus serviços</p>
       </div>
-      <div class="form-title">Bem-vindo de volta 👋</div>
+<div class="form-title">Bem-vindo de volta</div>
       <div class="form-sub">Entre para continuar</div>
       <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
@@ -259,9 +261,9 @@
 
     <form class="auth-form" id="cadastroForm">
       <div class="push-notice" id="pushNotice">
-        <strong>🔔 Ative as notificações!</strong>
+<strong><span data-icon="bell"></span> Ative as notificações!</strong>
         <p style="margin: 8px 0 0;">Precisamos da sua autorização para enviar notificações quando o profissional responder. Você receberá alertas no navegador.</p>
-        <button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacoesCadastro()" style="width:100%;justify-content:center;">🔔 Aceitar Notificações</button>
+<button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacoesCadastro()" style="width:100%;justify-content:center;"><span data-icon="bell"></span> Aceitar Notificações</button>
       </div>
       <div class="form-group">
         <label for="cadastroNome">Nome Completo</label>
@@ -297,7 +299,7 @@
         <div class="user-area" id="userArea">
           <div class="user-dropdown" id="userDropdown">
             <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
-              <span class="user-avatar" id="userAvatar">👤</span>
+<span class="user-avatar" id="userAvatar"><span data-icon="user"></span></span>
               <span class="user-name" id="userName">Cliente</span>
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
@@ -357,7 +359,7 @@
         </div>
       </div>
 <div id="chatEmptyState" class="empty-state">
-        <span class="icon">💬</span>
+        <span class="icon"><span data-icon="chat"></span></span>
         <h3>Selecione uma solicitação</h3>
         <p>Escolha uma solicitação acima para conversar com o profissional.</p>
       </div>
@@ -381,14 +383,14 @@
 
 <!-- Widget de Chat Flutuante (Messenger) -->
 <div class="chat-widget" id="chatWidget">
-  <button class="chat-bubble" id="chatBubble" onclick="toggleChatPainel()">
-    💬
+<button class="chat-bubble" id="chatBubble" onclick="toggleChatPainel()">
+    <span data-icon="chat"></span>
     <span class="chat-badge" id="chatBadge">0</span>
   </button>
 </div>
 <div class="chat-panel" id="chatPanel">
   <div class="chat-panel-header">
-    <h4>💬 Conversas</h4>
+<h4><span data-icon="chat"></span> Conversas</h4>
     <button onclick="toggleChatPainel()">&times;</button>
   </div>
   <div class="chat-panel-select">
@@ -398,7 +400,7 @@
   </div>
   <div class="chat-panel-body" id="widgetChatBody">
     <div class="chat-panel-empty">
-      <span class="icon">💬</span>
+<span class="icon"><span data-icon="chat"></span></span>
       <p>Selecione uma conversa acima</p>
     </div>
   </div>
