@@ -378,7 +378,7 @@ module.exports = function(db, dbConnected) {
             }
           }
 
-          if (idPart.startsWith('preference:') && refPart && mp.payment) {
+if (idPart.startsWith('preference:') && refPart && mp.payment) {
             try {
               const searchResult = await mp.payment.search({
                 options: {
@@ -389,14 +389,15 @@ module.exports = function(db, dbConnected) {
                 }
               });
               const payments = searchResult.results || searchResult.body?.results || [];
+              let approvedPreference = false;
               for (const payment of payments) {
                 const valorPago = parseFloat(payment.transaction_amount || 0);
                 if (payment.status === 'approved' && Math.abs(valorPago - mp.VALOR_LIBERACAO_CHAT) <= 0.01) {
-                  approved = true;
+                  approvedPreference = true;
                   break;
                 }
               }
-              if (approved) {
+              if (approvedPreference) {
                 db.query(
                   'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
                   [solicitacaoId],
@@ -475,43 +476,11 @@ module.exports = function(db, dbConnected) {
     }
   });
 
-  // ============================================
+// ============================================
   // GET /api/pagamento/webhook (para testes de IPN)
   // ============================================
   router.get('/webhook', (req, res) => {
     res.status(200).json({ success: true, message: 'Webhook ativo' });
-  });
-
-  // ============================================
-  // POST /api/pagamento/confirmar (fallback manual)
-  // ============================================
-  router.post('/confirmar', (req, res) => {
-    if (!dbConnected()) {
-      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
-    }
-    const { solicitacao_id } = req.body;
-    if (!solicitacao_id) {
-      return res.status(400).json({ success: false, message: 'solicitacao_id é obrigatório' });
-    }
-    db.query(
-      'UPDATE solicitacoes SET status_pagamento = "pago", preference_id = NULL WHERE id = ?',
-      [solicitacao_id],
-      (err, result) => {
-        if (err) {
-          console.error('Erro ao confirmar pagamento:', err);
-          return res.status(500).json({ success: false, message: 'Erro ao confirmar pagamento' });
-        }
-        if (result.affectedRows === 0) {
-          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
-        }
-        console.log(`Pagamento confirmado manualmente para solicitação #${solicitacao_id}`);
-        res.json({
-          success: true,
-          message: 'Pagamento confirmado! O chat com o cliente foi liberado.',
-          data: { id: parseInt(solicitacao_id), status_pagamento: 'pago' }
-        });
-      }
-    );
   });
 
   // ============================================
