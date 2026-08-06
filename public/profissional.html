@@ -259,12 +259,17 @@
       .solicitacao-card .info-grid { grid-template-columns: 1fr; }
       .config-grid { grid-template-columns: 1fr; }
       .config-foto-servicos { grid-template-columns: repeat(3, 1fr); }
-      .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; }
+      .chat-panel { left: 10px; right: 10px; width: auto; bottom: 80px; max-height: calc(100vh - 110px); }
+      .chat-panel-body { min-height: 200px; max-height: none; }
+      .chat-panel-footer { padding: 10px; }
+      .chat-panel-footer input { min-width: 0; }
+      .chat-container .chat-input input { min-width: 0; }
     }
     /* Widget de Chat Flutuante (Messenger) - espelhado do cliente */
     .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none; }
     .chat-widget.active { display: block; }
-    .chat-bubble { width: 60px; height: 60px; border-radius: 50%; background: var(--red-primary); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; box-shadow: var(--shadow-lg); transition: var(--transition); border: none; position: relative; }
+.chat-bubble { width: 60px; height: 60px; border-radius: 50%; background: var(--red-primary); color: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-lg); transition: var(--transition); border: none; position: relative; }
+    .chat-bubble .icon-svg { width: 30px; height: 30px; color: var(--white); }
     .chat-bubble:hover { transform: scale(1.1); background: var(--red-dark); }
     .chat-bubble.pulse { animation: pulseBubble 1s ease-in-out infinite, blinkBubble 1s ease-in-out infinite; }
     @keyframes pulseBubble { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,0,0,0.5); } 50% { box-shadow: 0 0 0 20px rgba(255,0,0,0); } }
@@ -622,7 +627,7 @@
 <!-- Widget de Chat Flutuante (Messenger) -->
 <div class="chat-widget" id="chatWidget">
   <button class="chat-bubble" id="chatBubble" onclick="toggleChatPainel()">
-    💬
+    <span data-icon="chat"></span>
     <span class="chat-badge" id="chatBadge">0</span>
   </button>
 </div>

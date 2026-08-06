@@ -187,7 +187,11 @@
       .auth-mobile-logo { display: block; }
       .dashboard-tabs { flex-direction: column; }
       .solicitacao-card .card-header { flex-direction: column; }
-      .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; }
+      .chat-panel { left: 10px; right: 10px; width: auto; bottom: 80px; max-height: calc(100vh - 110px); }
+      .chat-panel-body { min-height: 200px; max-height: none; }
+      .chat-panel-footer { padding: 10px; }
+      .chat-panel-footer input { min-width: 0; }
+      .chat-input-area input { min-width: 0; }
     }
   </style>
 </head>

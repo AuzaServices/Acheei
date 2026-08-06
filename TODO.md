@@ -9,10 +9,12 @@
 ## public/js/cliente.js
 - [x] Bug 3: Abrir a conversa da mensagem mais recente ao clicar no balão
 
+## public/profissional.html e public/cliente.html
+- [x] Ajuste de layout do chat no mobile (input/botão não cortados)
+
 ## Testes
 - [ ] Trocar de aba no painel do profissional e voltar ao chat (mensagem deve enviar)
 - [ ] Balão do profissional pulsar ao receber mensagem do cliente
 - [ ] Logout -> login com 2 profissionais diferentes (não vazar conversas)
 - [ ] Página profissional já logada não piscar a tela de login
 - [ ] Balão do cliente abrir na conversa do último profissional que enviou
-
