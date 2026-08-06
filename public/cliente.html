@@ -10,13 +10,57 @@
   <link rel="manifest" href="manifest.json">
 <style>
     /* Ambos ocultos por padrão; o JS decide qual exibir (evita flash) */
-    .cliente-body { background: #f0f0f0; }
+.cliente-body { background: #f0f0f0; }
     #authScreen, #dashboard { display: none !important; }
-    .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
-    .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
+
+    /* ===== Tela de Login em Split-Screen (moderna) ===== */
+    .auth-container { min-height: 100vh; display: flex; padding: 0; background: var(--gray-bg); }
+
+    /* Painel visual à esquerda */
+    .auth-visual {
+      flex: 1.1; display: flex; flex-direction: column; justify-content: space-between;
+      background: linear-gradient(160deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
+      color: #fff; padding: 48px; position: relative; overflow: hidden;
+    }
+    .auth-visual::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,0,0,0.28) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(255,0,0,0.18) 0%, transparent 45%);
+    }
+    .auth-visual .vis-brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; color: #fff; position: relative; z-index: 2; }
+    .auth-visual .vis-brand .logo-badge { width: 44px; height: 44px; border-radius: 12px; background: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 8px 22px rgba(255,0,0,0.4); }
+    .auth-visual .vis-brand span.dot { color: var(--red-primary); }
+    .auth-visual .vis-hero { position: relative; z-index: 2; max-width: 460px; }
+    .auth-visual .vis-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); padding: 7px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 22px; }
+    .auth-visual .vis-hero h2 { font-size: 40px; font-weight: 800; line-height: 1.18; margin-bottom: 16px; }
+    .auth-visual .vis-hero h2 .hl { color: var(--red-primary); }
+    .auth-visual .vis-hero p { font-size: 16px; color: rgba(255,255,255,0.82); line-height: 1.7; margin-bottom: 34px; }
+    .auth-visual .vis-features { display: flex; flex-direction: column; gap: 14px; }
+    .auth-visual .vis-feature { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.9); }
+    .auth-visual .vis-feature .f-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.12); color: var(--red-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .auth-visual .vis-review { position: relative; z-index: 2; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-lg); padding: 20px 22px; backdrop-filter: blur(6px); }
+    .auth-visual .vis-review p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.92); margin-bottom: 14px; }
+    .auth-visual .vis-review .who { display: flex; align-items: center; gap: 12px; }
+    .auth-visual .vis-review .who .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .auth-visual .vis-review .who .nm { font-size: 14px; font-weight: 700; }
+    .auth-visual .vis-review .who .role { font-size: 12px; color: rgba(255,255,255,0.65); }
+    .auth-visual .vis-review .stars { color: #f5c518; font-size: 13px; margin-left: auto; }
+
+    /* Divisor entre o painel e o login */
+    .auth-divider { width: 1px; background: linear-gradient(180deg, transparent, var(--red-primary), transparent); flex-shrink: 0; }
+
+    /* Painel do formulário à direita */
+    .auth-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--gray-bg); }
+    .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
+    .auth-mobile-logo { display: none; text-align: center; margin-bottom: 22px; }
+    .auth-mobile-logo h1 { font-size: 30px; color: var(--red-primary); font-weight: 800; }
+    .auth-mobile-logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
     .auth-card .logo { text-align: center; margin-bottom: 24px; }
-    .auth-card .logo h1 { font-size: 32px; color: var(--red-primary); font-weight: 800; }
+    .auth-card .logo h1 { font-size: 28px; color: var(--red-primary); font-weight: 800; }
     .auth-card .logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
+    .auth-card .form-title { font-size: 22px; font-weight: 800; color: var(--black-primary); margin-bottom: 6px; }
+    .auth-card .form-sub { font-size: 14px; color: var(--gray-medium); margin-bottom: 24px; }
     .auth-tabs { display: flex; margin-bottom: 24px; border-radius: var(--radius-sm); overflow: hidden; border: 2px solid var(--gray-lighter); }
     .auth-tab { flex: 1; padding: 12px; text-align: center; font-weight: 600; font-size: 14px; cursor: pointer; transition: var(--transition); background: var(--white); color: var(--gray-medium); border: none; }
     .auth-tab.active { background: var(--red-primary); color: var(--white); }
@@ -132,21 +176,73 @@
     .chat-panel-msg.cliente .time { text-align: right; color: rgba(255,255,255,0.7); }
     .chat-panel-select { padding: 12px; border-bottom: 1px solid var(--gray-lighter); }
 .chat-panel-select select { width: 100%; padding: 10px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 13px; }
-    @media (max-width: 768px) { .dashboard-tabs { flex-direction: column; } .solicitacao-card .card-header { flex-direction: column; } .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; } }
+@media (max-width: 768px) {
+      .auth-container { flex-direction: column; }
+      .auth-visual, .auth-divider { display: none; }
+      .auth-panel { padding: 24px; }
+      .auth-card { padding: 28px 24px; }
+      .auth-mobile-logo { display: block; }
+      .dashboard-tabs { flex-direction: column; }
+      .solicitacao-card .card-header { flex-direction: column; }
+      .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; }
+    }
   </style>
 </head>
 <body class="cliente-body">
 
 <div class="auth-container" id="authScreen">
-  <div class="auth-card">
-    <div class="logo">
-      <h1>Acheei</h1>
-      <p>Área do Cliente</p>
+  <!-- Painel visual da lateral esquerda -->
+  <div class="auth-visual">
+    <div class="vis-brand">
+      <div class="logo-badge">🔍</div>
+      <span>Acheei<span class="dot">.</span></span>
     </div>
-    <div class="auth-tabs">
+
+    <div class="vis-hero">
+      <span class="vis-eyebrow"><span data-icon="user"></span> Área do Cliente</span>
+      <h2>Encontre o <span class="hl">profissional ideal</span> para cada serviço</h2>
+      <p>Na Acheei você encontra profissionais de confiança perto de você. Rápido, fácil e seguro.</p>
+
+      <div class="vis-features">
+        <div class="vis-feature"><span class="f-icon"><span data-icon="search"></span></span> Busque por serviço, cidade e estado</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="chat"></span></span> Converse direto com o profissional</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="star"></span></span> Acompanhe orçamentos e avaliações</div>
+      </div>
+    </div>
+
+    <div class="vis-review">
+      <p>"Encontrei um excelente eletricista em minutos. Incrível!"</p>
+      <div class="who">
+        <div class="avatar">👤</div>
+        <div>
+          <div class="nm">Marina Souza</div>
+          <div class="role">Cliente Acheei</div>
+        </div>
+        <div class="stars">★★★★★</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divisor -->
+  <div class="auth-divider"></div>
+
+  <!-- Painel do formulário à direita -->
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-mobile-logo">
+        <h1>Acheei</h1>
+        <p>Área do Cliente</p>
+      </div>
+      <div class="logo">
+        <h1>Acheei <span style="color:var(--red-primary);">Cliente</span></h1>
+        <p>Acesse sua conta para gerenciar seus serviços</p>
+      </div>
+      <div class="form-title">Bem-vindo de volta 👋</div>
+      <div class="form-sub">Entre para continuar</div>
+      <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
       <button class="auth-tab" onclick="switchAuthTab('cadastro')">Cadastrar</button>
-    </div>
+      </div>
 
     <form class="auth-form active" id="loginForm">
       <div class="form-group">
@@ -184,9 +280,10 @@
         <input type="tel" id="cadastroTelefone" placeholder="(11) 99999-9999" required>
       </div>
       <button type="submit" class="btn btn-primary btn-lg" id="btnCriarConta" disabled>Criar Conta</button>
-      <div class="auth-error" id="cadastroError"></div>
+<div class="auth-error" id="cadastroError"></div>
       <div class="auth-success" id="cadastroSuccess">Conta criada! Entrando...</div>
     </form>
+    </div>
   </div>
 </div>
 

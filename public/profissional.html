@@ -8,12 +8,54 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
   <style>
-    .prof-body { background: #f0f0f0; }
-    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); }
-    .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
-    .login-card .logo { text-align: center; margin-bottom: 30px; }
-    .login-card .logo h1 { font-size: 32px; color: var(--red-primary); font-weight: 800; }
+.prof-body { background: #f0f0f0; }
+    .login-container { min-height: 100vh; display: flex; padding: 0; background: var(--gray-bg); }
+
+    /* ===== Painel visual à esquerda ===== */
+    .login-visual {
+      flex: 1.1; display: flex; flex-direction: column; justify-content: space-between;
+      background: linear-gradient(160deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
+      color: #fff; padding: 48px; position: relative; overflow: hidden;
+    }
+    .login-visual::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(255,0,0,0.28) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(255,0,0,0.18) 0%, transparent 45%);
+    }
+    .login-visual .vis-brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; color: #fff; position: relative; z-index: 2; }
+    .login-visual .vis-brand .logo-badge { width: 44px; height: 44px; border-radius: 12px; background: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 8px 22px rgba(255,0,0,0.4); }
+    .login-visual .vis-brand span.dot { color: var(--red-primary); }
+    .login-visual .vis-hero { position: relative; z-index: 2; max-width: 460px; }
+    .login-visual .vis-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22); padding: 7px 16px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 22px; }
+    .login-visual .vis-hero h2 { font-size: 40px; font-weight: 800; line-height: 1.18; margin-bottom: 16px; }
+    .login-visual .vis-hero h2 .hl { color: var(--red-primary); }
+    .login-visual .vis-hero p { font-size: 16px; color: rgba(255,255,255,0.82); line-height: 1.7; margin-bottom: 34px; }
+    .login-visual .vis-features { display: flex; flex-direction: column; gap: 14px; }
+    .login-visual .vis-feature { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.9); }
+    .login-visual .vis-feature .f-icon { width: 34px; height: 34px; border-radius: 10px; background: rgba(255,255,255,0.12); color: var(--red-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .login-visual .vis-review { position: relative; z-index: 2; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: var(--radius-lg); padding: 20px 22px; backdrop-filter: blur(6px); }
+    .login-visual .vis-review p { font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.92); margin-bottom: 14px; }
+    .login-visual .vis-review .who { display: flex; align-items: center; gap: 12px; }
+    .login-visual .vis-review .who .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .login-visual .vis-review .who .nm { font-size: 14px; font-weight: 700; }
+    .login-visual .vis-review .who .role { font-size: 12px; color: rgba(255,255,255,0.65); }
+    .login-visual .vis-review .stars { color: #f5c518; font-size: 13px; margin-left: auto; }
+
+    /* ===== Divisor ===== */
+    .login-divider { width: 1px; background: linear-gradient(180deg, transparent, var(--red-primary), transparent); flex-shrink: 0; }
+
+    /* ===== Painel do formulário à direita ===== */
+    .login-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--gray-bg); }
+    .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); }
+    .login-mobile-logo { display: none; text-align: center; margin-bottom: 22px; }
+    .login-mobile-logo h1 { font-size: 30px; color: var(--red-primary); font-weight: 800; }
+    .login-mobile-logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
+    .login-card .logo { text-align: center; margin-bottom: 24px; }
+    .login-card .logo h1 { font-size: 28px; color: var(--red-primary); font-weight: 800; }
     .login-card .logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
+    .login-card .form-title { font-size: 22px; font-weight: 800; color: var(--black-primary); margin-bottom: 6px; }
+    .login-card .form-sub { font-size: 14px; color: var(--gray-medium); margin-bottom: 24px; }
     .login-card .form-group { margin-bottom: 20px; }
     .login-card .form-group label { display: block; font-size: 14px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; }
     .login-card .form-group input { width: 100%; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 15px; transition: var(--transition); }
@@ -204,7 +246,19 @@
     .config-save-bar.active { display: flex; justify-content: flex-end; gap: 10px; }
     .config-modal { max-height: 90vh; display: flex; flex-direction: column; }
     .config-modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
-    @media (max-width: 768px) { .calc-grid, .ferramentas-grid { grid-template-columns: 1fr; } .dashboard-tab { min-width: 80px; font-size: 12px; padding: 12px 8px; } .solicitacao-card .info-grid { grid-template-columns: 1fr; } .config-grid { grid-template-columns: 1fr; } .config-foto-servicos { grid-template-columns: repeat(3, 1fr); } .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; } }
+@media (max-width: 768px) {
+      .login-container { flex-direction: column; }
+      .login-visual, .login-divider { display: none; }
+      .login-panel { padding: 24px; }
+      .login-card { padding: 28px 24px; }
+      .login-mobile-logo { display: block; }
+      .calc-grid, .ferramentas-grid { grid-template-columns: 1fr; }
+      .dashboard-tab { min-width: 80px; font-size: 12px; padding: 12px 8px; }
+      .solicitacao-card .info-grid { grid-template-columns: 1fr; }
+      .config-grid { grid-template-columns: 1fr; }
+      .config-foto-servicos { grid-template-columns: repeat(3, 1fr); }
+      .chat-panel { width: calc(100vw - 20px); right: 10px; bottom: 80px; max-height: 450px; }
+    }
     /* Widget de Chat Flutuante (Messenger) - espelhado do cliente */
     .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none; }
     .chat-widget.active { display: block; }
@@ -242,26 +296,70 @@
 
 <!-- TELA DE LOGIN -->
 <div class="login-container" id="loginScreen">
-  <div class="login-card">
-    <div class="logo">
-      <h1>Acheei</h1>
-      <p>Área do Profissional</p>
+  <!-- Painel visual da lateral esquerda -->
+  <div class="login-visual">
+    <div class="vis-brand">
+      <div class="logo-badge">🔧</div>
+      <span>Acheei<span class="dot">.</span></span>
     </div>
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email">
+
+    <div class="vis-hero">
+      <span class="vis-eyebrow"><span data-icon="hard-hat"></span> Área do Profissional</span>
+      <h2>Gerencie seu negócio e <span class="hl">conquiste mais clientes</span></h2>
+      <p>Receba solicitações, envie orçamentos e converse com seus clientes em um só lugar.</p>
+
+      <div class="vis-features">
+        <div class="vis-feature"><span class="f-icon"><span data-icon="bell"></span></span> Receba solicitações em tempo real</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="chat"></span></span> Converse direto com o cliente</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="settings"></span></span> Ferramentas e calculadora inclusas</div>
       </div>
-      <div class="form-group">
-        <label for="senha">Senha</label>
-        <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password">
+    </div>
+
+    <div class="vis-review">
+      <p>"Acheei me ajudou a dobrar minha carteira de clientes!"</p>
+      <div class="who">
+        <div class="avatar">👷</div>
+        <div>
+          <div class="nm">Carlos Mendes</div>
+          <div class="role">Eletricista</div>
+        </div>
+        <div class="stars">★★★★★</div>
       </div>
-      <button type="submit" class="btn btn-primary btn-lg">Entrar na Área</button>
-      <div class="login-error" id="loginError">E-mail ou senha inválidos</div>
-    </form>
-    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--gray-medium);">
-      Ainda não tem conta? <a href="cadastro.html" style="color:var(--red-primary);font-weight:600;">Cadastre-se</a>
-    </p>
+    </div>
+  </div>
+
+  <!-- Divisor -->
+  <div class="login-divider"></div>
+
+  <!-- Painel do formulário à direita -->
+  <div class="login-panel">
+    <div class="login-card">
+      <div class="login-mobile-logo">
+        <h1>Acheei</h1>
+        <p>Área do Profissional</p>
+      </div>
+      <div class="logo">
+        <h1>Acheei <span style="color:var(--red-primary);">Profissional</span></h1>
+        <p>Acesse sua conta para gerenciar seus serviços</p>
+      </div>
+      <div class="form-title">Bem-vindo de volta 👋</div>
+      <div class="form-sub">Entre para continuar</div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">Entrar na Área</button>
+        <div class="login-error" id="loginError">E-mail ou senha inválidos</div>
+      </form>
+      <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--gray-medium);">
+        Ainda não tem conta? <a href="cadastro.html" style="color:var(--red-primary);font-weight:600;">Cadastre-se</a>
+      </p>
+    </div>
   </div>
 </div>
 

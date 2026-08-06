@@ -525,6 +525,44 @@ img {
   transform: translateY(-2px);
 }
 
+/* ============================================
+   Botões da Navbar (Área do Cliente / Profissional)
+   Tamanho menor, uniforme e hover sutil
+   ============================================ */
+.navbar .nav-links .btn-primary,
+.navbar .nav-links .btn-outline {
+  padding: 8px 16px;
+  min-height: 36px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  text-transform: none;
+  letter-spacing: 0;
+  gap: 6px;
+}
+
+.navbar .nav-links .btn-primary .icon-svg,
+.navbar .nav-links .btn-outline .icon-svg {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* Hover sutil e consistente: sem encher tudo de vermelho */
+.navbar .nav-links .btn-primary:hover {
+  background: var(--red-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(255, 0, 0, 0.18);
+}
+
+.navbar .nav-links .btn-outline:hover {
+  background: rgba(255, 0, 0, 0.08);
+  border-color: var(--red-dark);
+  color: var(--red-dark);
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
 .btn-success {
   background: #28a745;
   color: var(--white);
