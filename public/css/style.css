@@ -1534,7 +1534,7 @@ img {
 
 /* Faixa de destaque no topo do footer */
 .footer-accent {
-  height: 4px;
+  height: 1px;
   background: linear-gradient(90deg, var(--red-dark), var(--red-primary), #ff6b6b, var(--red-primary), var(--red-dark));
   background-size: 200% 100%;
   animation: footerAccent 6s linear infinite;
