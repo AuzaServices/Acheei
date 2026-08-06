@@ -2059,6 +2059,15 @@ button[type="button"] {
    Scroll Reveal Animations
    Efeitos modernos de aparecimento na rolagem
    ============================================ */
+.js body.page-enter {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.js body.page-enter.page-loaded {
+  opacity: 1;
+}
+
 .reveal {
   opacity: 0;
   will-change: opacity, transform;
@@ -2084,6 +2093,11 @@ button[type="button"] {
 
 /* Respeita preferência por movimento reduzido */
 @media (prefers-reduced-motion: reduce) {
+  .js body.page-enter {
+    opacity: 1;
+    transition: none;
+  }
+
   .reveal {
     opacity: 1 !important;
     transform: none !important;

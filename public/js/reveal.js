@@ -12,6 +12,7 @@
     document.querySelectorAll('.reveal').forEach(function(el) {
       el.classList.add('visible');
     });
+    document.body.classList.add('page-loaded');
     return;
   }
 
@@ -45,7 +46,9 @@
       // Se já estiver no viewport, marca visível imediatamente
       var rect = el.getBoundingClientRect();
       if (rect.top < window.innerHeight) {
-        el.classList.add('visible');
+        window.requestAnimationFrame(function() {
+          el.classList.add('visible');
+        });
         return;
       }
       observer.observe(el);
@@ -150,11 +153,20 @@
   // ============================================
   // Start
   // ============================================
-  document.addEventListener('DOMContentLoaded', function() {
+  function start() {
     applyReveal();
     applyStagger();
     initReveal();
-  });
+    window.requestAnimationFrame(function() {
+      document.body.classList.add('page-loaded');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
 
 })();
 
