@@ -130,6 +130,11 @@ card.innerHTML = `
           ${fotosHtml}
         </div>
       </div>
+      <div class="card-footer">
+        <button class="btn btn-primary" onclick="abrirModalSolicitacao(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}')">
+          <span data-icon="send"></span> Solicitar Serviço
+        </button>
+      </div>
     `;
 
     // Substitui os placeholders [data-icon] pelos SVGs reais

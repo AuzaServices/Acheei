@@ -947,7 +947,10 @@ img {
   color: var(--gray-lighter);
 }
 
-
+.profissional-card .card-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--gray-lighter);
+}
 
 .foto-box {
   position: relative;
