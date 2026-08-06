@@ -207,48 +207,276 @@ async function deletarProfissional(id) {
   }
 }
 
+let detalhesEditando = false;
+let detalhesId = null;
+
 function verDetalhes(id) {
   var prof = null;
   for (var i = 0; i < profissionaisData.length; i++) {
     if (profissionaisData[i].id === id) { prof = profissionaisData[i]; break; }
   }
   if (!prof) return;
+  detalhesId = id;
+  detalhesEditando = false;
+  renderizarDetalhes(prof);
+  document.getElementById('detalhesModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderizarDetalhes(prof) {
   var fotosServicos = [];
   if (prof.fotos_servicos) {
     if (Array.isArray(prof.fotos_servicos)) fotosServicos = prof.fotos_servicos;
     else try { fotosServicos = JSON.parse(prof.fotos_servicos); } catch(e) { fotosServicos = []; }
   }
-  var fotosHtml = '';
-  if (fotosServicos.length > 0) {
-    for (var i = 0; i < fotosServicos.length; i++) {
-      fotosHtml += '<div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoServico(' + prof.id + ', ' + i + ')">&times;</button><img src="' + fotosServicos[i] + '" alt="Servico"></div>';
-    }
-  } else {
-    fotosHtml = '<p style="color:#999;">Nenhuma foto de servico cadastrada</p>';
-  }
-  var fotoPerfil = '';
-  if (prof.foto_perfil) fotoPerfil = '<div class="foto-box"><button type="button" class="photo-delete-btn" onclick="removerFotoPerfil(' + prof.id + ')">&times;</button><img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;display:block;margin:0 auto 16px;"></div>';
   var sc = prof.status_aprovacao;
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
+
+  // Foto de perfil editável
+  var fotoPerfil = '<div class="detalhes-foto-perfil" style="text-align:center;margin-bottom:16px;">';
+  fotoPerfil += '<div style="position:relative;display:inline-block;">';
+  if (prof.foto_perfil) {
+    fotoPerfil += '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;">';
+  } else {
+    fotoPerfil += '<div style="width:100px;height:100px;border-radius:50%;background:var(--gray-lighter);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--gray-medium);">👤</div>';
+  }
+  fotoPerfil += '<button type="button" class="btn btn-primary btn-sm" onclick="editarFotoPerfilAdmin(' + prof.id + ')" style="display:block;margin:8px auto 0;">Alterar Foto</button>';
+  fotoPerfil += '</div></div>';
+
+  var itens = '';
+  itens += detalheItem('cpf', 'CPF', prof.cpf, false);
+  itens += detalheItem('nome_perfil', 'Nome de Perfil', prof.nome_perfil, true);
+  itens += detalheItem('email', 'E-mail', prof.email, true);
+  itens += detalheItem('profissao', 'Profissão', prof.profissao, false);
+  itens += detalheItem('data_nascimento', 'Data de Nascimento', prof.data_nascimento ? new Date(prof.data_nascimento).toLocaleDateString('pt-BR') : '', true);
+  itens += detalheItem('endereco', 'Endereço', prof.endereco, true);
+  itens += detalheItem('numero', 'Número', prof.numero || '', true);
+  itens += detalheItem('bairro', 'Bairro', prof.bairro, true);
+  itens += detalheItem('cidade', 'Cidade', prof.cidade, true);
+  itens += detalheItem('estado', 'Estado', prof.estado, true);
+  itens += detalheItem('cep', 'CEP', prof.cep, true);
+  itens += detalheItem('data_cadastro', 'Data de Cadastro', prof.data_cadastro ? new Date(prof.data_cadastro).toLocaleString('pt-BR') : '', false);
+
+  var fotosHtml = '';
+  for (var i = 0; i < 3; i++) {
+    var fotoUrl = fotosServicos[i];
+    fotosHtml += '<div class="detalhes-foto-item" style="position:relative;">';
+    if (fotoUrl) {
+      fotosHtml += '<img src="' + fotoUrl + '" alt="Servico ' + (i + 1) + '">';
+    } else {
+      fotosHtml += '<div style="width:100%;height:150px;border:2px dashed var(--gray-lighter);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--gray-medium);background:var(--gray-bg);">Sem foto</div>';
+    }
+    fotosHtml += '<button type="button" class="btn btn-primary btn-sm" onclick="editarFotoServicoAdmin(' + prof.id + ', ' + i + ')" style="position:absolute;bottom:6px;right:6px;padding:4px 10px;font-size:11px;">Alterar</button>';
+    fotosHtml += '</div>';
+  }
+
   document.getElementById('detalhesBody').innerHTML =
     fotoPerfil +
     '<h3 style="text-align:center;margin-bottom:4px;">' + prof.nome_perfil + '</h3>' +
     '<p style="text-align:center;color:red;font-weight:600;margin-bottom:16px;">' + prof.profissao + '</p>' +
     '<div style="text-align:center;margin-bottom:16px;"><span class="status-badge ' + sc + '">' + sl + '</span></div>' +
-    '<div class="detalhes-grid">' +
-      '<div class="detalhes-item"><div class="label">CPF</div><div class="value">' + prof.cpf + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Data de Nascimento</div><div class="value">' + new Date(prof.data_nascimento).toLocaleDateString('pt-BR') + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Endereco</div><div class="value">' + prof.endereco + ', ' + (prof.numero || 'S/N') + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Bairro</div><div class="value">' + prof.bairro + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Cidade</div><div class="value">' + prof.cidade + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Estado</div><div class="value">' + prof.estado + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">CEP</div><div class="value">' + prof.cep + '</div></div>' +
-      '<div class="detalhes-item"><div class="label">Data de Cadastro</div><div class="value">' + new Date(prof.data_cadastro).toLocaleString('pt-BR') + '</div></div>' +
-    '</div>' +
-    '<h4 style="margin-top:24px;margin-bottom:12px;">Fotos dos Servicos</h4>' +
+    '<div class="detalhes-grid">' + itens + '</div>' +
+    '<h4 style="margin-top:24px;margin-bottom:12px;">Fotos dos Serviços</h4>' +
     '<div class="detalhes-fotos">' + fotosHtml + '</div>';
-  document.getElementById('detalhesModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
+
+  document.getElementById('detalhesSaveBar').classList.remove('active');
+}
+
+function detalheItem(campo, label, valor, editavel) {
+  var html = '<div class="detalhes-item" id="detalhe-' + campo + '">';
+  html += '<div class="label">' + label + '</div>';
+  html += '<div class="value" id="valor-' + campo + '">' + (valor || '—') + '</div>';
+  if (editavel) {
+    html += '<button type="button" class="edit-btn" onclick="editarCampo(\'' + campo + '\', \'' + label + '\')" title="Editar">' + icon('edit') + '</button>';
+    html += '<input type="text" class="edit-input" id="input-' + campo + '" style="display:none;">';
+    html += '<input type="hidden" id="campo-' + campo + '" value="' + (valor || '') + '">';
+  }
+  html += '</div>';
+  return html;
+}
+
+function editarCampo(campo, label) {
+  var item = document.getElementById('detalhe-' + campo);
+  var input = document.getElementById('input-' + campo);
+  if (!item || !input) return;
+  item.classList.add('editando');
+  input.value = document.getElementById('campo-' + campo).value;
+  input.style.display = 'block';
+  input.focus();
+  document.getElementById('valor-' + campo).style.display = 'none';
+  document.getElementById('detalhesSaveBar').classList.add('active');
+  detalhesEditando = true;
+  input.onchange = function() {
+    document.getElementById('campo-' + campo).value = input.value;
+  };
+}
+
+function cancelarEdicao() {
+  if (!detalhesId) return;
+  detalhesEditando = false;
+  document.getElementById('detalhesSaveBar').classList.remove('active');
+  // Re-renderiza com dados originais
+  var prof = null;
+  for (var i = 0; i < profissionaisData.length; i++) {
+    if (profissionaisData[i].id === detalhesId) { prof = profissionaisData[i]; break; }
+  }
+  if (prof) renderizarDetalhes(prof);
+}
+
+async function salvarDetalhes() {
+  if (!detalhesId) return;
+  var dados = {};
+  var campos = ['nome_perfil', 'email', 'data_nascimento', 'endereco', 'numero', 'bairro', 'cidade', 'estado', 'cep'];
+  for (var i = 0; i < campos.length; i++) {
+    var campo = campos[i];
+    var input = document.getElementById('input-' + campo);
+    if (input && input.style.display !== 'none') {
+      dados[campo] = input.value;
+    }
+  }
+
+  var btn = document.getElementById('btnSalvarDetalhes');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Salvando...';
+  }
+
+  var result = await apiRequest(API_BASE + '/admin/profissional/' + detalhesId, {
+    method: 'PUT',
+    body: JSON.stringify(dados)
+  });
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = 'Salvar Alterações';
+  }
+
+  if (result && result.success) {
+    showToast('Dados atualizados com sucesso!', 'success');
+    detalhesEditando = false;
+    await carregarProfissionais();
+    cancelarEdicao();
+  } else {
+    showToast((result && result.message) || 'Erro ao salvar', 'error');
+  }
+}
+
+function editarFotoPerfilAdmin(id) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    try {
+      var resized = await resizeImage(file);
+      var url = await uploadImageToCloudinary(resized, 'perfis');
+      var result = await apiRequest(API_BASE + '/admin/profissional/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({ foto_perfil: url })
+      });
+      if (result && result.success) {
+        showToast('Foto de perfil atualizada!', 'success');
+        await carregarProfissionais();
+        cancelarEdicao();
+      } else {
+        showToast((result && result.message) || 'Erro ao atualizar foto', 'error');
+      }
+    } catch (err) {
+      console.error('Erro ao alterar foto de perfil:', err);
+      showToast(err.message || 'Erro ao processar imagem', 'error');
+    }
+  };
+  input.click();
+}
+
+function editarFotoServicoAdmin(id, index) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    try {
+      var resized = await resizeImage(file);
+      var url = await uploadImageToCloudinary(resized, 'servicos');
+
+      // Busca fotos atuais
+      var prof = null;
+      for (var i = 0; i < profissionaisData.length; i++) {
+        if (profissionaisData[i].id == id) { prof = profissionaisData[i]; break; }
+      }
+      var fotos = [];
+      if (prof && prof.fotos_servicos) {
+        if (Array.isArray(prof.fotos_servicos)) fotos = prof.fotos_servicos.slice();
+        else try { fotos = JSON.parse(prof.fotos_servicos); } catch(e) { fotos = []; }
+      }
+      while (fotos.length < 3) fotos.push(null);
+      fotos[index] = url;
+
+      var result = await apiRequest(API_BASE + '/admin/profissional/' + id, {
+        method: 'PUT',
+        body: JSON.stringify({ fotos_servicos: fotos })
+      });
+      if (result && result.success) {
+        showToast('Foto de serviço atualizada!', 'success');
+        await carregarProfissionais();
+        cancelarEdicao();
+      } else {
+        showToast((result && result.message) || 'Erro ao atualizar foto', 'error');
+      }
+    } catch (err) {
+      console.error('Erro ao alterar foto de serviço:', err);
+      showToast(err.message || 'Erro ao processar imagem', 'error');
+    }
+  };
+  input.click();
+}
+
+function resizeImage(file, maxWidth, maxHeight, quality) {
+  if (!maxWidth) maxWidth = 800;
+  if (!maxHeight) maxHeight = 800;
+  if (!quality) quality = 0.7;
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function(e) {
+      var img = new Image();
+      img.src = e.target.result;
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var width = img.width;
+        var height = img.height;
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+    };
+  });
+}
+
+async function uploadImageToCloudinary(base64Image, folder) {
+  var response = await fetch(API_BASE + '/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: base64Image, folder: folder })
+  });
+  var result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Erro no upload');
+  return result.data.url;
 }
 
 function fecharDetalhes() {

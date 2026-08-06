@@ -85,30 +85,42 @@ async function login(event) {
     return;
   }
 
-  var result = await apiRequest(API_BASE + '/profissionais/login', {
-    method: 'POST',
-    body: JSON.stringify({ email: email, senha: senha })
-  });
+try {
+    var response = await fetch(API_BASE + '/profissionais/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, senha: senha })
+    });
+    var result = await response.json();
 
-  btn.disabled = false;
-  btn.innerHTML = 'Entrar na Área';
+    btn.disabled = false;
+    btn.innerHTML = 'Entrar na Área';
 
-  if (result && result.success) {
-token = result.data.token;
-    profissional = result.data.profissional;
-    localStorage.setItem('acheei_prof_token', token);
-    document.getElementById('userName').textContent = profissional.nome_perfil;
-    // Foto
-    var avatar = document.getElementById('userAvatar');
-    if (profissional.foto_perfil) {
-      avatar.innerHTML = '<img src="' + profissional.foto_perfil + '" alt="Foto">';
+    if (response.ok && result && result.success) {
+      token = result.data.token;
+      profissional = result.data.profissional;
+      localStorage.setItem('acheei_prof_token', token);
+      document.getElementById('userName').textContent = profissional.nome_perfil;
+      // Foto
+      var avatar = document.getElementById('userAvatar');
+      if (profissional.foto_perfil) {
+        avatar.innerHTML = '<img src="' + profissional.foto_perfil + '" alt="Foto">';
+      } else {
+        avatar.textContent = '👤';
+      }
+      mostrarDashboard();
+      carregarDados();
+      showToast('Login realizado com sucesso!', 'success');
     } else {
-      avatar.textContent = '👤';
+      var msg = (result && result.message) ? result.message : 'E-mail ou senha inválidos';
+      document.getElementById('loginError').textContent = msg;
+      document.getElementById('loginError').style.display = 'block';
     }
-    mostrarDashboard();
-    carregarDados();
-    showToast('Login realizado com sucesso!', 'success');
-  } else {
+  } catch (error) {
+    console.error('Erro no login do profissional:', error);
+    btn.disabled = false;
+    btn.innerHTML = 'Entrar na Área';
+    document.getElementById('loginError').textContent = 'Erro ao conectar com o servidor. Tente novamente.';
     document.getElementById('loginError').style.display = 'block';
   }
 }
@@ -778,6 +790,280 @@ function fecharDropdown() {
 }
 
 // ============================================
+// Configurações do Profissional
+// ============================================
+let configFotosServicos = [null, null, null];
+let configFotoPerfil = null;
+let configNovaFotoPerfil = null;
+let configNovasFotos = [null, null, null];
+
+function resizeImage(file, maxWidth, maxHeight, quality) {
+  if (!maxWidth) maxWidth = 800;
+  if (!maxHeight) maxHeight = 800;
+  if (!quality) quality = 0.7;
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function(e) {
+      var img = new Image();
+      img.src = e.target.result;
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var width = img.width;
+        var height = img.height;
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+    };
+  });
+}
+
+async function uploadImageToCloudinary(base64Image, folder) {
+  var response = await fetch(API_BASE + '/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: base64Image, folder: folder })
+  });
+  var result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Erro no upload');
+  return result.data.url;
+}
+
+async function uploadMultipleToCloudinary(images, folder) {
+  if (!images || images.length === 0) return [];
+  var response = await fetch(API_BASE + '/upload/multiplas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ images: images, folder: folder })
+  });
+  var result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Erro no upload');
+  return result.data.map(function(item) { return item.url; });
+}
+
+function abrirConfiguracoes() {
+  if (!profissional) {
+    showToast('Faça login primeiro', 'error');
+    return;
+  }
+  fecharDropdown();
+  renderizarConfiguracoes();
+  document.getElementById('configModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharConfiguracoes() {
+  document.getElementById('configModal').classList.remove('active');
+  document.body.style.overflow = '';
+  configNovaFotoPerfil = null;
+  configNovasFotos = [null, null, null];
+}
+
+function renderizarConfiguracoes() {
+  var prof = profissional;
+  configFotoPerfil = prof.foto_perfil || null;
+  configFotosServicos = (prof.fotos_servicos && Array.isArray(prof.fotos_servicos))
+    ? prof.fotos_servicos.slice(0, 3)
+    : [null, null, null];
+  while (configFotosServicos.length < 3) configFotosServicos.push(null);
+
+  var html = '';
+  html += '<div class="config-section">';
+  html += '  <h4><span data-icon="user"></span> Informações Pessoais</h4>';
+  html += '  <div class="config-grid">';
+  html += '    <div class="config-group"><label>Nome de Perfil</label><input type="text" id="cfgNome" value="' + escHtml(prof.nome_perfil || '') + '"></div>';
+  html += '    <div class="config-group"><label>E-mail</label><input type="email" id="cfgEmail" value="' + escHtml(prof.email || '') + '"></div>';
+  html += '    <div class="config-group"><label>CPF</label><input type="text" value="' + escHtml(prof.cpf || '') + '" disabled></div>';
+  html += '    <div class="config-group"><label>Profissão</label><input type="text" value="' + escHtml(prof.profissao || '') + '" disabled></div>';
+  html += '    <div class="config-group"><label>Endereço</label><input type="text" id="cfgEndereco" value="' + escHtml(prof.endereco || '') + '"></div>';
+  html += '    <div class="config-group"><label>Número</label><input type="text" id="cfgNumero" value="' + escHtml(prof.numero || '') + '"></div>';
+  html += '    <div class="config-group"><label>Bairro</label><input type="text" id="cfgBairro" value="' + escHtml(prof.bairro || '') + '"></div>';
+  html += '    <div class="config-group"><label>Cidade</label><input type="text" id="cfgCidade" value="' + escHtml(prof.cidade || '') + '"></div>';
+  html += '    <div class="config-group"><label>Estado (UF)</label><input type="text" id="cfgEstado" maxlength="2" value="' + escHtml(prof.estado || '') + '"></div>';
+  html += '    <div class="config-group"><label>CEP</label><input type="text" id="cfgCep" value="' + escHtml(prof.cep || '') + '"></div>';
+  html += '  </div>';
+  html += '</div>';
+
+  // Foto de perfil
+  html += '<div class="config-section">';
+  html += '  <h4><span data-icon="camera"></span> Foto de Perfil</h4>';
+  html += '  <div class="config-foto-perfil">';
+  html += '    <div class="config-foto-perfil-preview" id="cfgFotoPerfilPreview" style="cursor:pointer;" onclick="document.getElementById(\'cfgFotoPerfilInput\').click()">';
+  html += configFotoPerfil
+    ? '<img src="' + configFotoPerfil + '" alt="Foto de Perfil">'
+    : '<div class="foto-placeholder">👤</div>';
+  html += '    </div>';
+  html += '    <input type="file" id="cfgFotoPerfilInput" accept="image/*" style="display:none;">';
+  html += '    <p style="font-size:13px;color:var(--gray-medium);">Clique na foto para alterar</p>';
+  html += '  </div>';
+  html += '</div>';
+
+  // Fotos de serviço
+  html += '<div class="config-section">';
+  html += '  <h4><span data-icon="image"></span> Fotos dos Serviços</h4>';
+  html += '  <div class="config-foto-servicos" id="cfgFotosServicosContainer">';
+  for (var i = 0; i < 3; i++) {
+    html += '    <div class="config-foto-servico" data-index="' + i + '" onclick="document.getElementById(\'cfgServicoInput' + i + '\').click()">';
+    html += configFotosServicos[i]
+      ? '<img src="' + configFotosServicos[i] + '" alt="Serviço ' + (i + 1) + '">'
+      : '<div class="placeholder"><span data-icon="image"></span><span>Foto ' + (i + 1) + '</span></div>';
+    html += '      <input type="file" id="cfgServicoInput' + i + '" accept="image/*" style="display:none;" data-index="' + i + '">';
+    html += '    </div>';
+  }
+  html += '  </div>';
+  html += '</div>';
+
+  html += '<div class="config-save-bar active" style="display:flex;justify-content:flex-end;gap:10px;">';
+  html += '  <button class="btn btn-outline" onclick="fecharConfiguracoes()">Cancelar</button>';
+  html += '  <button class="btn btn-primary" onclick="salvarConfiguracoes()">Salvar Alterações</button>';
+  html += '</div>';
+
+  document.getElementById('configBody').innerHTML = html;
+
+  // Event listeners de upload
+  document.getElementById('cfgFotoPerfilInput').addEventListener('change', async function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    try {
+      var resized = await resizeImage(file);
+      configNovaFotoPerfil = resized;
+      var preview = document.getElementById('cfgFotoPerfilPreview');
+      preview.innerHTML = '<img src="' + resized + '" alt="Foto de Perfil">';
+    } catch (err) {
+      showToast('Erro ao processar imagem', 'error');
+    }
+  });
+
+  for (var j = 0; j < 3; j++) {
+    (function(idx) {
+      var input = document.getElementById('cfgServicoInput' + idx);
+      if (!input) return;
+      input.addEventListener('change', async function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        try {
+          var resized = await resizeImage(file);
+          configNovasFotos[idx] = resized;
+          var box = document.querySelector('.config-foto-servico[data-index="' + idx + '"]');
+          if (box) box.innerHTML = '<img src="' + resized + '" alt="Serviço ' + (idx + 1) + '">';
+        } catch (err) {
+          showToast('Erro ao processar imagem', 'error');
+        }
+      });
+    })(j);
+  }
+}
+
+function escHtml(str) {
+  if (!str) return ('');
+  var a = String.fromCharCode(38);
+  return String(str)
+    .replace(/&/g, a + 'amp;')
+    .replace(/</g, a + 'lt;')
+    .replace(/>/g, a + 'gt;')
+    .replace(/\x22/g, a + 'quot;')
+    .replace(/'/g, a + '#39;');
+}
+
+async function salvarConfiguracoes() {
+  var btn = event && event.target ? event.target : document.querySelector('[onclick="salvarConfiguracoes()"]');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Salvando...';
+  }
+
+  try {
+    var dados = {
+      nome_perfil: document.getElementById('cfgNome').value.trim(),
+      email: document.getElementById('cfgEmail').value.trim(),
+      endereco: document.getElementById('cfgEndereco').value.trim(),
+      numero: document.getElementById('cfgNumero').value.trim(),
+      bairro: document.getElementById('cfgBairro').value.trim(),
+      cidade: document.getElementById('cfgCidade').value.trim(),
+      estado: document.getElementById('cfgEstado').value.trim().toUpperCase(),
+      cep: document.getElementById('cfgCep').value.trim()
+    };
+
+    // Upload nova foto de perfil se alterada
+    if (configNovaFotoPerfil) {
+      btn.innerHTML = '<span class="spinner"></span> Enviando foto de perfil...';
+      dados.foto_perfil = await uploadImageToCloudinary(configNovaFotoPerfil, 'perfis');
+    }
+
+    // Upload novas fotos de serviço se alteradas
+    var novasFotos = [];
+    var temNova = false;
+    for (var i = 0; i < 3; i++) {
+      if (configNovasFotos[i]) { temNova = true; }
+    }
+    if (temNova) {
+      btn.innerHTML = '<span class="spinner"></span> Enviando fotos dos serviços...';
+      var fotosFinais = [];
+      for (var k = 0; k < 3; k++) {
+        if (configNovasFotos[k]) {
+          fotosFinais.push(configNovasFotos[k]);
+        } else if (configFotosServicos[k]) {
+          fotosFinais.push(configFotosServicos[k]);
+        }
+      }
+      if (fotosFinais.length > 0) {
+        var urls = await uploadMultipleToCloudinary(fotosFinais, 'servicos');
+        dados.fotos_servicos = urls;
+      } else {
+        dados.fotos_servicos = [];
+      }
+    }
+
+    btn.innerHTML = '<span class="spinner"></span> Salvando...';
+    var result = await apiRequest(API_BASE + '/profissionais/me', {
+      method: 'PUT',
+      body: JSON.stringify(dados)
+    });
+
+    if (result && result.success) {
+      showToast('Configurações salvas com sucesso!', 'success');
+      fecharConfiguracoes();
+      // Atualiza dados locais e header
+      var me = await apiRequest(API_BASE + '/profissionais/me');
+      if (me && me.success) {
+        profissional = me.data;
+        document.getElementById('userName').textContent = profissional.nome_perfil;
+        var avatar = document.getElementById('userAvatar');
+        if (profissional.foto_perfil) {
+          avatar.innerHTML = '<img src="' + profissional.foto_perfil + '" alt="Foto">';
+        } else {
+          avatar.textContent = '👤';
+        }
+      }
+    } else {
+      showToast((result && result.message) || 'Erro ao salvar configurações', 'error');
+    }
+  } catch (error) {
+    console.error('Erro ao salvar configurações:', error);
+    showToast(error.message || 'Erro ao salvar configurações', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Salvar Alterações';
+    }
+  }
+}
+
+// ============================================
 // Retorno do Mercado Pago (Checkout Pro)
 // Verifica se o usuário voltou de um pagamento
 // ============================================
@@ -812,6 +1098,108 @@ function verificarRetornoPagamento() {
     showToast('Pagamento pendente. Complete o pagamento para liberar o chat.', 'warning');
   } else if (status === 'failure') {
     showToast('Pagamento cancelado ou não aprovado. Tente novamente.', 'error');
+  }
+}
+
+// ============================================
+// Widget de Chat Flutuante (Messenger)
+// ============================================
+function toggleChatPainel() {
+  var panel = document.getElementById('chatPanel');
+  var widget = document.getElementById('chatWidget');
+  if (!panel || !widget) return;
+  if (panel.classList.contains('open')) {
+    fecharChatPainel();
+  } else {
+    panel.classList.add('open');
+    widget.classList.remove('active');
+    widget.classList.add('pulse');
+    widgetCarregarChat();
+  }
+}
+
+function fecharChatPainel() {
+  var panel = document.getElementById('chatPanel');
+  var widget = document.getElementById('chatWidget');
+  if (panel) panel.classList.remove('open');
+  if (widget) widget.classList.remove('pulse');
+}
+
+async function widgetCarregarChat() {
+  if (!profissional) return;
+  var select = document.getElementById('widgetChatSelect');
+  var id = select.value;
+  var body = document.getElementById('widgetChatBody');
+  var footer = document.getElementById('widgetChatFooter');
+  var badge = document.getElementById('chatBadge');
+  if (!body) return;
+
+  if (!id) {
+    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa acima</p></div>';
+    if (footer) footer.style.display = 'none';
+    if (badge) badge.classList.remove('show');
+    return;
+  }
+
+  // Busca os dados da solicitação para saber se o chat está liberado
+  var sol = null;
+  for (var i = 0; i < solicitacoesData.length; i++) {
+    if (solicitacoesData[i].id == id) { sol = solicitacoesData[i]; break; }
+  }
+
+  if (sol && sol.status_pagamento !== 'pago') {
+    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">🔒</span><p>Chat bloqueado. Realize o pagamento na aba "Solicitações" para liberar.</p></div>';
+    if (footer) footer.style.display = 'none';
+    if (badge) badge.classList.remove('show');
+    return;
+  }
+
+  // Carrega mensagens
+  var result = await apiRequest(API_BASE + '/mensagens/' + id);
+  if (result && result.success) {
+    renderizarWidgetMensagens(result.data);
+    if (footer) footer.style.display = 'flex';
+    if (badge) badge.classList.remove('show');
+  }
+}
+
+function renderizarWidgetMensagens(mensagens) {
+  var body = document.getElementById('widgetChatBody');
+  if (!body) return;
+  body.innerHTML = '';
+  if (!mensagens || mensagens.length === 0) {
+    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Nenhuma mensagem ainda.</p></div>';
+    return;
+  }
+  for (var i = 0; i < mensagens.length; i++) {
+    var msg = mensagens[i];
+    var classe = msg.remetente === 'profissional' ? 'profissional' : 'cliente';
+    var label = msg.remetente === 'profissional' ? 'Você' : 'Cliente';
+    var div = document.createElement('div');
+    div.className = 'chat-panel-msg ' + classe;
+    div.innerHTML = '<div class="bubble">' + msg.texto + '</div><div class="time">' + label + ' - ' + new Date(msg.data_envio).toLocaleTimeString('pt-BR') + '</div>';
+    body.appendChild(div);
+  }
+  body.scrollTop = body.scrollHeight;
+}
+
+async function widgetEnviarMensagem() {
+  var input = document.getElementById('widgetChatInput');
+  var select = document.getElementById('widgetChatSelect');
+  var solicitacaoId = select.value;
+  var texto = input.value.trim();
+  if (!texto || !solicitacaoId) return;
+  input.value = '';
+  var result = await apiRequest(API_BASE + '/mensagens', {
+    method: 'POST',
+    body: JSON.stringify({
+      solicitacao_id: parseInt(solicitacaoId),
+      remetente: 'profissional',
+      texto: texto
+    })
+  });
+  if (result && result.success) {
+    widgetCarregarChat();
   }
 }
 

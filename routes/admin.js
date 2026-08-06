@@ -354,6 +354,56 @@ module.exports = function(db, dbConnected) {
     });
   });
 
+// ============================================
+  // PUT /api/admin/profissional/:id
+  // Editar dados e fotos de um profissional (protegido)
+  // ============================================
+  router.put('/profissional/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    const {
+      nome_perfil, email, data_nascimento, endereco, numero, bairro,
+      cidade, estado, cep, foto_perfil, fotos_servicos
+    } = req.body;
+
+    const campos = [];
+    const params = [];
+
+    if (nome_perfil !== undefined) { campos.push('nome_perfil = ?'); params.push(nome_perfil); }
+    if (email !== undefined) { campos.push('email = ?'); params.push(email); }
+    if (data_nascimento !== undefined) { campos.push('data_nascimento = ?'); params.push(data_nascimento); }
+    if (endereco !== undefined) { campos.push('endereco = ?'); params.push(endereco); }
+    if (numero !== undefined) { campos.push('numero = ?'); params.push(numero); }
+    if (bairro !== undefined) { campos.push('bairro = ?'); params.push(bairro); }
+    if (cidade !== undefined) { campos.push('cidade = ?'); params.push(cidade); }
+    if (estado !== undefined) { campos.push('estado = ?'); params.push(estado.toUpperCase()); }
+    if (cep !== undefined) { campos.push('cep = ?'); params.push(cep); }
+    if (foto_perfil !== undefined) { campos.push('foto_perfil = ?'); params.push(foto_perfil); }
+    if (fotos_servicos !== undefined) { campos.push('fotos_servicos = ?'); params.push(JSON.stringify(fotos_servicos)); }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
+    }
+
+    params.push(req.params.id);
+    const sql = 'UPDATE profissionais SET ' + campos.join(', ') + ' WHERE id = ?';
+
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Este e-mail já está em uso por outro profissional.' });
+        }
+        console.error('Erro ao atualizar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar profissional' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+      res.json({ success: true, message: 'Dados atualizados com sucesso!' });
+    });
+  });
+
   // ============================================
   // POST /api/admin/criar
   // Criar novo administrador (protegido)

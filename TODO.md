@@ -1,27 +1,29 @@
-# TODO - Botão "Compartilhar" e Melhorias de Navegação
+# TODO - Correções Área do Profissional e Painel Admin
 
 ## Objetivo
-1. Remover emojis do `public/contato.html` e substituí-los pelos ícones SVG do sistema (`public/js/icons.js`).
-2. Adicionar botão "Início" no dropdown do Avatar-Nome em `public/cliente.html` (igual à página do profissional).
-3. Adicionar botão "Compartilhar" moderno nos cards de profissionais, permitindo compartilhar o link
-   do profissional via WhatsApp, Facebook, Twitter/X e copiar link. O link abre o modal com
-   nome, profissão, cidade e estado, e botão "Solicitar Serviço".
+1. Implementar o modal de Configurações do profissional (abrir, editar dados, editar foto de perfil e 3 fotos de serviços).
+2. Restaurar a edição de fotos e informações no painel do admin.
 
 ## Passos
-- [x] Analisar projeto (contato.html, cliente.html, index.html, main.js, icons.js, profissionais.js)
+- [x] Analisar profissional.html, profissional.js, painel.html, painel.js, admin.js, upload.js, cadastro.js
 - [x] Criar plano e aprovar com o usuário
 
 ## Implementação
-- [x] contato.html: substituir emojis por ícones SVG (chat, mail, phone, map-pin, check-circle, clock, help-circle)
-- [x] cliente.html: remover botão inferior "Início" e mover "Início" para o dropdown do Avatar-Nome
-- [x] icons.js: adicionar ícone `share`
-- [x] index.html: criar modal `#compartilharModal` (nome, profissão, cidade/estado, Solicitar Serviço, baotoes WhatsApp/Facebook/Twitter/Copiar)
-- [x] main.js: adicionar botão "Compartilhar" nos cards; funções abrirCompartilhar, compartilharWhatsApp,
-       compartilharFacebook, compartilharTwitter, copiarLinkProfissional; detectar `?profissional=ID` na URL
+### Área do Profissional
+- [x] profissional.js: adicionar funções de Configurações (abrirConfiguracoes, fecharConfiguracoes, salvarConfiguracoes)
+- [x] profissional.js: adicionar resizeImage, uploadImageToCloudinary, uploadMultipleToCloudinary (reaproveitando padrão cadastro.js)
+- [x] Modal de configurações: CPF e profissão somente leitura; demais campos editáveis; foto de perfil e 3 fotos de serviço editáveis
+- [x] Salvar via PUT /api/profissionais/me e atualizar header (nome/foto)
+
+### Painel Admin
+- [x] admin.js: adicionar rota PUT /api/admin/profissional/:id (autenticada) para atualizar dados e fotos
+- [x] painel.js: restaurar edição no modal de detalhes (campos com botão de editar, editáveis exceto CPF e profissão)
+- [x] painel.js: adicionar edição de foto de perfil e fotos de serviço via upload Cloudinary
+- [x] painel.js: adicionar funções salvarDetalhes, cancelarEdicao, editarCampo
+- [x] painel.html: garantir modal tem elementos de edição (já preparados)
 
 ## Validação
-- [ ] Testar botão "Compartilhar" nos cards (modal abre com dados do profissional)
-- [ ] Testar link `?profissional=ID` abre o modal ao ser acessado
-- [ ] Testar compartilhamento via WhatsApp/Facebook/Twitter e copiar link
-- [ ] Testar botão "Solicitar Serviço" dentro do modal de compartilhamento
-</content>
+- [ ] Testar botão Configurações no dropdown do profissional (abre modal, edita e salva)
+- [ ] Testar edição de foto de perfil e fotos de serviço no profissional
+- [ ] Testar edição de informações e fotos no painel admin
+- [ ] node --check nos arquivos JS alterados
