@@ -976,23 +976,29 @@ async function abrirProfissionalPorLink() {
 // Event Listeners
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
+  // Verificar se o cliente está logado e atualizar o header
+  verificarLoginCliente();
+  // Verificar se o profissional está logado e atualizar o header
+  verificarLoginProfissional();
+
+  // Dropdown do usuário (avatar + nome)
+  setupUserDropdown();
+
+  // Em páginas que não têm a busca da home (ex: sobre.html, contato.html),
+  // encerra aqui para não acessar elementos que não existem nessa página.
+  if (!document.getElementById('searchForm')) {
+    return;
+  }
+
   // Preencher Cidade/Estado automaticamente via geolocalização
   preencherLocalizacaoAutomatica();
 
   // Se veio por link compartilhado, abre o modal do profissional
   abrirProfissionalPorLink();
 
-  // Verificar se o cliente está logado e atualizar o header
-  verificarLoginCliente();
-  // Verificar se o profissional está logado e atualizar o header
-  verificarLoginProfissional();
-
 // Carregar categorias para autocomplete
   carregarCategorias();
   setupAutocomplete();
-
-// Dropdown do usuário (avatar + nome)
-  setupUserDropdown();
 
   // Botão "Solicitar Serviço" do modal de compartilhamento
   var compartilharSolicitarBtn = document.getElementById('compartilharSolicitarBtn');
