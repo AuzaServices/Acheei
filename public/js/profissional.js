@@ -94,18 +94,17 @@ async function login(event) {
   btn.innerHTML = 'Entrar na Área';
 
   if (result && result.success) {
-    token = result.data.token;
+token = result.data.token;
     profissional = result.data.profissional;
     localStorage.setItem('acheei_prof_token', token);
-    document.getElementById('profNome').textContent = profissional.nome_perfil;
+    document.getElementById('userName').textContent = profissional.nome_perfil;
     // Foto
-    var fotoHtml = '';
+    var avatar = document.getElementById('userAvatar');
     if (profissional.foto_perfil) {
-      fotoHtml = '<img src="' + profissional.foto_perfil + '" alt="Foto" class="foto-mini">';
+      avatar.innerHTML = '<img src="' + profissional.foto_perfil + '" alt="Foto">';
     } else {
-      fotoHtml = '<div class="foto-mini-placeholder">👤</div>';
+      avatar.textContent = '👤';
     }
-    document.getElementById('profFotoMini').innerHTML = fotoHtml;
     mostrarDashboard();
     carregarDados();
     showToast('Login realizado com sucesso!', 'success');
@@ -688,17 +687,16 @@ async function enviarMensagem() {
 // ============================================
 async function verificarToken() {
   if (!token) { mostrarLogin(); return; }
-  var result = await apiRequest(API_BASE + '/profissionais/me');
+var result = await apiRequest(API_BASE + '/profissionais/me');
   if (result && result.success) {
     profissional = result.data;
-    document.getElementById('profNome').textContent = profissional.nome_perfil;
-    var fotoHtml = '';
+    document.getElementById('userName').textContent = profissional.nome_perfil;
+    var avatar = document.getElementById('userAvatar');
     if (profissional.foto_perfil) {
-      fotoHtml = '<img src="' + profissional.foto_perfil + '" alt="Foto" class="foto-mini">';
+      avatar.innerHTML = '<img src="' + profissional.foto_perfil + '" alt="Foto">';
     } else {
-      fotoHtml = '<div class="foto-mini-placeholder">👤</div>';
+      avatar.textContent = '👤';
     }
-    document.getElementById('profFotoMini').innerHTML = fotoHtml;
     mostrarDashboard();
     await carregarDados();
   } else {
