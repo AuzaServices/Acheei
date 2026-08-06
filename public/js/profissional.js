@@ -8,6 +8,10 @@ let profissional = null;
 let solicitacoesData = [];
 let orcamentosData = [];
 let chatTimer = null;
+let chatSolicitacaoSelecionada = '';
+let widgetUltimasMensagensProf = {};
+let widgetUltimaNovaSolicitacaoProf = null;
+let widgetGlobalIntervalProf = null;
 
 // ============================================
 // Utility
@@ -161,7 +165,7 @@ function switchTab(tab, btn) {
     ferramentas: 'tabFerramentas',
     chat: 'tabChat'
   };
-  document.getElementById(map[tab]).classList.add('active');
+document.getElementById(map[tab]).classList.add('active');
   if (tab === 'chat') carregarChatSolicitacoes();
 }
 
