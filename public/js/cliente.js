@@ -733,11 +733,32 @@ function toggleChatPainel() {
     var badge = document.getElementById('chatBadge');
     badge.classList.remove('show');
     badge.textContent = '0';
-    widgetCarregarSolicitacoes();
+    // Ao clicar no balão, abre a conversa da mensagem mais recente
+    widgetCarregarSolicitacoes(true);
   }
 }
 
-async function widgetCarregarSolicitacoes() {
+// Retorna o id da conversa (solicitação liberada) que tem a mensagem mais recente.
+// Prioriza a conversa do último profissional que enviou. Em empate de datas, a de maior id.
+async function widgetEncontrarConversaMaisRecente(solicitacoes) {
+  var melhores = null; // { id, data }
+  for (var i = 0; i < solicitacoes.length; i++) {
+    var sol = solicitacoes[i];
+    if (sol.status_pagamento !== 'pago') continue;
+    var msgRes = await apiRequest(API_BASE + '/clientes/mensagens/' + sol.id);
+    if (!msgRes || !msgRes.success) continue;
+    var mensagens = msgRes.data;
+    if (!mensagens || mensagens.length === 0) continue;
+    var ultima = mensagens[mensagens.length - 1];
+    var tempo = new Date(ultima.data_envio).getTime();
+    if (!melhores || tempo > melhores.data) {
+      melhores = { id: sol.id, data: tempo };
+    }
+  }
+  return melhores ? melhores.id : null;
+}
+
+async function widgetCarregarSolicitacoes(abrirMaisRecente) {
   var result = await apiRequest(API_BASE + '/clientes/solicitacoes');
   if (!result || !result.success) return;
 
@@ -754,6 +775,30 @@ async function widgetCarregarSolicitacoes() {
     select.appendChild(option);
   }
 
+  if (abrirMaisRecente) {
+    // Ao clicar no balão, abre a conversa da mensagem mais recente
+    var maisRecenteId = await widgetEncontrarConversaMaisRecente(result.data);
+    if (maisRecenteId) {
+      select.value = maisRecenteId;
+    } else {
+      // Nenhuma conversa com mensagens: mantém o padrão (primeira liberada ou atual)
+      widgetRestaurarSelecao(select, currentVal);
+    }
+  } else {
+    widgetRestaurarSelecao(select, currentVal);
+  }
+
+  if (select.value) {
+    widgetCarregarChat();
+  } else {
+    var body = document.getElementById('widgetChatBody');
+    var footer = document.getElementById('widgetChatFooter');
+    if (body) body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa</p></div>';
+    if (footer) footer.style.display = 'none';
+  }
+}
+
+function widgetRestaurarSelecao(select, currentVal) {
   if (currentVal && currentVal !== '') {
     for (var i = 0; i < select.options.length; i++) {
       if (select.options[i].value === currentVal) {
@@ -762,8 +807,6 @@ async function widgetCarregarSolicitacoes() {
       }
     }
   }
-
-  if (select.value) widgetCarregarChat();
 }
 
 function widgetCarregarChat() {

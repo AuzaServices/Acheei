@@ -14,6 +14,47 @@ let widgetUltimaNovaSolicitacaoProf = null;
 let widgetGlobalIntervalProf = null;
 
 // ============================================
+// Cache do Profissional (compartilhado via localStorage)
+// ============================================
+function salvarProfCache(prof) {
+  if (prof) {
+    localStorage.setItem('acheei_prof_cache', JSON.stringify({
+      id: prof.id,
+      nome_perfil: prof.nome_perfil,
+      foto_perfil: prof.foto_perfil || null
+    }));
+  } else {
+    localStorage.removeItem('acheei_prof_cache');
+  }
+}
+
+function carregarProfCache() {
+  try {
+    return JSON.parse(localStorage.getItem('acheei_prof_cache') || 'null');
+  } catch (e) {
+    return null;
+  }
+}
+
+// Otimista: se já está logado e existe cache, mostra o dashboard imediatamente
+// (evita o flash da tela de login ao acessar a área do profissional)
+if (token && carregarProfCache()) {
+  var cacheInicial = carregarProfCache();
+  profissional = { id: cacheInicial.id, nome_perfil: cacheInicial.nome_perfil, foto_perfil: cacheInicial.foto_perfil };
+  var nmInicial = document.getElementById('userName');
+  var avInicial = document.getElementById('userAvatar');
+  if (nmInicial) nmInicial.textContent = cacheInicial.nome_perfil || 'Profissional';
+  if (avInicial) {
+    if (cacheInicial.foto_perfil) {
+      avInicial.innerHTML = '<img src="' + cacheInicial.foto_perfil + '" alt="Foto">';
+    } else {
+      avInicial.textContent = '👤';
+    }
+  }
+  mostrarDashboard();
+}
+
+// ============================================
 // Utility
 // ============================================
 function showToast(message, type) {
@@ -104,6 +145,14 @@ try {
       token = result.data.token;
       profissional = result.data.profissional;
       localStorage.setItem('acheei_prof_token', token);
+      salvarProfCache(profissional);
+      // Limpa estado de conversas do profissional anterior
+      pararPollingWidgetProf();
+      widgetUltimasMensagensProf = {};
+      widgetUltimaNovaSolicitacaoProf = null;
+      chatSolicitacaoSelecionada = '';
+      var selectWidget = document.getElementById('widgetChatSelect');
+      if (selectWidget) selectWidget.innerHTML = '<option value="">Selecione uma conversa...</option>';
       document.getElementById('userName').textContent = profissional.nome_perfil;
       // Foto
       var avatar = document.getElementById('userAvatar');
@@ -114,6 +163,7 @@ try {
       }
       mostrarDashboard();
       carregarDados();
+      mostrarWidgetChat();
       showToast('Login realizado com sucesso!', 'success');
     } else {
       var msg = (result && result.message) ? result.message : 'E-mail ou senha inválidos';
@@ -131,8 +181,29 @@ try {
 
 function logout() {
   localStorage.removeItem('acheei_prof_token');
+  salvarProfCache(null);
   token = null;
   profissional = null;
+  // Limpa todo o estado do chat/widget do profissional anterior
+  pararPollingWidgetProf();
+  widgetUltimasMensagensProf = {};
+  widgetUltimaNovaSolicitacaoProf = null;
+  chatSolicitacaoSelecionada = '';
+  if (chatTimer) { clearInterval(chatTimer); chatTimer = null; }
+  var selectWidget = document.getElementById('widgetChatSelect');
+  if (selectWidget) selectWidget.innerHTML = '<option value="">Selecione uma conversa...</option>';
+  var bodyWidget = document.getElementById('widgetChatBody');
+  if (bodyWidget) bodyWidget.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa acima</p></div>';
+  var footerWidget = document.getElementById('widgetChatFooter');
+  if (footerWidget) footerWidget.style.display = 'none';
+  var bubbleWidget = document.getElementById('chatBubble');
+  if (bubbleWidget) bubbleWidget.classList.remove('pulse');
+  var badgeWidget = document.getElementById('chatBadge');
+  if (badgeWidget) { badgeWidget.classList.remove('show'); badgeWidget.textContent = '0'; }
+  var panelWidget = document.getElementById('chatPanel');
+  if (panelWidget) panelWidget.classList.remove('open');
+  var widgetBox = document.getElementById('chatWidget');
+  if (widgetBox) widgetBox.classList.remove('active');
   mostrarLogin();
   showToast('Sessao encerrada', 'info');
 }
@@ -166,7 +237,12 @@ function switchTab(tab, btn) {
     chat: 'tabChat'
   };
 document.getElementById(map[tab]).classList.add('active');
-  if (tab === 'chat') carregarChatSolicitacoes();
+  if (tab === 'chat') {
+    esconderWidgetChat();
+    carregarChatSolicitacoes();
+  } else {
+    mostrarWidgetChat();
+  }
 }
 
 function openMobileMenu() {
@@ -638,12 +714,21 @@ async function carregarChatSolicitacoes() {
   select.innerHTML = '<option value="">Selecione uma solicitação para conversar</option>';
   var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
   if (result && result.success) {
+    var achouSelecionada = false;
     for (var i = 0; i < result.data.length; i++) {
       var sol = result.data[i];
       var opt = document.createElement('option');
       opt.value = sol.id;
       opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome + ' (' + (sol.status_pagamento === 'pago' ? 'Pago' : 'Pendente') + ')';
       select.appendChild(opt);
+      if (String(sol.id) === String(chatSolicitacaoSelecionada)) achouSelecionada = true;
+    }
+    // Restaura a conversa selecionada ao voltar para a aba Chat
+    if (achouSelecionada) {
+      select.value = chatSolicitacaoSelecionada;
+      selecionarChat();
+    } else if (chatSolicitacaoSelecionada) {
+      chatSolicitacaoSelecionada = '';
     }
   }
 }
@@ -651,6 +736,7 @@ async function carregarChatSolicitacoes() {
 function selecionarChat() {
   var select = document.getElementById('chatSolicitacaoSelect');
   var id = select.value;
+  chatSolicitacaoSelecionada = id;
   if (!id) {
     document.getElementById('chatHeader').textContent = 'Selecione uma solicitação acima';
     document.getElementById('chatMessages').innerHTML = '<div class="chat-locked"><span class="icon">💬</span><p>Selecione uma solicitação para iniciar o chat</p></div>';
@@ -732,9 +818,26 @@ async function enviarMensagem() {
 // ============================================
 async function verificarToken() {
   if (!token) { mostrarLogin(); return; }
-var result = await apiRequest(API_BASE + '/profissionais/me');
+
+  // Estado otimista: se há cache, mostra o dashboard imediatamente
+  var cache = carregarProfCache();
+  if (cache) {
+    profissional = { id: cache.id, nome_perfil: cache.nome_perfil, foto_perfil: cache.foto_perfil };
+    document.getElementById('userName').textContent = cache.nome_perfil || 'Profissional';
+    var avatarCache = document.getElementById('userAvatar');
+    if (cache.foto_perfil) {
+      avatarCache.innerHTML = '<img src="' + cache.foto_perfil + '" alt="Foto">';
+    } else {
+      avatarCache.textContent = '👤';
+    }
+    mostrarDashboard();
+    mostrarWidgetChat();
+  }
+
+  var result = await apiRequest(API_BASE + '/profissionais/me');
   if (result && result.success) {
     profissional = result.data;
+    salvarProfCache(result.data);
     document.getElementById('userName').textContent = profissional.nome_perfil;
     var avatar = document.getElementById('userAvatar');
     if (profissional.foto_perfil) {
@@ -743,9 +846,13 @@ var result = await apiRequest(API_BASE + '/profissionais/me');
       avatar.textContent = '👤';
     }
     mostrarDashboard();
+    mostrarWidgetChat();
     await carregarDados();
   } else {
-    mostrarLogin();
+    // Se a verificação falhar por erro de rede, mantém o cache (não derruba o login)
+    if (!cache) {
+      mostrarLogin();
+    }
   }
 }
 
@@ -1108,6 +1215,86 @@ function verificarRetornoPagamento() {
 // ============================================
 // Widget de Chat Flutuante (Messenger)
 // ============================================
+function mostrarWidgetChat() {
+  var widget = document.getElementById('chatWidget');
+  if (widget) widget.classList.add('active');
+  // Reinicia o polling de novas mensagens do cliente
+  iniciarPollingWidgetProf();
+}
+
+function esconderWidgetChat() {
+  var widget = document.getElementById('chatWidget');
+  if (widget) widget.classList.remove('active');
+  // Para o polling enquanto escondido
+  pararPollingWidgetProf();
+  // Zera badge e pulsação
+  var bubble = document.getElementById('chatBubble');
+  if (bubble) bubble.classList.remove('pulse');
+  var badge = document.getElementById('chatBadge');
+  if (badge) {
+    badge.classList.remove('show');
+    badge.textContent = '0';
+  }
+  var panel = document.getElementById('chatPanel');
+  if (panel) panel.classList.remove('open');
+}
+
+// Polling global: verifica novas mensagens do cliente em todas as conversas
+function iniciarPollingWidgetProf() {
+  if (widgetGlobalIntervalProf) clearInterval(widgetGlobalIntervalProf);
+  widgetGlobalIntervalProf = setInterval(function() {
+    widgetVerificarNovasMensagensProf();
+  }, 5000);
+  widgetVerificarNovasMensagensProf();
+}
+
+function pararPollingWidgetProf() {
+  if (widgetGlobalIntervalProf) {
+    clearInterval(widgetGlobalIntervalProf);
+    widgetGlobalIntervalProf = null;
+  }
+}
+
+async function widgetVerificarNovasMensagensProf() {
+  if (!token || !profissional) return;
+  var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
+  if (!result || !result.success) return;
+
+  var novasCliente = 0;
+  for (var i = 0; i < result.data.length; i++) {
+    var sol = result.data[i];
+    if (sol.status_pagamento !== 'pago') continue;
+    var msgRes = await apiRequest(API_BASE + '/mensagens/' + sol.id);
+    if (!msgRes || !msgRes.success) continue;
+    var mensagens = msgRes.data;
+    if (!widgetUltimasMensagensProf[sol.id]) {
+      widgetUltimasMensagensProf[sol.id] = 0;
+    }
+    for (var j = 0; j < mensagens.length; j++) {
+      if (mensagens[j].id > widgetUltimasMensagensProf[sol.id] && mensagens[j].remetente === 'cliente') {
+        novasCliente++;
+      }
+    }
+    if (mensagens.length > 0) {
+      widgetUltimasMensagensProf[sol.id] = mensagens[mensagens.length - 1].id;
+    }
+  }
+
+  var panel = document.getElementById('chatPanel');
+  var chatAberto = panel && panel.classList.contains('open');
+
+  if (novasCliente > 0 && !chatAberto) {
+    var bubble = document.getElementById('chatBubble');
+    if (bubble) bubble.classList.add('pulse');
+    var badge = document.getElementById('chatBadge');
+    if (badge) {
+      var count = parseInt(badge.textContent) || 0;
+      badge.textContent = count + novasCliente;
+      badge.classList.add('show');
+    }
+  }
+}
+
 function toggleChatPainel() {
   var panel = document.getElementById('chatPanel');
   var widget = document.getElementById('chatWidget');
@@ -1116,9 +1303,15 @@ function toggleChatPainel() {
     fecharChatPainel();
   } else {
     panel.classList.add('open');
-    widget.classList.remove('active');
-    widget.classList.add('pulse');
-    widgetCarregarChat();
+    // Zera badge e pulsação ao abrir
+    var bubble = document.getElementById('chatBubble');
+    if (bubble) bubble.classList.remove('pulse');
+    var badge = document.getElementById('chatBadge');
+    if (badge) {
+      badge.classList.remove('show');
+      badge.textContent = '0';
+    }
+    widgetCarregarSolicitacoesProf();
   }
 }
 
@@ -1126,7 +1319,44 @@ function fecharChatPainel() {
   var panel = document.getElementById('chatPanel');
   var widget = document.getElementById('chatWidget');
   if (panel) panel.classList.remove('open');
-  if (widget) widget.classList.remove('pulse');
+  if (widget) {
+    widget.classList.add('active');
+    widget.classList.remove('pulse');
+  }
+}
+
+// Preenche o select do widget com as conversas liberadas (pagas)
+async function widgetCarregarSolicitacoesProf() {
+  if (!profissional) return;
+  var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
+  if (!result || !result.success) return;
+  var select = document.getElementById('widgetChatSelect');
+  var currentVal = select.value;
+  select.innerHTML = '<option value="">Selecione uma conversa...</option>';
+  for (var i = 0; i < result.data.length; i++) {
+    var sol = result.data[i];
+    if (sol.status_pagamento !== 'pago') continue;
+    var opt = document.createElement('option');
+    opt.value = sol.id;
+    opt.textContent = '#' + sol.id + ' - ' + sol.cliente_nome;
+    select.appendChild(opt);
+  }
+  if (currentVal) {
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].value === currentVal) {
+        select.value = currentVal;
+        break;
+      }
+    }
+  }
+  var body = document.getElementById('widgetChatBody');
+  var footer = document.getElementById('widgetChatFooter');
+  if (select.value) {
+    widgetCarregarChat();
+  } else {
+    if (body) body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Nenhuma conversa liberada ainda.</p></div>';
+    if (footer) footer.style.display = 'none';
+  }
 }
 
 async function widgetCarregarChat() {
