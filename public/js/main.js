@@ -96,6 +96,13 @@ const fotoPerfil = prof.foto_perfil
       ? `<img src="${prof.foto_perfil}" alt="${prof.nome_perfil}" class="profile-photo">`
       : `<div class="profile-photo-placeholder"><span data-icon="user"></span></div>`;
 
+    var mediaAvaliacoes = Number(prof.media_avaliacoes) || 0;
+    var totalAvaliacoes = Number(prof.total_avaliacoes) || 0;
+    var estrelasPublicas = '★★★★★'.slice(0, Math.round(mediaAvaliacoes)) + '☆☆☆☆☆'.slice(Math.round(mediaAvaliacoes));
+    var avaliacaoCard = totalAvaliacoes
+      ? '<p class="avaliacao-card" aria-label="Avaliação média ' + mediaAvaliacoes.toFixed(1) + ' de 5"><span class="estrelas-publicas" aria-hidden="true">' + estrelasPublicas + '</span> ' + mediaAvaliacoes.toFixed(1).replace('.', ',') + ' <span>(' + totalAvaliacoes + ')</span></p>'
+      : '<p class="avaliacao-card sem-avaliacoes">☆ Sem avaliações</p>';
+
     let fotosHtml = '';
     if (prof.fotos_servicos && prof.fotos_servicos.length > 0) {
       fotosHtml = prof.fotos_servicos.map(foto => 
@@ -120,8 +127,9 @@ card.innerHTML = `
           <h4>${prof.nome_perfil}</h4>
           <p class="profissao">${prof.profissao}</p>
           <p class="localizacao"><span data-icon="map-pin"></span> ${prof.cidade}/${prof.estado}</p>
+          ${avaliacaoCard}
         </div>
-        <button type="button" class="btn-share-icon" onclick="abrirCompartilhar(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}', '${prof.cidade}', '${prof.estado}', '${prof.foto_perfil || ''}')" title="Compartilhar">
+        <button type="button" class="btn-share-icon" onclick="abrirCompartilhar(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}', '${prof.cidade}', '${prof.estado}', '${prof.foto_perfil || ''}', ${Number(prof.media_avaliacoes) || 0}, ${Number(prof.total_avaliacoes) || 0})" title="Compartilhar">
           <span data-icon="share"></span>
         </button>
       </div>
@@ -852,7 +860,7 @@ function montarTextoCompartilhamento() {
   return texto;
 }
 
-function abrirCompartilhar(id, nome, profissao, cidade, estado, foto) {
+function abrirCompartilhar(id, nome, profissao, cidade, estado, foto, mediaAvaliacoes, totalAvaliacoes) {
   profissionalCompartilhado = {
     id: id, nome: nome, profissao: profissao, cidade: cidade, estado: estado, foto: foto || ''
   };
@@ -861,6 +869,12 @@ function abrirCompartilhar(id, nome, profissao, cidade, estado, foto) {
   document.getElementById('compartilharNome').textContent = nome;
   document.getElementById('compartilharProfissao').textContent = profissao;
   document.getElementById('compartilharCidadeEstado').textContent = (cidade && estado) ? cidade + '/' + estado : 'Localização não informada';
+
+  var avaliacaoEl = document.getElementById('compartilharAvaliacao');
+  var media = Number(mediaAvaliacoes) || 0;
+  var total = Number(totalAvaliacoes) || 0;
+  var estrelas = '★★★★★'.slice(0, Math.round(media)) + '☆☆☆☆☆'.slice(Math.round(media));
+  avaliacaoEl.textContent = total ? estrelas + ' ' + media.toFixed(1).replace('.', ',') + ' (' + total + ' avaliação' + (total !== 1 ? 'ões' : '') + ')' : '☆☆☆☆☆ Ainda sem avaliações';
 
   // Foto do profissional
   var fotoContainer = document.getElementById('compartilharFoto');
@@ -951,7 +965,7 @@ async function abrirProfissionalPorLink() {
     var result = await response.json();
     if (result.success && result.data) {
       var p = result.data;
-      abrirCompartilhar(p.id, p.nome_perfil, p.profissao, p.cidade, p.estado, p.foto_perfil || '');
+      abrirCompartilhar(p.id, p.nome_perfil, p.profissao, p.cidade, p.estado, p.foto_perfil || '', p.media_avaliacoes, p.total_avaliacoes);
     }
   } catch (e) {
     console.error('Erro ao carregar profissional por link:', e);

@@ -2091,6 +2091,15 @@ button[type="button"] {
   transform: none;
 }
 
+.compartilhar-perfil { display: flex; align-items: center; gap: 16px; }
+.compartilhar-foto { width: 72px; height: 72px; border-radius: 50%; background: var(--gray-bg); border: 2px solid var(--red-primary); overflow: hidden; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.compartilhar-perfil h4 { margin: 0 0 4px; font-size: 18px; }
+.compartilhar-perfil p { margin: 0 0 4px; color: var(--red-primary); font-weight: 600; }
+.compartilhar-perfil .compartilhar-localizacao { color: var(--gray-medium); font-size: 14px; font-weight: 400; }
+.avaliacao-publica { color: #c98d00; font-size: 14px; font-weight: 700; margin-top: 8px; }
+.profissional-card .avaliacao-card { color: #c98d00; font-size: 13px; font-weight: 700; margin: 5px 0 0; }
+.profissional-card .avaliacao-card span, .profissional-card .avaliacao-card.sem-avaliacoes { color: var(--gray-medium); font-weight: 500; }
+
 /* Respeita preferência por movimento reduzido */
 @media (prefers-reduced-motion: reduce) {
   .js body.page-enter {

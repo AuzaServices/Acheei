@@ -342,6 +342,17 @@
     </div>
   </div>
 
+  <div id="compartilharModal" class="modal-overlay">
+    <div class="modal compartilhar-modal">
+      <div class="modal-header"><h3>Compartilhar profissional</h3><button type="button" class="modal-close" onclick="fecharCompartilhar()">&times;</button></div>
+      <div class="modal-body">
+        <input type="hidden" id="compartilharProfissionalId">
+        <div class="compartilhar-perfil"><div id="compartilharFoto" class="compartilhar-foto"></div><div><h4 id="compartilharNome"></h4><p id="compartilharProfissao"></p><p id="compartilharCidadeEstado" class="compartilhar-localizacao"></p><div id="compartilharAvaliacao" class="avaliacao-publica"></div></div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="compartilharWhatsApp()">WhatsApp</button><button type="button" class="btn btn-primary" onclick="compartilharProfissional()">Compartilhar</button></div>
+      </div>
+    </div>
+  </div>
+
   <div id="solicitacaoModal" class="modal-overlay">
     <div class="modal">
       <div class="modal-header">

@@ -22,14 +22,23 @@ module.exports = function(db, dbConnected) {
     var estado = req.query.estado;
     var profissao = req.query.profissao;
     
-    var sql = 'SELECT * FROM profissionais WHERE status_aprovacao = "aprovado"';
+    var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
+      COALESCE(a.media_avaliacoes, 0) AS media_avaliacoes,
+      COALESCE(a.ranking_score, 3.5) AS ranking_score
+      FROM profissionais p
+      LEFT JOIN (
+        SELECT profissional_id, COUNT(*) AS total_avaliacoes, ROUND(AVG(nota), 1) AS media_avaliacoes,
+          ((AVG(nota) * COUNT(*) + 3.5 * 5) / (COUNT(*) + 5)) AS ranking_score
+        FROM avaliacoes GROUP BY profissional_id
+      ) a ON a.profissional_id = p.id
+      WHERE p.status_aprovacao = "aprovado"`;
     var params = [];
 
-    if (cidade) { sql += ' AND cidade LIKE ?'; params.push('%' + cidade + '%'); }
-    if (estado) { sql += ' AND estado = ?'; params.push(estado.toUpperCase()); }
-    if (profissao) { sql += ' AND profissao LIKE ?'; params.push('%' + profissao + '%'); }
+    if (cidade) { sql += ' AND p.cidade LIKE ?'; params.push('%' + cidade + '%'); }
+    if (estado) { sql += ' AND p.estado = ?'; params.push(estado.toUpperCase()); }
+    if (profissao) { sql += ' AND p.profissao LIKE ?'; params.push('%' + profissao + '%'); }
 
-    sql += ' ORDER BY data_cadastro DESC';
+    sql += ' ORDER BY ranking_score DESC, total_avaliacoes DESC, p.data_cadastro DESC';
 
     db.query(sql, params, function(err, results) {
       if (err) {
@@ -44,7 +53,9 @@ module.exports = function(db, dbConnected) {
           nome_perfil: prof.nome_perfil, foto_perfil: prof.foto_perfil,
           profissao: prof.profissao,
           fotos_servicos: prof.fotos_servicos ? JSON.parse(prof.fotos_servicos) : [],
-          status_aprovacao: prof.status_aprovacao, data_cadastro: prof.data_cadastro
+          status_aprovacao: prof.status_aprovacao, data_cadastro: prof.data_cadastro,
+          media_avaliacoes: Number(prof.media_avaliacoes) || 0,
+          total_avaliacoes: Number(prof.total_avaliacoes) || 0
         };
       });
       res.json({ success: true, data: profissionais, total: profissionais.length });
@@ -276,7 +287,14 @@ module.exports = function(db, dbConnected) {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-    db.query('SELECT * FROM profissionais WHERE id = ?', [req.params.id], (err, results) => {
+    db.query(`SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
+      COALESCE(a.media_avaliacoes, 0) AS media_avaliacoes
+      FROM profissionais p
+      LEFT JOIN (
+        SELECT profissional_id, COUNT(*) AS total_avaliacoes, ROUND(AVG(nota), 1) AS media_avaliacoes
+        FROM avaliacoes GROUP BY profissional_id
+      ) a ON a.profissional_id = p.id
+      WHERE p.id = ?`, [req.params.id], (err, results) => {
       if (err) {
         return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
       }

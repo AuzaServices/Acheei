@@ -301,6 +301,17 @@ function renderizarSolicitacoes(solicitacoes) {
     var sol = solicitacoes[i];
     var foto = sol.foto_perfil ? '<img src="' + sol.foto_perfil + '" class="foto">' : '<div class="foto-placeholder">👤</div>';
     var pagamento = sol.status_pagamento === 'pago' ? '<span class="status-badge" style="background:#d4edda;color:#155724;">Chat liberado</span>' : '<span class="status-badge pendente">Aguarde a liberação do Chat</span>';
+    var chatLiberado = sol.status_pagamento === 'pago';
+    var avaliacao = '';
+    if (chatLiberado && sol.avaliacao_id) {
+      avaliacao = '<div class="avaliacao-enviada">Avaliação enviada: ' + sol.avaliacao_nota + ' de 5 estrelas.</div>';
+    } else if (chatLiberado) {
+      avaliacao = '<div class="avaliacao-disponivel"><p>Como foi sua experiência? Escolha uma estrela para avaliar.</p><div class="estrelas-avaliacao">';
+      for (var estrela = 1; estrela <= 5; estrela++) {
+        avaliacao += '<button type="button" class="estrela-btn" aria-label="Avaliar com ' + estrela + ' estrelas" onclick="abrirModalAvaliacao(' + sol.id + ', ' + estrela + ', \'" + encodeURIComponent(sol.nome_perfil).replace(/\'/g, \'%27\') + "\')">★</button>';
+      }
+      avaliacao += '</div></div>';
+    }
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
     card.innerHTML =
@@ -313,6 +324,7 @@ function renderizarSolicitacoes(solicitacoes) {
       '</div>' +
       '<div class="descricao">' + sol.descricao + '</div>' +
       '<div style="margin-bottom:12px;">' + pagamento + '</div>' +
+      avaliacao +
       '<div class="card-footer">' +
         '<button class="btn btn-outline btn-sm" onclick="switchTab(\'chat\', document.querySelectorAll(\'.dashboard-tab\')[2]);setTimeout(function(){document.getElementById(\'chatSolicitacaoSelect\').value=' + sol.id + ';carregarChat();},100);">💬 Chat</button>' +
       '</div>';
@@ -323,6 +335,44 @@ function renderizarSolicitacoes(solicitacoes) {
 // ============================================
 // Orçamentos
 // ============================================
+function abrirModalAvaliacao(solicitacaoId, nota, nomeCodificado) {
+  document.getElementById('avaliacaoForm').reset();
+  document.getElementById('avaliacaoSolicitacaoId').value = solicitacaoId;
+  document.getElementById('avaliacaoNota').value = nota;
+  var nome = decodeURIComponent(nomeCodificado);
+  document.getElementById('avaliacaoProfissional').textContent = 'Você selecionou ' + nota + ' estrela' + (nota > 1 ? 's' : '') + ' para ' + nome + '.';
+  document.getElementById('avaliacaoModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharModalAvaliacao() {
+  document.getElementById('avaliacaoModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+async function enviarAvaliacao(event) {
+  event.preventDefault();
+  var form = event.target;
+  var botao = form.querySelector('button[type="submit"]');
+  botao.disabled = true;
+  var result = await apiRequest(API_BASE + '/clientes/avaliacoes', {
+    method: 'POST',
+    body: JSON.stringify({
+      solicitacao_id: Number(document.getElementById('avaliacaoSolicitacaoId').value),
+      nota: Number(document.getElementById('avaliacaoNota').value),
+      respeito: document.getElementById('avaliacaoRespeito').value,
+      comprometimento: document.getElementById('avaliacaoComprometimento').value,
+      qualidade: document.getElementById('avaliacaoQualidade').value
+    })
+  });
+  botao.disabled = false;
+  if (result && result.success) {
+    fecharModalAvaliacao();
+    showToast('Avaliação enviada. Obrigado pelo seu feedback!', 'success');
+    carregarSolicitacoes();
+  }
+}
+
 async function carregarOrcamentos() {
   var result = await apiRequest(API_BASE + '/clientes/orcamentos');
   if (result && result.success) {
@@ -826,6 +876,10 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Dropdown do usuário (avatar + nome)
+  document.getElementById('avaliacaoForm').addEventListener('submit', enviarAvaliacao);
+  document.getElementById('avaliacaoModal').addEventListener('click', function(e) {
+    if (e.target === this) fecharModalAvaliacao();
+  });
   setupUserDropdown();
 
   // Inicializar push

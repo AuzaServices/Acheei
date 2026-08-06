@@ -63,6 +63,16 @@
     .solicitacao-card .descricao { color: var(--gray-dark); font-size: 14px; margin-bottom: 12px; line-height: 1.5; }
     .solicitacao-card .card-footer { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--gray-lighter); padding-top: 12px; }
     .solicitacao-card .card-footer .btn { padding: 8px 16px; font-size: 13px; }
+    .avaliacao-disponivel { margin: 4px 0 14px; padding: 12px; background: #fff8e1; border: 1px solid #ffe08a; border-radius: var(--radius-sm); }
+    .avaliacao-disponivel p { margin: 0 0 8px; color: var(--gray-dark); font-size: 13px; font-weight: 600; }
+    .estrelas-avaliacao { display: flex; gap: 4px; }
+    .estrela-btn { appearance: none; background: transparent; border: 0; color: #f5b301; cursor: pointer; font-size: 27px; line-height: 1; padding: 0; transition: transform .15s ease; }
+    .estrela-btn:hover, .estrela-btn:focus { transform: scale(1.16); outline: none; }
+    .avaliacao-enviada { margin: 4px 0 14px; color: #155724; font-size: 13px; font-weight: 600; }
+    .avaliacao-modal .modal-body { display: grid; gap: 18px; }
+    .avaliacao-modal .pergunta label { display: block; margin-bottom: 8px; color: var(--gray-dark); font-size: 14px; font-weight: 600; line-height: 1.45; }
+    .avaliacao-modal select { width: 100%; padding: 11px 12px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); background: var(--white); font: inherit; }
+    .avaliacao-modal select:focus { outline: none; border-color: var(--red-primary); }
     .orcamento-card { background: var(--white); border-radius: var(--radius-md); padding: 20px; margin-bottom: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-lighter); }
     .orcamento-card .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
     .orcamento-card .card-header .prof-info { display: flex; align-items: center; gap: 12px; }
@@ -255,6 +265,20 @@
         <p>Escolha uma solicitação acima para conversar com o profissional.</p>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="avaliacaoModal">
+  <div class="modal avaliacao-modal">
+    <div class="modal-header"><h3>Avaliar profissional</h3><button type="button" class="modal-close" onclick="fecharModalAvaliacao()">&times;</button></div>
+    <form id="avaliacaoForm" class="modal-body">
+      <input type="hidden" id="avaliacaoSolicitacaoId"><input type="hidden" id="avaliacaoNota">
+      <p id="avaliacaoProfissional" style="margin:0;color:var(--gray-medium);"></p>
+      <div class="pergunta"><label for="avaliacaoRespeito">Esse profissional demonstrou respeito no relacionamento com colegas e clientes?</label><select id="avaliacaoRespeito" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">Não</option></select></div>
+      <div class="pergunta"><label for="avaliacaoComprometimento">Esse profissional manteve comprometimento com as metas e responsabilidades atribuídas?</label><select id="avaliacaoComprometimento" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">Não</option></select></div>
+      <div class="pergunta"><label for="avaliacaoQualidade">Esse profissional entregou resultados com a qualidade esperada e dentro dos padrões estabelecidos?</label><select id="avaliacaoQualidade" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">Não</option></select></div>
+      <div class="modal-footer" style="padding:0;border:0;background:transparent;"><button type="button" class="btn btn-outline" onclick="fecharModalAvaliacao()">Cancelar</button><button type="submit" class="btn btn-primary">Enviar avaliação</button></div>
+    </form>
   </div>
 </div>
 

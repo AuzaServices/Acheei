@@ -287,7 +287,10 @@ function renderizarSolicitacoes(solicitacoes) {
     var sol = solicitacoes[i];
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
-var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
+    var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telefone.replace(/\D/g, '') + '?text=' + encodeURIComponent('Ola, aqui e do time Acheei! Gostaria de dar prosseguimento ao servico de "' + sol.descricao.substring(0, 100) + '"') : '#';
+    var avaliacaoHtml = sol.avaliacao_nota
+      ? '<div class="item" style="grid-column:1/-1;"><div class="label">Avaliação do cliente</div><div class="value"><strong>★ ' + sol.avaliacao_nota + '/5</strong><br>Respeito: ' + sol.avaliacao_respeito + ' · Comprometimento: ' + sol.avaliacao_comprometimento + ' · Qualidade: ' + sol.avaliacao_qualidade + '</div></div>'
+      : '<div class="item" style="grid-column:1/-1;"><div class="label">Avaliação do cliente</div><div class="value">Ainda não avaliada.</div></div>';
       card.innerHTML =
       '<div class="card-header"><h4>Solicitacao #' + sol.id + '</h4><span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span></div>' +
       '<div class="info">' +
@@ -295,6 +298,7 @@ var telefoneLink = sol.cliente_telefone ? 'https://wa.me/55' + sol.cliente_telef
         '<div class="item"><div class="label">Telefone</div><div class="value"><a href="' + telefoneLink + '" target="_blank" class="btn btn-success btn-sm" style="text-decoration:none;">' + icon('chat') + ' ' + sol.cliente_telefone + '</a></div></div>' +
         '<div class="item"><div class="label">Profissional</div><div class="value">' + sol.nome_perfil + ' (' + sol.profissao + ')</div></div>' +
         '<div class="item" style="grid-column:1/-1;"><div class="label">Descricao do Servico</div><div class="value">' + sol.descricao + '</div></div>' +
+        avaliacaoHtml +
       '</div>';
     container.appendChild(card);
   }

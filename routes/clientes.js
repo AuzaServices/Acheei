@@ -184,9 +184,11 @@ const { nome, email, senha, telefone } = req.body;
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
     db.query(
-      `SELECT s.*, p.nome_perfil, p.profissao, p.foto_perfil, p.cidade, p.estado
+      `SELECT s.*, p.nome_perfil, p.profissao, p.foto_perfil, p.cidade, p.estado,
+        a.id AS avaliacao_id, a.nota AS avaliacao_nota
        FROM solicitacoes s
        JOIN profissionais p ON s.profissional_id = p.id
+       LEFT JOIN avaliacoes a ON a.solicitacao_id = s.id
        WHERE s.cliente_id = ?
        ORDER BY s.data_solicitacao DESC`,
       [req.cliente.id],
@@ -196,6 +198,50 @@ const { nome, email, senha, telefone } = req.body;
           return res.status(500).json({ success: false, message: 'Erro ao buscar solicitações' });
         }
         res.json({ success: true, data: results, total: results.length });
+      }
+    );
+  });
+
+  // ============================================
+  // POST /api/clientes/avaliacoes
+  // Uma unica avaliacao, apenas para solicitacao do cliente com chat liberado
+  // ============================================
+  router.post('/avaliacoes', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponivel' });
+    }
+    const { solicitacao_id, nota, respeito, comprometimento, qualidade } = req.body;
+    const respostasValidas = ['sim', 'parcialmente', 'nao'];
+    const notaNumero = Number(nota);
+
+    if (!Number.isInteger(notaNumero) || notaNumero < 1 || notaNumero > 5 ||
+      !respostasValidas.includes(respeito) || !respostasValidas.includes(comprometimento) || !respostasValidas.includes(qualidade)) {
+      return res.status(400).json({ success: false, message: 'Preencha a nota e todas as respostas da avaliacao.' });
+    }
+
+    db.query(
+      'SELECT id, profissional_id FROM solicitacoes WHERE id = ? AND cliente_id = ? AND status_pagamento = "pago"',
+      [solicitacao_id, req.cliente.id],
+      (err, solicitacoes) => {
+        if (err) return res.status(500).json({ success: false, message: 'Erro ao verificar solicitacao' });
+        if (solicitacoes.length === 0) {
+          return res.status(403).json({ success: false, message: 'A avaliacao so e permitida apos a liberacao do chat desta solicitacao.' });
+        }
+        const solicitacao = solicitacoes[0];
+        db.query(
+          'INSERT INTO avaliacoes (solicitacao_id, profissional_id, cliente_id, nota, respeito, comprometimento, qualidade) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [solicitacao.id, solicitacao.profissional_id, req.cliente.id, notaNumero, respeito, comprometimento, qualidade],
+          (insertErr) => {
+            if (insertErr) {
+              if (insertErr.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ success: false, message: 'Esta solicitacao ja foi avaliada.' });
+              }
+              console.error('Erro ao salvar avaliacao:', insertErr);
+              return res.status(500).json({ success: false, message: 'Erro ao salvar avaliacao' });
+            }
+            res.status(201).json({ success: true, message: 'Avaliacao enviada com sucesso!' });
+          }
+        );
       }
     );
   });

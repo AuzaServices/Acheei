@@ -139,9 +139,13 @@ router.post('/', (req, res) => {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
     db.query(
-      `SELECT s.*, p.nome_perfil, p.profissao 
+      `SELECT s.*, p.nome_perfil, p.profissao,
+        a.nota AS avaliacao_nota, a.respeito AS avaliacao_respeito,
+        a.comprometimento AS avaliacao_comprometimento, a.qualidade AS avaliacao_qualidade,
+        a.data_avaliacao
        FROM solicitacoes s 
        JOIN profissionais p ON s.profissional_id = p.id 
+       LEFT JOIN avaliacoes a ON a.solicitacao_id = s.id
        ORDER BY s.data_solicitacao DESC`,
       (err, results) => {
         if (err) {

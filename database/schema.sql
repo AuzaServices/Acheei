@@ -101,3 +101,22 @@ CREATE TABLE IF NOT EXISTS clientes (
   push_subscription LONGTEXT,
   data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- Tabela: avaliacoes
+-- Uma avaliacao por solicitacao, feita pelo cliente apos a liberacao do chat
+-- ============================================
+CREATE TABLE IF NOT EXISTS avaliacoes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  solicitacao_id INT NOT NULL UNIQUE,
+  profissional_id INT NOT NULL,
+  cliente_id INT NOT NULL,
+  nota TINYINT NOT NULL,
+  respeito ENUM('sim', 'parcialmente', 'nao') NOT NULL,
+  comprometimento ENUM('sim', 'parcialmente', 'nao') NOT NULL,
+  qualidade ENUM('sim', 'parcialmente', 'nao') NOT NULL,
+  data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE,
+  FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE,
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
