@@ -467,8 +467,7 @@ img {
   }
 
   .dashboard-nav .cliente-info,
-  .dashboard-nav .admin-info,
-  .dashboard-nav-links {
+  .dashboard-nav .admin-info {
     display: none;
   }
 }
@@ -608,47 +607,6 @@ img {
 
 .hero h1 .highlight {
   color: var(--red-primary);
-}
-
-.hero-title {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  line-height: 1.35;
-}
-
-.hero-title .hero-line {
-  display: block;
-  white-space: nowrap;
-}
-
-.hero-title .hero-typed {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  min-height: 1.2em;
-  white-space: nowrap;
-}
-
-.typed-word {
-  color: var(--red-primary);
-}
-
-.typed-cursor {
-  display: inline-block;
-  width: 3px;
-  height: 1em;
-  margin-left: 4px;
-  align-self: center;
-  background: var(--red-primary);
-  animation: blink 0.8s step-end infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
 }
 
 .hero p {
@@ -886,38 +844,6 @@ img {
   margin-top: 4px;
 }
 
-.profissional-card .card-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.profissional-card .btn-share-icon {
-  margin-left: auto;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--black-primary);
-  cursor: pointer;
-  border-radius: var(--radius-full);
-  transition: var(--transition);
-}
-
-.profissional-card .btn-share-icon:hover {
-  background: var(--gray-bg);
-  transform: scale(1.1);
-}
-
-.profissional-card .btn-share-icon .icon-svg {
-  width: 20px;
-  height: 20px;
-}
-
 .profissional-card .card-body {
   padding: 16px 20px;
 }
@@ -950,6 +876,11 @@ img {
 .profissional-card .card-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--gray-lighter);
+}
+
+.profissional-card .card-footer .btn {
+  width: 100%;
+  justify-content: center;
 }
 
 .foto-box {
@@ -1317,6 +1248,23 @@ img {
   margin: 18px 0 12px;
 }
 
+.section-title {
+  margin-top: 20px;
+  margin-bottom: 14px;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(0,0,0,0.55);
+  color: var(--white);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  transition: background 0.2s ease;
+}
+
 .photo-delete-btn:hover {
   background: rgba(0,0,0,0.75);
 }
@@ -1608,509 +1556,6 @@ img {
   .btn-lg {
     padding: 12px 24px;
     font-size: 14px;
-  }
-}
-
-/* ==================== User Area (Home Header) ==================== */
-.user-area {
-  display: flex;
-  align-items: center;
-}
-
-/* Dropdown do usuário (avatar + nome) */
-.user-dropdown {
-  position: relative;
-}
-
-.user-dropdown .user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px 4px 4px;
-  background: var(--gray-bg);
-  border-radius: 999px;
-  border: 1px solid var(--gray-lighter);
-  cursor: pointer;
-  font-family: var(--font-primary);
-  transition: var(--transition);
-}
-
-.user-dropdown .user-info:hover {
-  border-color: var(--red-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-.user-dropdown .user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--gray-lighter);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: var(--gray-medium);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.user-dropdown .user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.user-dropdown .user-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-dark);
-  max-width: 140px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.user-dropdown .user-caret {
-  font-size: 12px;
-  color: var(--gray-medium);
-  display: inline-flex;
-  align-items: center;
-  transition: var(--transition);
-}
-
-.user-dropdown.active .user-caret {
-  transform: rotate(180deg);
-}
-
-.user-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 200px;
-  background: var(--white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--gray-lighter);
-  padding: 6px;
-  display: none;
-  flex-direction: column;
-  z-index: 1100;
-  overflow: hidden;
-}
-
-.user-dropdown.active .user-dropdown-menu {
-  display: flex;
-  animation: dropdownIn 0.18s ease;
-}
-
-@keyframes dropdownIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.user-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 11px 14px;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-primary);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gray-dark);
-  cursor: pointer;
-  text-align: left;
-  transition: var(--transition);
-}
-
-.user-dropdown-item:hover {
-  background: var(--gray-bg);
-  color: var(--red-primary);
-}
-
-.user-dropdown-item .icon-svg {
-  font-size: 16px;
-}
-
-/* Divisor dentro do dropdown do usuário */
-.user-dropdown-divider {
-  height: 1px;
-  background: var(--gray-lighter);
-  margin: 6px 4px;
-}
-
-/* Mobile User Area */
-.mobile-user-area {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
-  background: var(--gray-bg);
-  border-radius: var(--radius-md);
-  margin-bottom: 12px;
-}
-
-.mobile-user-area .user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.mobile-user-area .user-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--gray-lighter);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--gray-medium);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.mobile-user-area .user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mobile-user-area .user-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--black-primary);
-}
-
-/* Modal de solicitação - seção de cadastro (para cliente logado esconder) */
-.modal-cadastro-section {
-  transition: display 0.2s ease;
-}
-
-.modal-cadastro-section.hidden {
-  display: none !important;
-}
-
-.btn-show-inline {
-  background: transparent;
-  border: none;
-  color: var(--red-primary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
-}
-
-.btn-show-inline:hover {
-  color: var(--red-dark);
-}
-
-/* ============================================
-   Alinhamento Perfeito de Botões
-   Centraliza e padroniza tamanho/altura de todos
-   os botões de ação (Buscar, Próximo, Voltar,
-   Pagar, Enviar, Cancelar, Salvar, Aprovar etc.)
-   ============================================ */
-
-/* Padronização global dos botões de ação */
-.btn,
-button.btn,
-.btn-primary,
-.btn-secondary,
-.btn-outline,
-.btn-success,
-.btn-danger,
-.btn-search,
-.modal-footer .btn,
-.form-navigation .btn {
-  justify-content: center;
-  text-align: center;
-  white-space: nowrap;
-  line-height: 1.4;
-  min-height: 44px;
-  vertical-align: middle;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.btn-sm {
-  min-height: 36px;
-  padding: 8px 16px;
-}
-
-.btn-lg {
-  min-height: 52px;
-  padding: 16px 32px;
-}
-
-/* Botões em formulários (Buscar, Enviar) alinhados aos inputs */
-button[type="submit"],
-button[type="button"] {
-  font-family: var(--font-primary);
-}
-
-/* ==================== Modal Footer ==================== */
-.modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 20px 24px;
-  border-top: 1px solid var(--gray-lighter);
-  background: var(--gray-bg);
-}
-
-.modal-footer .btn {
-  min-width: 140px;
-}
-
-/* ==================== Busca (index) ==================== */
-.search-box .btn-search {
-  height: 50px;
-  min-height: 50px;
-  padding: 0 28px;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-/* ==================== Cadastro (form-navigation) ==================== */
-.form-navigation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 24px 32px;
-  border-top: 1px solid var(--gray-lighter);
-}
-
-.form-navigation .btn {
-  min-width: 140px;
-  min-height: 48px;
-}
-
-/* ==================== Chat (Enviar) ==================== */
-.chat-input-area .btn,
-.chat-panel-footer .btn,
-.chat-container .chat-input button {
-  min-width: 90px;
-  height: 48px;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-/* ==================== Cards (Solicitar Serviço, Pagar) ==================== */
-.profissional-card .card-footer .btn {
-  width: 100%;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.solicitacao-card .card-footer .btn,
-.orcamento-card .orc-footer .btn {
-  white-space: nowrap;
-}
-
-/* ==================== Admin (Aprovar/Reprovar/Ver) ==================== */
-.admin-table .action-btns {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.admin-table .action-btns .btn {
-  min-height: 36px;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-/* ==================== Auth (Entrar/Cadastrar) ==================== */
-.auth-form .btn,
-.login-card .btn,
-.login-container .btn {
-  width: 100%;
-  justify-content: center;
-  min-height: 48px;
-}
-
-/* ==================== Responsivo - Modal footer & Cadastro ==================== */
-@media (max-width: 600px) {
-  .modal-footer,
-  .form-navigation {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-    padding: 16px 20px;
-  }
-
-  .modal-footer .btn,
-  .form-navigation .btn {
-    width: 100%;
-    min-width: 0;
-  }
-
-.chat-input-area,
-  .chat-panel-footer,
-  .chat-container .chat-input {
-    flex-wrap: nowrap;
-  }
-
-  .chat-input-area .btn,
-  .chat-panel-footer .btn,
-  .chat-container .chat-input button {
-    flex: 0 0 auto;
-    min-width: 0;
-    width: 88px;
-    white-space: nowrap;
-  }
-
-  .chat-input-area input,
-  .chat-panel-footer input,
-  .chat-container .chat-input input {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 0;
-  }
-}
-
-/* ==================== Chat mobile - correção do rodapé cortado ==================== */
-@media (max-width: 767px) {
-  .chat-panel {
-    left: 10px;
-    right: 10px;
-    width: auto;
-    bottom: 80px;
-    max-height: calc(100vh - 120px);
-  }
-
-  .chat-panel-body {
-    max-height: none;
-    min-height: 200px;
-    flex: 1 1 auto;
-  }
-
-  .chat-panel-footer,
-  .chat-input-area,
-  .chat-container .chat-input {
-    gap: 8px;
-    padding: 10px;
-    flex-wrap: nowrap;
-    align-items: center;
-  }
-
-  .chat-panel-footer input,
-  .chat-input-area input,
-  .chat-container .chat-input input {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .chat-panel-footer .btn,
-  .chat-input-area .btn,
-  .chat-container .chat-input button {
-    flex: 0 0 auto;
-    width: 88px;
-    min-width: 88px;
-    height: 44px;
-    padding: 0 12px;
-    white-space: nowrap;
-  }
-
-  .chat-widget {
-    bottom: 16px;
-    right: 16px;
-  }
-}
-
-/* ==================== Responsivo - Busca ==================== */
-@media (max-width: 768px) {
-  .search-box .btn-search {
-    width: 100%;
-    height: 50px;
-  }
-}
-
-/* ==================== Nav de Início/Categorias no dropdown ==================== */
-/* No desktop, os links ficam na navbar e os itens do dropdown ficam ocultos */
-.dropdown-nav-links-item {
-  display: none;
-}
-
-/* No mobile, esconde os links da navbar e mostra os itens dentro do dropdown */
-@media (max-width: 768px) {
-  .dropdown-nav-links-item {
-    display: flex;
-  }
-}
-
-/* ============================================
-   Scroll Reveal Animations
-   Efeitos modernos de aparecimento na rolagem
-   ============================================ */
-.js body.page-enter {
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.js body.page-enter.page-loaded {
-  opacity: 1;
-}
-
-.reveal {
-  opacity: 0;
-  will-change: opacity, transform;
-}
-
-/* Hero: fade suave + leve escala, sem "flash" na abertura */
-.reveal-hero {
-  transform: translateY(12px) scale(0.99);
-  transition: opacity 1s ease, transform 1s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Fade up (padrão) */
-.reveal-fade-up {
-  transform: translateY(40px);
-  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Estado visível */
-.reveal.visible {
-  opacity: 1;
-  transform: none;
-}
-
-.compartilhar-perfil { display: flex; align-items: center; gap: 16px; }
-.compartilhar-foto { width: 72px; height: 72px; border-radius: 50%; background: var(--gray-bg); border: 2px solid var(--red-primary); overflow: hidden; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-.compartilhar-perfil h4 { margin: 0 0 4px; font-size: 18px; }
-.compartilhar-perfil p { margin: 0 0 4px; color: var(--red-primary); font-weight: 600; }
-.compartilhar-perfil .compartilhar-localizacao { color: var(--gray-medium); font-size: 14px; font-weight: 400; }
-.avaliacao-publica { color: #c98d00; font-size: 14px; font-weight: 700; margin-top: 8px; }
-.profissional-card .avaliacao-card { color: #c98d00; font-size: 13px; font-weight: 700; margin: 5px 0 0; }
-.profissional-card .avaliacao-card span, .profissional-card .avaliacao-card.sem-avaliacoes { color: var(--gray-medium); font-weight: 500; }
-
-/* Respeita preferência por movimento reduzido */
-@media (prefers-reduced-motion: reduce) {
-  .js body.page-enter {
-    opacity: 1;
-    transition: none;
-  }
-
-  .reveal {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
   }
 }
 
