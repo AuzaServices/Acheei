@@ -384,7 +384,7 @@ async function pagarSolicitacao(event, id) {
 if (btn) {
       btn.disabled = false;
       btn.dataset.processing = 'false';
-      btn.innerHTML = '💳 Pagar R$14,99';
+      btn.innerHTML = 'Pagar R$14,99';
     }
 
     if (result && result.success && result.data) {
