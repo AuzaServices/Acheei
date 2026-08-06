@@ -628,6 +628,7 @@ var cache = carregarClienteCache();
 // ============================================
 var widgetSolicitacoesCache = [];
 var widgetChatInterval = null;
+var widgetGlobalInterval = null;
 var widgetUltimasMensagens = {};
 var widgetPainelAberto = false;
 
@@ -638,6 +639,8 @@ function mostrarWidgetChat() {
   widgetPainelAberto = false;
   var panel = document.getElementById('chatPanel');
   if (panel) panel.classList.remove('open');
+  // Polling de fundo: detecta novas mensagens do profissional mesmo com o painel fechado
+  iniciarPollingGlobalWidget();
 }
 
 function esconderWidgetChat() {
@@ -647,6 +650,10 @@ function esconderWidgetChat() {
   if (widgetChatInterval) {
     clearInterval(widgetChatInterval);
     widgetChatInterval = null;
+  }
+  if (widgetGlobalInterval) {
+    clearInterval(widgetGlobalInterval);
+    widgetGlobalInterval = null;
   }
   // Zera badge e pulsação
   var badge = document.getElementById('chatBadge');
@@ -659,6 +666,57 @@ function esconderWidgetChat() {
   var panel = document.getElementById('chatPanel');
   if (panel) panel.classList.remove('open');
   widgetPainelAberto = false;
+}
+
+// Polling global: verifica periódicamente todas as conversas em busca de novas mensagens do profissional
+function iniciarPollingGlobalWidget() {
+  if (widgetGlobalInterval) clearInterval(widgetGlobalInterval);
+  widgetGlobalInterval = setInterval(function() {
+    widgetVerificarNovasMensagens();
+  }, 5000);
+  // Verifica imediatamente ao iniciar
+  widgetVerificarNovasMensagens();
+}
+
+async function widgetVerificarNovasMensagens() {
+  if (!token) return;
+  var result = await apiRequest(API_BASE + '/clientes/solicitacoes');
+  if (!result || !result.success) return;
+
+  var temNovaProfissional = false;
+  for (var i = 0; i < result.data.length; i++) {
+    var sol = result.data[i];
+    if (sol.status_pagamento !== 'pago') continue;
+    var msgRes = await apiRequest(API_BASE + '/clientes/mensagens/' + sol.id);
+    if (!msgRes || !msgRes.success) continue;
+    var mensagens = msgRes.data;
+    if (!widgetUltimasMensagens[sol.id]) {
+      widgetUltimasMensagens[sol.id] = 0;
+    }
+    for (var j = 0; j < mensagens.length; j++) {
+      if (mensagens[j].id > widgetUltimasMensagens[sol.id] && mensagens[j].remetente === 'profissional') {
+        temNovaProfissional = true;
+      }
+    }
+    if (mensagens.length > 0) {
+      widgetUltimasMensagens[sol.id] = mensagens[mensagens.length - 1].id;
+    }
+  }
+
+  var panel = document.getElementById('chatPanel');
+  var select = document.getElementById('widgetChatSelect');
+  var chatAberto = widgetPainelAberto && panel.classList.contains('open');
+
+  if (temNovaProfissional && !chatAberto) {
+    var bubble = document.getElementById('chatBubble');
+    if (bubble) bubble.classList.add('pulse');
+    var badge = document.getElementById('chatBadge');
+    if (badge && !badge.classList.contains('show')) {
+      badge.classList.add('show');
+      var count = parseInt(badge.textContent) || 0;
+      badge.textContent = count + temNovaProfissional ? (count + 1) : 1;
+    }
+  }
 }
 
 function toggleChatPainel() {
