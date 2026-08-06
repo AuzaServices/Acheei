@@ -369,8 +369,9 @@ async function pagarSolicitacao(event, id) {
       })
     });
 
-    if (btn) {
+if (btn) {
       btn.disabled = false;
+      btn.dataset.processing = 'false';
       btn.innerHTML = '💳 Pagar R$14,99';
     }
 
@@ -491,40 +492,68 @@ async function excluirOrcamento(id) {
 // ============================================
 // Calculadora
 // ============================================
-function calcular(tipo) {
-  var res = 0;
-  if (tipo === 'soma') {
-    var a = parseFloat(document.getElementById('calcSoma1').value) || 0;
-    var b = parseFloat(document.getElementById('calcSoma2').value) || 0;
-    res = a + b;
-    document.getElementById('resSoma').textContent = res;
-  } else if (tipo === 'subtracao') {
-    var a = parseFloat(document.getElementById('calcSub1').value) || 0;
-    var b = parseFloat(document.getElementById('calcSub2').value) || 0;
-    res = a - b;
-    document.getElementById('resSub').textContent = res;
-  } else if (tipo === 'multiplicacao') {
-    var a = parseFloat(document.getElementById('calcMult1').value) || 0;
-    var b = parseFloat(document.getElementById('calcMult2').value) || 0;
-    res = a * b;
-    document.getElementById('resMult').textContent = res;
-  } else if (tipo === 'divisao') {
-    var a = parseFloat(document.getElementById('calcDiv1').value) || 0;
-    var b = parseFloat(document.getElementById('calcDiv2').value) || 1;
-    if (b === 0) { showToast('Divisão por zero!', 'error'); return; }
-    res = a / b;
-    document.getElementById('resDiv').textContent = res.toFixed(2);
-  } else if (tipo === 'porcentagem') {
-    var valor = parseFloat(document.getElementById('calcPctValor').value) || 0;
-    var pct = parseFloat(document.getElementById('calcPctPct').value) || 0;
-    res = (valor * pct) / 100;
-    document.getElementById('resPct').textContent = res.toFixed(2);
-  } else if (tipo === 'juros') {
-    var capital = parseFloat(document.getElementById('calcJurosCapital').value) || 0;
-    var taxa = parseFloat(document.getElementById('calcJurosTaxa').value) || 0;
-    var tempo = parseFloat(document.getElementById('calcJurosTempo').value) || 0;
-    res = capital * (taxa / 100) * tempo;
-    document.getElementById('resJuros').textContent = 'Juros: R$ ' + res.toFixed(2).replace('.', ',') + ' | Total: R$ ' + (capital + res).toFixed(2).replace('.', ',');
+let calcExpressao = '';
+let calcUltimoResultado = null;
+
+function calcInput(valor) {
+  var display = document.getElementById('calcDisplay');
+  if (calcUltimoResultado !== null && /[0-9]/.test(valor)) {
+    calcExpressao = String(calcUltimoResultado);
+    calcUltimoResultado = null;
+  }
+  if (valor === '.' && calcExpressao.split(/[÷×+\-]/).pop().includes('.')) return;
+  if (valor === '÷' || valor === '×' || valor === '-' || valor === '+') {
+    if (calcExpressao === '' && valor === '-') {
+      calcExpressao = '-';
+    } else if (calcExpressao !== '' && /[÷×+\-]$/.test(calcExpressao)) {
+      calcExpressao = calcExpressao.slice(0, -1) + valor;
+    } else {
+      calcExpressao += valor;
+    }
+  } else {
+    calcExpressao += valor;
+  }
+  display.value = calcExpressao || '0';
+}
+
+function calcClearAll() {
+  calcExpressao = '';
+  calcUltimoResultado = null;
+  document.getElementById('calcDisplay').value = '0';
+}
+
+function calcDelete() {
+  calcExpressao = calcExpressao.slice(0, -1);
+  document.getElementById('calcDisplay').value = calcExpressao || '0';
+}
+
+function calcPercent() {
+  if (!calcExpressao) return;
+  var valor = parseFloat(calcExpressao);
+  if (isNaN(valor)) return;
+  calcExpressao = String(valor / 100);
+  document.getElementById('calcDisplay').value = calcExpressao;
+}
+
+function calcEqual() {
+  if (!calcExpressao) return;
+  var expr = calcExpressao
+    .replace(/÷/g, '/')
+    .replace(/×/g, '*')
+    .replace(/,/g, '.');
+  try {
+    var resultado = Function('"use strict"; return (' + expr + ')')();
+    if (typeof resultado === 'number' && !isFinite(resultado)) {
+      document.getElementById('calcDisplay').value = 'Erro';
+      calcExpressao = '';
+      return;
+    }
+    calcExpressao = String(resultado);
+    calcUltimoResultado = resultado;
+    document.getElementById('calcDisplay').value = String(resultado);
+  } catch (e) {
+    document.getElementById('calcDisplay').value = 'Erro';
+    calcExpressao = '';
   }
 }
 
@@ -705,6 +734,50 @@ var result = await apiRequest(API_BASE + '/profissionais/me');
 }
 
 // ============================================
+// Header - Dropdown Avatar + Nome
+// ============================================
+function setupUserDropdown() {
+  var trigger = document.getElementById('userDropdownTrigger');
+  var dropdown = document.getElementById('userDropdown');
+  if (!trigger || !dropdown) return;
+
+  trigger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isActive = dropdown.classList.toggle('active');
+    trigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+  });
+
+  // Fecha ao clicar em qualquer item do menu
+  var menu = document.getElementById('userDropdownMenu');
+  if (menu) {
+    menu.addEventListener('click', function(e) {
+      if (e.target.closest('.user-dropdown-item')) {
+        fecharDropdown();
+      }
+    });
+  }
+
+  // Fecha ao clicar fora
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target)) {
+      fecharDropdown();
+    }
+  });
+
+  // Fecha com Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharDropdown();
+  });
+}
+
+function fecharDropdown() {
+  var dropdown = document.getElementById('userDropdown');
+  var trigger = document.getElementById('userDropdownTrigger');
+  if (dropdown) dropdown.classList.remove('active');
+  if (trigger) trigger.setAttribute('aria-expanded', 'false');
+}
+
+// ============================================
 // Retorno do Mercado Pago (Checkout Pro)
 // Verifica se o usuário voltou de um pagamento
 // ============================================
@@ -750,9 +823,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') fecharModalOrcamento();
   });
-  document.getElementById('orcamentoModal').addEventListener('click', function(e) {
+document.getElementById('orcamentoModal').addEventListener('click', function(e) {
     if (e.target === this) fecharModalOrcamento();
   });
+  setupUserDropdown();
   verificarToken();
   verificarRetornoPagamento();
 });
