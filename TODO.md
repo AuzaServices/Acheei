@@ -1,8 +1,10 @@
-# TODO - Botões Navbar (Área do Cliente / Área do Profissional)
+# TODO - Footer Profissional 2026
 
-## Passos
-- [x] Analisar o arquivo index.html e style.css (estilos dos botões)
-- [x] Criar bloco CSS dedicado aos botões da navbar (`#btnAreaCliente`, `#btnAreaProfissional`)
-- [x] Aplicar tamanho menor e uniforme no desktop
-- [x] Corrigir hover (sem encher de vermelho)
-- [x] Verificar visualmente o resultado
+## Etapas
+- [ ] 1. Atualizar CSS do footer em `public/css/style.css` (novo design premium + responsivo)
+- [ ] 2. Atualizar footer + ano 2026 em `public/index.html`
+- [ ] 3. Atualizar footer + remover estilos inline em `public/contato.html`
+- [ ] 4. Atualizar footer + remover estilos inline em `public/sobre.html`
+- [ ] 5. Atualizar footer + remover estilos inline em `public/termos.html`
+- [ ] 6. Atualizar footer + remover estilos inline em `public/politica.html`
+- [ ] 7. Abrir o site para visualizar o resultado
