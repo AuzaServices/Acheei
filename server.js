@@ -27,20 +27,32 @@ var dbConnected = false;
 var setupJaFeito = false;
 
 // ============================================
-// Conexao com MySQL (conexao unica + reconexao automatica)
-// FreeSQLDatabase limita MUITO o numero de conexoes por usuario
-// (max_user_connections, geralmente 5). Por isso usamos UMA unica
-// conexao que reconecta sozinha quando cai. Isso evita tanto o
-// "Banco de dados indisponivel" quanto o ER_TOO_MANY_USER_CONNECTIONS.
+// Conexao com MySQL usando POOL limitado + reconexao automatica
+// FreeSQLDatabase limita max_user_connections (geralmente 5).
+// Usamos ate 4 conexoes para dar boa concorrencia (50+ usuarios)
+// sem estourar o limite do banco. O pool recupera conexoes mortas
+// sozinho e as queries concorrentes aguardam em fila.
 // ============================================
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || '',
   database: process.env.DB_NAME || 'acheei',
+  waitForConnections: true,
+  connectionLimit: 4,
+  queueLimit: 0,
   multipleStatements: true,
-  connectTimeout: 10000
+  connectTimeout: 10000,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
+});
+
+// Se uma conexao do pool cair, marca como indisponivel
+// (o pool continua tentando conexoes novas sozinho)
+db.on('error', function(err) {
+  console.error('Erro no banco de dados:', err.message);
+  dbConnected = false;
 });
 
 // ============================================
@@ -86,18 +98,22 @@ function criarTabelas() {
 }
 
 // ============================================
-// Conecta ao banco (e reconecta sozinho se cair)
+// Conecta/verifica o banco (e reconecta sozinho se cair)
 // ============================================
 function conectarBanco() {
-  db.connect(function(err) {
+  db.query('SELECT 1', function(err) {
     if (err) {
-      console.error('Falha ao conectar ao MySQL:', err.message);
+      if (dbConnected) {
+        console.error('Falha ao conectar ao MySQL:', err.message);
+      }
       dbConnected = false;
       // Tenta de novo em 5s (nao derruba o servidor)
       setTimeout(conectarBanco, 5000);
     } else {
-      dbConnected = true;
-      console.log('Conectado ao MySQL com sucesso!');
+      if (!dbConnected) {
+        dbConnected = true;
+        console.log('Conectado ao MySQL com sucesso!');
+      }
       if (!setupJaFeito) {
         setupJaFeito = true;
         criarTabelas();
@@ -106,27 +122,8 @@ function conectarBanco() {
   });
 }
 
-// Se a conexao cair, marca como indisponivel e tenta reconectar
-db.on('error', function(err) {
-  console.error('Erro no banco de dados:', err.message);
-  dbConnected = false;
-  setTimeout(conectarBanco, 5000);
-});
-
 // Manter a conexao acordada e detectar queda/retorno
-setInterval(function() {
-  db.query('SELECT 1', function(err) {
-    if (err) {
-      if (dbConnected) {
-        console.error('Conexao com o banco perdida - tentando reconectar...');
-      }
-      dbConnected = false;
-    } else if (!dbConnected) {
-      dbConnected = true;
-      console.log('Conexao com o banco restabelecida!');
-    }
-  });
-}, 15000);
+setInterval(conectarBanco, 15000);
 
 // Conexao inicial
 conectarBanco();
