@@ -290,6 +290,14 @@ async function carregarSolicitacoes() {
   }
 }
 
+// Retorna uma estrela em SVG com cantos arredondados (sem emoji)
+function svgEstrela() {
+  return '<svg class="estrela-svg" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">' +
+    '<path d="M12 2.5l2.9 5.9 6.5.95-4.7 4.58 1.1 6.47L12 17.5l-5.8 3.05 1.1-6.47-4.7-4.58 6.5-.95L12 2.5z" ' +
+    'fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
+    '</svg>';
+}
+
 function renderizarSolicitacoes(solicitacoes) {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
@@ -308,7 +316,8 @@ function renderizarSolicitacoes(solicitacoes) {
     } else if (chatLiberado) {
       avaliacao = '<div class="avaliacao-disponivel"><p>Como foi sua experiência? Escolha uma estrela para avaliar.</p><div class="estrelas-avaliacao">';
       for (var estrela = 1; estrela <= 5; estrela++) {
-        avaliacao += '<button type="button" class="estrela-btn" aria-label="Avaliar com ' + estrela + ' estrelas" onclick="abrirModalAvaliacao(' + sol.id + ', ' + estrela + ', \'" + encodeURIComponent(sol.nome_perfil).replace(/\'/g, \'%27\') + "\')">★</button>';
+        var nomeCod = encodeURIComponent(String(sol.nome_perfil).replace(/'/g, '%27'));
+        avaliacao += '<button type="button" class="estrela-btn" aria-label="Avaliar com ' + estrela + ' estrelas" onclick="abrirModalAvaliacao(' + sol.id + ', ' + estrela + ', \'' + nomeCod + '\')">' + svgEstrela() + '</button>';
       }
       avaliacao += '</div></div>';
     }
@@ -324,10 +333,7 @@ function renderizarSolicitacoes(solicitacoes) {
       '</div>' +
       '<div class="descricao">' + sol.descricao + '</div>' +
       '<div style="margin-bottom:12px;">' + pagamento + '</div>' +
-      avaliacao +
-      '<div class="card-footer">' +
-        '<button class="btn btn-outline btn-sm" onclick="switchTab(\'chat\', document.querySelectorAll(\'.dashboard-tab\')[2]);setTimeout(function(){document.getElementById(\'chatSolicitacaoSelect\').value=' + sol.id + ';carregarChat();},100);">💬 Chat</button>' +
-      '</div>';
+      avaliacao;
     container.appendChild(card);
   }
 }

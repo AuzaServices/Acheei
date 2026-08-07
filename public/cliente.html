@@ -112,7 +112,8 @@
     .avaliacao-disponivel { margin: 4px 0 14px; padding: 12px; background: #fff8e1; border: 1px solid #ffe08a; border-radius: var(--radius-sm); }
     .avaliacao-disponivel p { margin: 0 0 8px; color: var(--gray-dark); font-size: 13px; font-weight: 600; }
     .estrelas-avaliacao { display: flex; gap: 4px; }
-    .estrela-btn { appearance: none; background: transparent; border: 0; color: #f5b301; cursor: pointer; font-size: 27px; line-height: 1; padding: 0; transition: transform .15s ease; }
+.estrela-btn { appearance: none; background: transparent; border: 0; color: #f5b301; cursor: pointer; line-height: 1; padding: 0; transition: transform .15s ease; display: inline-flex; }
+    .estrela-btn .estrela-svg, .estrela-btn svg { display: block; width: 28px; height: 28px; }
     .estrela-btn:hover, .estrela-btn:focus { transform: scale(1.16); outline: none; }
     .avaliacao-enviada { margin: 4px 0 14px; color: #155724; font-size: 13px; font-weight: 600; }
     .avaliacao-modal .modal-body { display: grid; gap: 18px; }
