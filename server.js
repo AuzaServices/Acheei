@@ -20,34 +20,27 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ============================================
 // Variavel global de status do DB
+// ============================================
 var dbConnected = false;
+var setupJaFeito = false;
 
 // ============================================
-// Conexao com MySQL usando POOL (reconexao automatica)
-// O pool recupera conexoes mortas sozinho e
-// mantem o banco "acordado", evitando o erro
-// recorrente de "Banco de dados indisponivel".
+// Conexao com MySQL (conexao unica + reconexao automatica)
+// FreeSQLDatabase limita MUITO o numero de conexoes por usuario
+// (max_user_connections, geralmente 5). Por isso usamos UMA unica
+// conexao que reconecta sozinha quando cai. Isso evita tanto o
+// "Banco de dados indisponivel" quanto o ER_TOO_MANY_USER_CONNECTIONS.
 // ============================================
-const db = mysql.createPool({
+const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || '',
   database: process.env.DB_NAME || 'acheei',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
   multipleStatements: true,
-  connectTimeout: 10000,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0
-});
-
-// Evitar crash do servidor em erros de conexao/query
-db.on('error', function(err) {
-  console.error('Erro no banco de dados:', err.message);
-  dbConnected = false;
+  connectTimeout: 10000
 });
 
 // ============================================
@@ -70,7 +63,7 @@ function setupBanco() {
 }
 
 // ============================================
-// Cria/exclusivamente confirma as tabelas e o admin
+// Cria/confirma as tabelas e o admin
 // (usar aspas simples e LONGTEXT - banco remoto FreeSQLDatabase)
 // ============================================
 function criarTabelas() {
@@ -88,41 +81,55 @@ function criarTabelas() {
   db.query("ALTER TABLE solicitacoes ADD COLUMN cliente_id INT AFTER profissional_id", function(err) { if (err) { /* coluna já existe */ } });
   db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
   db.query("ALTER TABLE clientes ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription:', err.message); } });
-// Garantir admin padrão
+  // Garantir admin padrão
   setupBanco();
 }
 
 // ============================================
-// Verificacao de saude da conexao + reconexao automatica
-// Roda imediatamente e depois a cada 15s.
-// Quando o banco volta, refaz o setup do schema.
+// Conecta ao banco (e reconecta sozinho se cair)
 // ============================================
-var setupJaFeito = false;
-
-function testarConexao() {
-  db.query('SELECT 1', function(err) {
+function conectarBanco() {
+  db.connect(function(err) {
     if (err) {
-      if (dbConnected) {
-        console.error('Conexao com o banco perdida - tentando reconectar... (' + err.message + ')');
-      }
+      console.error('Falha ao conectar ao MySQL:', err.message);
       dbConnected = false;
+      // Tenta de novo em 5s (nao derruba o servidor)
+      setTimeout(conectarBanco, 5000);
     } else {
-      if (!dbConnected) {
-        console.log('Conectado ao MySQL com sucesso!');
-        if (!setupJaFeito) {
-          setupJaFeito = true;
-          criarTabelas();
-        }
-      }
       dbConnected = true;
+      console.log('Conectado ao MySQL com sucesso!');
+      if (!setupJaFeito) {
+        setupJaFeito = true;
+        criarTabelas();
+      }
     }
   });
 }
 
-// Primeira verificacao imediata
-testarConexao();
-// Manter acordado e detectar quando o banco voltar
-setInterval(testarConexao, 15000);
+// Se a conexao cair, marca como indisponivel e tenta reconectar
+db.on('error', function(err) {
+  console.error('Erro no banco de dados:', err.message);
+  dbConnected = false;
+  setTimeout(conectarBanco, 5000);
+});
+
+// Manter a conexao acordada e detectar queda/retorno
+setInterval(function() {
+  db.query('SELECT 1', function(err) {
+    if (err) {
+      if (dbConnected) {
+        console.error('Conexao com o banco perdida - tentando reconectar...');
+      }
+      dbConnected = false;
+    } else if (!dbConnected) {
+      dbConnected = true;
+      console.log('Conexao com o banco restabelecida!');
+    }
+  });
+}, 15000);
+
+// Conexao inicial
+conectarBanco();
 
 // Rotas (passa getter para acompanhar status ao vivo da conexão)
 app.use('/api/profissionais', require('./routes/profissionais')(db, () => dbConnected));
