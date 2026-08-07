@@ -36,7 +36,7 @@ const { nome, email, senha, telefone } = req.body;
       return res.status(400).json({ success: false, message: 'Email inválido' });
     }
 
-    // Verificar se email já existe
+// Verificar se email já existe como cliente
     db.query('SELECT id FROM clientes WHERE email = ?', [email], (err, results) => {
       if (err) {
         console.error('Erro ao verificar email:', err);
@@ -45,6 +45,19 @@ const { nome, email, senha, telefone } = req.body;
       if (results.length > 0) {
         return res.status(400).json({ success: false, message: 'Este email já está cadastrado. Faça login.' });
       }
+
+      // Verificar se email já existe como profissional
+      db.query('SELECT id FROM profissionais WHERE email = ?', [email], (err, profResults) => {
+        if (err) {
+          console.error('Erro ao verificar email de profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao verificar email' });
+        }
+        if (profResults.length > 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Este email já está cadastrado como profissional. Para solicitar serviços como cliente, cadastre-se com outro email.'
+          });
+        }
 
       bcrypt.hash(senha, 10, (err, senhaHash) => {
         if (err) {
@@ -67,7 +80,7 @@ const { nome, email, senha, telefone } = req.body;
               { expiresIn: '24h' }
             );
 
-            res.status(201).json({
+res.status(201).json({
               success: true,
               message: 'Cadastro realizado com sucesso!',
               data: {
@@ -81,6 +94,7 @@ const { nome, email, senha, telefone } = req.body;
             });
           }
         );
+      });
       });
     });
   });

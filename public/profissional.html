@@ -186,20 +186,21 @@
     .ferramenta-card .icon { font-size: 36px; display: block; margin-bottom: 8px; }
     .ferramenta-card .name { font-size: 14px; font-weight: 600; }
     .ferramenta-card .desc { font-size: 12px; color: var(--gray-medium); margin-top: 4px; }
-    .chat-container { background: var(--gray-bg); border-radius: var(--radius-md); min-height: 400px; display: flex; flex-direction: column; }
-    .chat-container .chat-header { padding: 16px; border-bottom: 1px solid var(--gray-lighter); font-weight: 700; font-size: 15px; background: var(--white); border-radius: var(--radius-md) var(--radius-md) 0 0; }
-    .chat-container .chat-messages { flex: 1; padding: 16px; overflow-y: auto; max-height: 400px; }
-    .chat-container .chat-messages .msg { margin-bottom: 12px; max-width: 80%; }
-    .chat-container .chat-messages .msg .bubble { padding: 10px 14px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.4; }
-    .chat-container .chat-messages .msg.cliente { text-align: left; }
-    .chat-container .chat-messages .msg.cliente .bubble { background: var(--white); border: 1px solid var(--gray-lighter); display: inline-block; }
-    .chat-container .chat-messages .msg.profissional { text-align: right; margin-left: auto; }
-    .chat-container .chat-messages .msg.profissional .bubble { background: var(--red-primary); color: var(--white); display: inline-block; }
-    .chat-container .chat-messages .msg .time { font-size: 10px; color: var(--gray-light); margin-top: 2px; }
-    .chat-container .chat-input { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--gray-lighter); background: var(--white); border-radius: 0 0 var(--radius-md) var(--radius-md); }
-    .chat-container .chat-input input { flex: 1; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; transition: var(--transition); }
-    .chat-container .chat-input input:focus { outline: none; border-color: var(--red-primary); }
-    .chat-container .chat-input button { padding: 10px 20px; }
+/* Chat idêntico ao da área do cliente */
+    .chat-container { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; min-height: 400px; display: flex; flex-direction: column; }
+    .chat-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-lighter); font-weight: 700; font-size: 15px; background: var(--white); }
+    .chat-messages { padding: 20px; max-height: 400px; overflow-y: auto; flex: 1; }
+    .chat-message { margin-bottom: 16px; display: flex; }
+    .chat-message.cliente { justify-content: flex-end; }
+    .chat-message .bubble { max-width: 75%; padding: 12px 16px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.5; }
+    .chat-message.cliente .bubble { background: var(--red-primary); color: var(--white); border-bottom-right-radius: 4px; }
+    .chat-message.profissional .bubble { background: var(--gray-bg); color: var(--black-primary); border-bottom-left-radius: 4px; }
+    .chat-message .time { font-size: 11px; color: var(--gray-light); margin-top: 4px; }
+    .chat-message.cliente .time { text-align: right; color: rgba(255,255,255,0.7); }
+    .chat-input-area { display: flex; gap: 8px; padding: 16px; border-top: 1px solid var(--gray-lighter); }
+    .chat-input-area input { flex: 1; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
+    .chat-input-area input:focus { outline: none; border-color: var(--red-primary); }
+    .chat-input-area .btn { padding: 12px 20px; }
     .chat-select { margin-bottom: 16px; }
     .chat-select select { width: 100%; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
 .chat-locked { text-align: center; padding: 40px; }
@@ -334,8 +335,38 @@
 .chat-panel { left: 50%; right: auto; top: 50%; bottom: auto; width: calc(100vw - 24px); max-width: 420px; max-height: calc(100vh - 32px); transform: translate(-50%, -50%); }
       .chat-panel-body { min-height: 200px; max-height: none; }
       .chat-panel-footer { padding: 10px; }
-      .chat-panel-footer input { min-width: 0; }
+.chat-panel-footer input { min-width: 0; }
       .chat-input-area input { min-width: 0; }
+    }
+    /* ===== Modal PIX (minimalista e profissional) ===== */
+    .pix-modal { max-width: 420px; width: 100%; }
+    .pix-header { text-align: center; }
+    .pix-body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .pix-value-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .pix-value-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray-light); }
+    .pix-value { font-size: 30px; font-weight: 800; color: var(--black-primary); line-height: 1.1; }
+    .pix-exp { font-size: 12px; color: var(--gray-medium); }
+    .pix-qr-box { background: var(--gray-bg); border: 1px solid var(--gray-lighter); border-radius: var(--radius-md); padding: 20px; display: flex; align-items: center; justify-content: center; }
+    .pix-qr-area { min-height: 200px; display: flex; align-items: center; justify-content: center; width: 100%; }
+    .pix-qr-loading { text-align: center; color: var(--gray-medium); }
+    .pix-qr-icon { font-size: 40px; display: block; margin-bottom: 8px; }
+    .pix-qr-loading p { margin: 0; font-size: 13px; }
+    .pix-copy-block { text-align: left; }
+    .pix-copy-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; }
+    .pix-copy-row { display: flex; gap: 8px; }
+    .pix-copy-row input { flex: 1; min-width: 0; padding: 11px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 12px; background: var(--white); color: var(--gray-dark); }
+    .pix-copy-row input:focus { outline: none; border-color: var(--red-primary); }
+    .pix-copy-btn { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    .pix-note { margin: 0; font-size: 12px; color: var(--gray-medium); text-align: center; line-height: 1.6; }
+    .pix-close-btn { width: 100%; justify-content: center; }
+    @media (max-width: 480px) {
+      .pix-modal { max-width: calc(100vw - 24px); }
+      .pix-body { padding: 18px 16px; gap: 14px; }
+      .pix-value { font-size: 26px; }
+      .pix-copy-row { flex-direction: column; }
+      .pix-copy-btn { width: 100%; justify-content: center; }
+      .pix-qr-box { padding: 14px; }
+      .pix-qr-area { min-height: 180px; }
     }
   </style>
 </head>
@@ -558,7 +589,7 @@
               <option value="">Selecione uma solicitação para conversar</option>
             </select>
           </div>
-          <div class="chat-container" id="chatContainer">
+<div class="chat-container" id="chatContainer">
             <div class="chat-header" id="chatHeader">Selecione uma solicitação acima</div>
             <div class="chat-messages" id="chatMessages">
               <div class="chat-locked">
@@ -566,7 +597,7 @@
                 <p>Selecione uma solicitação para iniciar o chat</p>
               </div>
             </div>
-            <div class="chat-input" id="chatInputArea" style="display:none;">
+            <div class="chat-input-area" id="chatInputArea" style="display:none;">
               <input type="text" id="chatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter')enviarMensagem()">
               <button class="btn btn-primary" onclick="enviarMensagem()">Enviar</button>
             </div>
@@ -607,45 +638,45 @@
 
 <!-- MODAL PIX -->
 <div class="modal-overlay" id="pixModal">
-  <div class="modal" style="max-width:480px;">
-    <div class="modal-header">
-      <h3><span data-icon="qr-code"></span> Pagamento via PIX</h3>
+  <div class="modal pix-modal">
+    <div class="modal-header pix-header">
+      <h3>Pagamento via PIX</h3>
       <button class="modal-close" onclick="fecharModalPix()">&times;</button>
     </div>
-    <div class="modal-body" style="text-align:center;">
+    <div class="modal-body pix-body">
       <input type="hidden" id="pixSolicitacaoId" value="">
 
-      <div style="background:var(--gray-bg);border-radius:var(--radius-md);padding:24px;margin-bottom:16px;">
-        <div id="pixQrCode" style="min-height:220px;display:flex;align-items:center;justify-content:center;">
-          <div style="text-align:center;color:var(--gray-medium);">
-            <span style="font-size:48px;display:block;margin-bottom:8px;">📱</span>
+      <div class="pix-value-block">
+        <span class="pix-value-label">Valor</span>
+        <span class="pix-value" id="pixValor">R$ 14,99</span>
+        <span class="pix-exp" id="pixExpiracao">Válido por 30 minutos</span>
+      </div>
+
+      <div class="pix-qr-box">
+        <div id="pixQrCode" class="pix-qr-area">
+          <div class="pix-qr-loading">
+            <span class="pix-qr-icon">📱</span>
             <p>Gerando QR Code...</p>
           </div>
         </div>
       </div>
 
-      <div style="margin-bottom:16px;">
-        <div style="font-size:13px;color:var(--gray-medium);margin-bottom:4px;">Valor</div>
-        <div style="font-size:28px;font-weight:800;color:var(--red-primary);" id="pixValor">R$ 14,99</div>
-        <div style="font-size:12px;color:var(--gray-light);margin-top:4px;" id="pixExpiracao">Válido por 30 minutos</div>
-      </div>
-
-      <div style="margin-bottom:16px;">
-        <div style="font-size:13px;color:var(--gray-medium);margin-bottom:6px;">PIX Copia e Cola</div>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="pixCopiaCola" readonly style="flex:1;padding:10px 14px;border:2px solid var(--gray-lighter);border-radius:var(--radius-sm);font-size:13px;background:var(--white);cursor:default;" placeholder="Clique em copiar">
-          <button class="btn btn-primary" onclick="copiarChavePix()" style="white-space:nowrap;"><span data-icon="copy"></span> Copiar</button>
+      <div class="pix-copy-block">
+        <span class="pix-copy-label">PIX Copia e Cola</span>
+        <div class="pix-copy-row">
+          <input type="text" id="pixCopiaCola" readonly placeholder="Clique em copiar">
+          <button type="button" class="btn btn-primary pix-copy-btn" onclick="copiarChavePix()">
+            <span data-icon="copy"></span> Copiar
+          </button>
         </div>
       </div>
 
-      <div style="padding:12px;background:#fff3cd;border-radius:var(--radius-sm);margin-bottom:16px;">
-        <p style="font-size:13px;color:#856404;margin:0;">
-          O pagamento é verificado automaticamente a cada 5 segundos.
-          <br>Após o pagamento, o chat será liberado automaticamente.
-        </p>
-      </div>
+      <p class="pix-note">
+        O pagamento é verificado automaticamente.
+        <br>Após a confirmação, o chat será liberado.
+      </p>
 
-<button class="btn btn-outline" onclick="fecharModalPix()" style="width:100%;justify-content:center;">Fechar</button>
+      <button type="button" class="btn btn-outline pix-close-btn" onclick="fecharModalPix()">Fechar</button>
     </div>
   </div>
 </div>

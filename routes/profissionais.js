@@ -348,7 +348,7 @@ if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !c
         return res.status(400).json({ success: false, message: 'CPF já cadastrado no sistema' });
       }
 
-      // Verificar se email já existe
+// Verificar se email já existe como profissional
       db.query('SELECT id FROM profissionais WHERE email = ?', [email], (err, results) => {
         if (err) {
           return res.status(500).json({ success: false, message: 'Erro ao verificar email' });
@@ -357,7 +357,16 @@ if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !c
           return res.status(400).json({ success: false, message: 'Email já cadastrado no sistema' });
         }
 
-        // Hash da senha
+        // Verificar se email já existe como cliente
+        db.query('SELECT id FROM clientes WHERE email = ?', [email], (err, clienteResults) => {
+        if (err) {
+          return res.status(500).json({ success: false, message: 'Erro ao verificar email' });
+        }
+        if (clienteResults.length > 0) {
+          return res.status(400).json({ success: false, message: 'Este email já está cadastrado como cliente. Use outro email para criar uma conta de profissional.' });
+        }
+
+// Hash da senha
         bcrypt.hash(senha, 10, (err, senhaHash) => {
           if (err) {
             return res.status(500).json({ success: false, message: 'Erro ao processar senha' });
@@ -382,6 +391,7 @@ if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !c
               });
             }
           );
+        });
         });
       });
     });

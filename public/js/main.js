@@ -138,10 +138,10 @@ card.innerHTML = `
           ${fotosHtml}
         </div>
       </div>
-      <div class="card-footer">
-        <button class="btn btn-primary" onclick="abrirModalSolicitacao(${prof.id}, '${prof.nome_perfil}', '${prof.profissao}')">
-          <span data-icon="send"></span> Solicitar Serviço
-        </button>
+<div class="card-footer">
+        ${profissionalLogado
+          ? '<button class="btn btn-primary btn-prof-disabled" title="Profissionais não podem solicitar serviços a outros profissionais" onclick="mostrarErroProfSolicitacao(event)"><span data-icon="send"></span> Solicitar Serviço</button>'
+          : '<button class="btn btn-primary" onclick="abrirModalSolicitacao(' + prof.id + ', \'' + prof.nome_perfil + '\', \'' + prof.profissao + '\')"><span data-icon="send"></span> Solicitar Serviço</button>'}
       </div>
     `;
 
@@ -463,7 +463,21 @@ function fecharDropdownUsuario() {
 // ============================================
 var pushNoticeAceito = localStorage.getItem('acheei_notificacoes') === 'true';
 
+// Profissionais não podem solicitar serviços a outros profissionais
+function mostrarErroProfSolicitacao(event) {
+  if (event) {
+    if (event.preventDefault) event.preventDefault();
+    if (event.stopPropagation) event.stopPropagation();
+  }
+  showToast('Profissionais não podem solicitar serviços a outros profissionais, por favor crie uma conta como cliente', 'error');
+}
+
 async function abrirModalSolicitacao(id, nome, profissao) {
+  // Profissional logado: bloqueia a abertura do modal de solicitação
+  if (profissionalLogado) {
+    mostrarErroProfSolicitacao();
+    return;
+  }
   document.getElementById('modalProfissionalId').value = id;
   document.getElementById('modalProfissionalNome').textContent = nome;
   document.getElementById('modalProfissionalProfissao').textContent = profissao;

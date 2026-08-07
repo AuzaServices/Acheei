@@ -1,9 +1,9 @@
-# TODO - Ajustes Chat Cliente/Profissional
+# TODO - Ajustes Acheei
 
 ## Tarefas
-- [x] 1. Profissional desktop: alinhar modelo do chat ao do cliente
-- [x] 2. Profissional desktop: ponta do balão do mesmo tamanho do cliente (ícone 18px)
-- [x] 3. Mobile (cliente): chat totalmente centralizado na tela ao abrir
-- [x] 4. Mobile (profissional): chat totalmente centralizado na tela ao abrir
-- [x] 5. Atualizar style.css para centralizar o chat no mobile
-</content>
+
+- [x] 1. Botão "Solicitar Serviço" cinza/desabilitado + erro quando logado como profissional (main.js + style.css)
+- [ ] 2. Chat do profissional idêntico ao chat da área do cliente (profissional.html + profissional.js)
+- [ ] 3. Modal PIX minimalista/profissional + botões mobile (profissional.html)
+- [ ] 4. Email de profissional não pode cadastrar como cliente (routes/clientes.js + routes/profissionais.js)
+- [ ] Testar (node server.js)

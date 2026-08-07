@@ -786,18 +786,16 @@ function renderizarMensagens(mensagens) {
   var container = document.getElementById('chatMessages');
   container.innerHTML = '';
   if (mensagens.length === 0) {
-    container.innerHTML = '<div class="chat-locked"><span class="icon">💬</span><p>Nenhuma mensagem ainda. Envie a primeira mensagem para o cliente!</p></div>';
+    container.innerHTML = '<div class="empty-state" style="padding:30px;"><span class="icon">💬</span><h3>Nenhuma mensagem</h3><p>Envie a primeira mensagem para o cliente.</p></div>';
     return;
   }
   for (var i = 0; i < mensagens.length; i++) {
     var msg = mensagens[i];
-    var classe = msg.remetente === 'profissional' ? 'profissional' : 'cliente';
-    var label = msg.remetente === 'profissional' ? 'Você' : 'Cliente';
+    // No chat do profissional, ele mesmo aparece à direita (vermelho) e o cliente à esquerda (cinza)
     var div = document.createElement('div');
-    div.className = 'msg ' + classe;
-    div.innerHTML =
-      '<div class="bubble">' + msg.texto + '</div>' +
-      '<div class="time">' + label + ' - ' + new Date(msg.data_envio).toLocaleTimeString('pt-BR') + '</div>';
+    div.className = 'chat-message ' + (msg.remetente === 'profissional' ? 'cliente' : 'profissional');
+    var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
     container.appendChild(div);
   }
   container.scrollTop = container.scrollHeight;
