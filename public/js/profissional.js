@@ -1494,10 +1494,10 @@ function renderizarWidgetMensagens(mensagens) {
   for (var i = 0; i < mensagens.length; i++) {
     var msg = mensagens[i];
     var classe = msg.remetente === 'profissional' ? 'profissional' : 'cliente';
-    var label = msg.remetente === 'profissional' ? 'Você' : 'Cliente';
     var div = document.createElement('div');
     div.className = 'chat-panel-msg ' + classe;
-    div.innerHTML = '<div class="bubble">' + msg.texto + '</div><div class="time">' + label + ' - ' + new Date(msg.data_envio).toLocaleTimeString('pt-BR') + '</div>';
+    var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
     body.appendChild(div);
   }
   body.scrollTop = body.scrollHeight;
