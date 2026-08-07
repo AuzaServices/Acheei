@@ -23,15 +23,25 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Variavel global de status do DB
 var dbConnected = false;
 
-// Conexao com MySQL
-const db = mysql.createConnection({
+// ============================================
+// Conexao com MySQL usando POOL (reconexao automatica)
+// O pool recupera conexoes mortas sozinho e
+// mantem o banco "acordado", evitando o erro
+// recorrente de "Banco de dados indisponivel".
+// ============================================
+const db = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || '',
   database: process.env.DB_NAME || 'acheei',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
   multipleStatements: true,
-  connectTimeout: 10000
+  connectTimeout: 10000,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 });
 
 // Evitar crash do servidor em erros de conexao/query
@@ -40,7 +50,11 @@ db.on('error', function(err) {
   dbConnected = false;
 });
 
-function criarAdminPadrao() {
+// ============================================
+// Setup do schema / admin (apenas quando o banco
+// estiver realmente disponivel)
+// ============================================
+function setupBanco() {
   var senhaHash = bcrypt.hashSync('admin123', 10);
   db.query(
     'INSERT INTO admin (usuario, senha) VALUES (?, ?) ON DUPLICATE KEY UPDATE usuario = usuario',
@@ -55,33 +69,60 @@ function criarAdminPadrao() {
   );
 }
 
-db.connect(function(err) {
-  if (err) {
-    console.error('MySQL nao disponivel - rodando em modo estatico');
-    console.error('Detalhes do erro:', err.message);
-    dbConnected = false;
-  } else {
-    dbConnected = true;
-    console.log('Conectado ao MySQL com sucesso!');
-// Criar tabelas (usar aspas simples e LONGTEXT - banco remoto FreeSQLDatabase)
-    db.query("CREATE TABLE IF NOT EXISTS profissionais (id INT AUTO_INCREMENT PRIMARY KEY, cpf VARCHAR(14) NOT NULL UNIQUE, data_nascimento DATE NOT NULL, endereco VARCHAR(255) NOT NULL, numero VARCHAR(20), bairro VARCHAR(100) NOT NULL, cidade VARCHAR(100) NOT NULL, estado VARCHAR(2) NOT NULL, cep VARCHAR(9) NOT NULL, nome_perfil VARCHAR(100) NOT NULL, foto_perfil VARCHAR(255), profissao VARCHAR(100) NOT NULL, fotos_servicos LONGTEXT, status_aprovacao ENUM('pendente','aprovado','reprovado') DEFAULT 'pendente', data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-    db.query('CREATE TABLE IF NOT EXISTS solicitacoes (id INT AUTO_INCREMENT PRIMARY KEY, cliente_nome VARCHAR(100) NOT NULL, cliente_telefone VARCHAR(20) NOT NULL, descricao TEXT NOT NULL, profissional_id INT NOT NULL, data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
-    db.query('CREATE TABLE IF NOT EXISTS admin (id INT AUTO_INCREMENT PRIMARY KEY, usuario VARCHAR(50) NOT NULL UNIQUE, senha VARCHAR(255) NOT NULL)');
-db.query('CREATE TABLE IF NOT EXISTS orcamentos (id INT AUTO_INCREMENT PRIMARY KEY, profissional_id INT NOT NULL, solicitacao_id INT, cliente_nome VARCHAR(100) NOT NULL, descricao TEXT NOT NULL, valor DECIMAL(10,2) NOT NULL, status ENUM("pendente","aprovado","recusado") DEFAULT "pendente", data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE SET NULL)');
-    db.query('CREATE TABLE IF NOT EXISTS mensagens (id INT AUTO_INCREMENT PRIMARY KEY, solicitacao_id INT NOT NULL, remetente VARCHAR(50) NOT NULL, texto TEXT NOT NULL, lida BOOLEAN DEFAULT FALSE, data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE)');
-    db.query('CREATE TABLE IF NOT EXISTS clientes (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, senha VARCHAR(255) NOT NULL, telefone VARCHAR(20), data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
-    db.query("CREATE TABLE IF NOT EXISTS avaliacoes (id INT AUTO_INCREMENT PRIMARY KEY, solicitacao_id INT NOT NULL UNIQUE, profissional_id INT NOT NULL, cliente_id INT NOT NULL, nota TINYINT NOT NULL, respeito ENUM('sim','parcialmente','nao') NOT NULL, comprometimento ENUM('sim','parcialmente','nao') NOT NULL, qualidade ENUM('sim','parcialmente','nao') NOT NULL, data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE, FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE, FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE)");
-    // Adicionar colunas novas se não existirem (compatibilidade)
-    db.query("ALTER TABLE profissionais ADD COLUMN email VARCHAR(100) UNIQUE AFTER data_cadastro", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE profissionais ADD COLUMN senha VARCHAR(255) AFTER email", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN status_pagamento ENUM('pendente','pago') DEFAULT 'pendente' AFTER data_solicitacao", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN cliente_id INT AFTER profissional_id", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
-    db.query("ALTER TABLE clientes ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription:', err.message); } });
-    // Criar admin padrão
-    criarAdminPadrao();
-  }
-});
+// ============================================
+// Cria/exclusivamente confirma as tabelas e o admin
+// (usar aspas simples e LONGTEXT - banco remoto FreeSQLDatabase)
+// ============================================
+function criarTabelas() {
+  db.query("CREATE TABLE IF NOT EXISTS profissionais (id INT AUTO_INCREMENT PRIMARY KEY, cpf VARCHAR(14) NOT NULL UNIQUE, data_nascimento DATE NOT NULL, endereco VARCHAR(255) NOT NULL, numero VARCHAR(20), bairro VARCHAR(100) NOT NULL, cidade VARCHAR(100) NOT NULL, estado VARCHAR(2) NOT NULL, cep VARCHAR(9) NOT NULL, nome_perfil VARCHAR(100) NOT NULL, foto_perfil VARCHAR(255), profissao VARCHAR(100) NOT NULL, fotos_servicos LONGTEXT, status_aprovacao ENUM('pendente','aprovado','reprovado') DEFAULT 'pendente', data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+  db.query('CREATE TABLE IF NOT EXISTS solicitacoes (id INT AUTO_INCREMENT PRIMARY KEY, cliente_nome VARCHAR(100) NOT NULL, cliente_telefone VARCHAR(20) NOT NULL, descricao TEXT NOT NULL, profissional_id INT NOT NULL, data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+  db.query('CREATE TABLE IF NOT EXISTS admin (id INT AUTO_INCREMENT PRIMARY KEY, usuario VARCHAR(50) NOT NULL UNIQUE, senha VARCHAR(255) NOT NULL)');
+  db.query('CREATE TABLE IF NOT EXISTS orcamentos (id INT AUTO_INCREMENT PRIMARY KEY, profissional_id INT NOT NULL, solicitacao_id INT, cliente_nome VARCHAR(100) NOT NULL, descricao TEXT NOT NULL, valor DECIMAL(10,2) NOT NULL, status ENUM("pendente","aprovado","recusado") DEFAULT "pendente", data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE SET NULL)');
+  db.query('CREATE TABLE IF NOT EXISTS mensagens (id INT AUTO_INCREMENT PRIMARY KEY, solicitacao_id INT NOT NULL, remetente VARCHAR(50) NOT NULL, texto TEXT NOT NULL, lida BOOLEAN DEFAULT FALSE, data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE)');
+  db.query('CREATE TABLE IF NOT EXISTS clientes (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL UNIQUE, senha VARCHAR(255) NOT NULL, telefone VARCHAR(20), data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP)');
+  db.query("CREATE TABLE IF NOT EXISTS avaliacoes (id INT AUTO_INCREMENT PRIMARY KEY, solicitacao_id INT NOT NULL UNIQUE, profissional_id INT NOT NULL, cliente_id INT NOT NULL, nota TINYINT NOT NULL, respeito ENUM('sim','parcialmente','nao') NOT NULL, comprometimento ENUM('sim','parcialmente','nao') NOT NULL, qualidade ENUM('sim','parcialmente','nao') NOT NULL, data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE, FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE, FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE)");
+  // Adicionar colunas novas se não existirem (compatibilidade)
+  db.query("ALTER TABLE profissionais ADD COLUMN email VARCHAR(100) UNIQUE AFTER data_cadastro", function(err) { if (err) { /* coluna já existe */ } });
+  db.query("ALTER TABLE profissionais ADD COLUMN senha VARCHAR(255) AFTER email", function(err) { if (err) { /* coluna já existe */ } });
+  db.query("ALTER TABLE solicitacoes ADD COLUMN status_pagamento ENUM('pendente','pago') DEFAULT 'pendente' AFTER data_solicitacao", function(err) { if (err) { /* coluna já existe */ } });
+  db.query("ALTER TABLE solicitacoes ADD COLUMN cliente_id INT AFTER profissional_id", function(err) { if (err) { /* coluna já existe */ } });
+  db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
+  db.query("ALTER TABLE clientes ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription:', err.message); } });
+// Garantir admin padrão
+  setupBanco();
+}
+
+// ============================================
+// Verificacao de saude da conexao + reconexao automatica
+// Roda imediatamente e depois a cada 15s.
+// Quando o banco volta, refaz o setup do schema.
+// ============================================
+var setupJaFeito = false;
+
+function testarConexao() {
+  db.query('SELECT 1', function(err) {
+    if (err) {
+      if (dbConnected) {
+        console.error('Conexao com o banco perdida - tentando reconectar... (' + err.message + ')');
+      }
+      dbConnected = false;
+    } else {
+      if (!dbConnected) {
+        console.log('Conectado ao MySQL com sucesso!');
+        if (!setupJaFeito) {
+          setupJaFeito = true;
+          criarTabelas();
+        }
+      }
+      dbConnected = true;
+    }
+  });
+}
+
+// Primeira verificacao imediata
+testarConexao();
+// Manter acordado e detectar quando o banco voltar
+setInterval(testarConexao, 15000);
 
 // Rotas (passa getter para acompanhar status ao vivo da conexão)
 app.use('/api/profissionais', require('./routes/profissionais')(db, () => dbConnected));

@@ -631,6 +631,7 @@ var widgetChatInterval = null;
 var widgetGlobalInterval = null;
 var widgetUltimasMensagens = {};
 var widgetPainelAberto = false;
+var widgetConversaSelecionada = '';
 
 function mostrarWidgetChat() {
   var widget = document.getElementById('chatWidget');
@@ -703,8 +704,7 @@ async function widgetVerificarNovasMensagens() {
     }
   }
 
-  var panel = document.getElementById('chatPanel');
-  var select = document.getElementById('widgetChatSelect');
+var panel = document.getElementById('chatPanel');
   var chatAberto = widgetPainelAberto && panel.classList.contains('open');
 
   if (temNovaProfissional && !chatAberto) {
@@ -758,81 +758,129 @@ async function widgetEncontrarConversaMaisRecente(solicitacoes) {
   return melhores ? melhores.id : null;
 }
 
+// Carrega a lista de conversas (estilo Messenger) com as solicitações liberadas (pagas)
 async function widgetCarregarSolicitacoes(abrirMaisRecente) {
   var result = await apiRequest(API_BASE + '/clientes/solicitacoes');
   if (!result || !result.success) return;
 
   widgetSolicitacoesCache = result.data;
-  var select = document.getElementById('widgetChatSelect');
-  var currentVal = select.value;
-  select.innerHTML = '<option value="">Selecione uma conversa...</option>';
 
+  var convs = [];
   for (var i = 0; i < result.data.length; i++) {
     var sol = result.data[i];
-    var option = document.createElement('option');
-    option.value = sol.id;
-    option.textContent = sol.nome_perfil + ' - ' + sol.profissao;
-    select.appendChild(option);
+    if (sol.status_pagamento !== 'pago') continue;
+    convs.push(sol);
   }
 
-  if (abrirMaisRecente) {
-    // Ao clicar no balão, abre a conversa da mensagem mais recente
-    var maisRecenteId = await widgetEncontrarConversaMaisRecente(result.data);
-    if (maisRecenteId) {
-      select.value = maisRecenteId;
-    } else {
-      // Nenhuma conversa com mensagens: mantém o padrão (primeira liberada ou atual)
-      widgetRestaurarSelecao(select, currentVal);
-    }
-  } else {
-    widgetRestaurarSelecao(select, currentVal);
-  }
+  var list = document.getElementById('widgetChatList');
+  if (!list) return;
 
-  if (select.value) {
-    widgetCarregarChat();
-  } else {
-    var body = document.getElementById('widgetChatBody');
-    var footer = document.getElementById('widgetChatFooter');
-    if (body) body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa</p></div>';
-    if (footer) footer.style.display = 'none';
-  }
-}
-
-function widgetRestaurarSelecao(select, currentVal) {
-  if (currentVal && currentVal !== '') {
-    for (var i = 0; i < select.options.length; i++) {
-      if (select.options[i].value === currentVal) {
-        select.value = currentVal;
-        break;
-      }
-    }
-  }
-}
-
-function widgetCarregarChat() {
-  var select = document.getElementById('widgetChatSelect');
-  var solicitacaoId = select.value;
-  var body = document.getElementById('widgetChatBody');
-  var footer = document.getElementById('widgetChatFooter');
-
-  if (widgetChatInterval) {
-    clearInterval(widgetChatInterval);
-    widgetChatInterval = null;
-  }
-
-  if (!solicitacaoId) {
-    body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Selecione uma conversa</p></div>';
-    footer.style.display = 'none';
+  // Se já está em uma conversa aberta, apenas atualiza a lista em segundo plano
+  if (widgetConversaSelecionada) {
+    widgetAtualizarItemConversa(convs);
     return;
   }
 
-  footer.style.display = 'flex';
-  widgetCarregarMensagens(solicitacaoId);
+  if (convs.length === 0) {
+    list.innerHTML = '<div class="chat-conv-empty"><span class="icon">💬</span><p>Nenhuma conversa liberada ainda.</p></div>';
+    return;
+  }
+
+  // Se for para abrir a mais recente, seleciona a conversa adequada
+  if (abrirMaisRecente) {
+    var maisRecenteId = await widgetEncontrarConversaMaisRecente(convs);
+    if (maisRecenteId) {
+      widgetAbrirConversa(maisRecenteId);
+      return;
+    }
+  }
+
+  list.innerHTML = '';
+  for (var j = 0; j < convs.length; j++) {
+    var c = convs[j];
+    var item = document.createElement('div');
+    item.className = 'chat-conv-item';
+    item.setAttribute('data-id', c.id);
+    item.setAttribute('onclick', "widgetAbrirConversa('" + c.id + "')");
+
+    var avatarHtml = c.foto_perfil
+      ? '<img src="' + c.foto_perfil + '" alt="Foto">'
+      : (c.nome_perfil ? c.nome_perfil.charAt(0).toUpperCase() : '👤');
+
+    item.innerHTML =
+      '<span class="chat-conv-avatar">' + avatarHtml + '</span>' +
+      '<span class="chat-conv-info">' +
+        '<span class="chat-conv-top">' +
+          '<span class="chat-conv-name">' + (c.nome_perfil || 'Profissional') + '</span>' +
+        '</span>' +
+        '<span class="chat-conv-snippet">' + (c.profissao || 'Conversa liberada') + '</span>' +
+      '</span>';
+    list.appendChild(item);
+  }
+}
+
+// Atualiza um item da lista (nome/snippet) sem refazer tudo
+function widgetAtualizarItemConversa(convs) {
+  for (var i = 0; i < convs.length; i++) {
+    var c = convs[i];
+    var item = document.querySelector('.chat-conv-item[data-id="' + c.id + '"]');
+    if (item) {
+      var name = item.querySelector('.chat-conv-name');
+      var snippet = item.querySelector('.chat-conv-snippet');
+      if (name) name.textContent = c.nome_perfil || 'Profissional';
+      if (snippet) snippet.textContent = c.profissao || 'Conversa liberada';
+    }
+  }
+}
+
+// Abre uma conversa específica (view estilo Messenger)
+async function widgetAbrirConversa(id) {
+  widgetConversaSelecionada = id;
+  var list = document.getElementById('widgetChatList');
+  var view = document.getElementById('widgetChatView');
+  if (list) list.style.display = 'none';
+  if (view) view.classList.add('open');
+
+  // Destaque o item ativo na lista (para quando voltar)
+  var items = document.querySelectorAll('.chat-conv-item');
+  for (var i = 0; i < items.length; i++) {
+    items[i].classList.remove('active');
+    if (items[i].getAttribute('data-id') === String(id)) items[i].classList.add('active');
+  }
+
+  // Atualiza o cabeçalho da conversa
+  var nome = document.getElementById('widgetChatViewNome');
+  var avatar = document.getElementById('widgetChatViewAvatar');
+  var sol = null;
+  for (var j = 0; j < widgetSolicitacoesCache.length; j++) {
+    if (widgetSolicitacoesCache[j].id == id) { sol = widgetSolicitacoesCache[j]; break; }
+  }
+  if (nome) nome.textContent = sol && sol.nome_perfil ? sol.nome_perfil : 'Profissional';
+  if (avatar) {
+    if (sol && sol.foto_perfil) {
+      avatar.innerHTML = '<img src="' + sol.foto_perfil + '" alt="Foto">';
+    } else {
+      avatar.textContent = sol && sol.nome_perfil ? sol.nome_perfil.charAt(0).toUpperCase() : '👤';
+    }
+  }
 
   // Polling a cada 5s
+  if (widgetChatInterval) clearInterval(widgetChatInterval);
   widgetChatInterval = setInterval(function() {
-    widgetCarregarMensagens(solicitacaoId);
+    widgetCarregarMensagens(id);
   }, 5000);
+  widgetCarregarMensagens(id);
+}
+
+function widgetVoltarParaLista() {
+  if (widgetChatInterval) { clearInterval(widgetChatInterval); widgetChatInterval = null; }
+  widgetConversaSelecionada = '';
+  var list = document.getElementById('widgetChatList');
+  var view = document.getElementById('widgetChatView');
+  if (list) list.style.display = '';
+  if (view) view.classList.remove('open');
+  // Recarrega a lista para mostrar o estado mais atual
+  widgetCarregarSolicitacoes(false);
 }
 
 async function widgetCarregarMensagens(solicitacaoId) {
@@ -851,6 +899,7 @@ async function widgetCarregarMensagens(solicitacaoId) {
   }
 
   var body = document.getElementById('widgetChatBody');
+  var footer = document.getElementById('widgetChatFooter');
   var mensagens = result.data;
 
   // Guarda as mensagens para detectar novas
@@ -871,8 +920,7 @@ async function widgetCarregarMensagens(solicitacaoId) {
   }
 
   // Detecta novas mensagens do profissional (não lidas)
-  var select = document.getElementById('widgetChatSelect');
-  var chatAberto = widgetPainelAberto && select.value === solicitacaoId;
+  var chatAberto = widgetPainelAberto && widgetConversaSelecionada === solicitacaoId;
   var qtdeNovaProfissional = 0;
   for (var j = 0; j < novas.length; j++) {
     if (novas[j].remetente === 'profissional') {
@@ -891,9 +939,9 @@ async function widgetCarregarMensagens(solicitacaoId) {
   }
 
   // Só renderiza se for a conversa selecionada no widget
-  if (select.value === solicitacaoId) {
-    body.setAttribute('data-solicitacao', solicitacaoId);
+  if (widgetConversaSelecionada === solicitacaoId) {
     renderizarWidgetChat(mensagens);
+    if (footer) footer.style.display = 'flex';
   }
 }
 
@@ -918,8 +966,7 @@ function renderizarWidgetChat(mensagens) {
 }
 
 async function widgetEnviarMensagem() {
-  var select = document.getElementById('widgetChatSelect');
-  var solicitacaoId = select.value;
+  var solicitacaoId = widgetConversaSelecionada;
   var input = document.getElementById('widgetChatInput');
   var texto = input.value.trim();
 
