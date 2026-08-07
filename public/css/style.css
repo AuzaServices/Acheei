@@ -890,7 +890,7 @@ img {
   height: 64px;
   border-radius: var(--radius-full);
   object-fit: cover;
-  border: 3px solid var(--red-primary);
+  border: 1px solid var(--red-primary);
 }
 
 .profissional-card .profile-photo-placeholder {

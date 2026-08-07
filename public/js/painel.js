@@ -229,18 +229,18 @@ function renderizarDetalhes(prof) {
     if (Array.isArray(prof.fotos_servicos)) fotosServicos = prof.fotos_servicos;
     else try { fotosServicos = JSON.parse(prof.fotos_servicos); } catch(e) { fotosServicos = []; }
   }
-  var sc = prof.status_aprovacao;
+var sc = prof.status_aprovacao;
   var sl = sc.charAt(0).toUpperCase() + sc.slice(1);
 
-  // Foto de perfil editável
+  // Foto de perfil (somente remoção, sem editar)
   var fotoPerfil = '<div class="detalhes-foto-perfil" style="text-align:center;margin-bottom:16px;">';
   fotoPerfil += '<div style="position:relative;display:inline-block;">';
   if (prof.foto_perfil) {
-    fotoPerfil += '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;">';
+    fotoPerfil += '<img src="' + prof.foto_perfil + '" alt="' + prof.nome_perfil + '" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid red;display:block;">';
+    fotoPerfil += '<button type="button" class="detalhes-remover-foto" onclick="removerFotoPerfil(' + prof.id + ')" title="Remover foto" aria-label="Remover foto">&times;</button>';
   } else {
     fotoPerfil += '<div style="width:100px;height:100px;border-radius:50%;background:var(--gray-lighter);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--gray-medium);">👤</div>';
   }
-  fotoPerfil += '<button type="button" class="btn btn-primary btn-sm" onclick="editarFotoPerfilAdmin(' + prof.id + ')" style="display:block;margin:8px auto 0;">Alterar Foto</button>';
   fotoPerfil += '</div></div>';
 
   var itens = '';
