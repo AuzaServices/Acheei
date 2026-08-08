@@ -392,8 +392,25 @@
             <input type="tel" id="clienteTelefone" name="cliente_telefone" placeholder="(11) 99999-9999">
           </div>
         </div>
+<div class="form-group">
+          <label for="dataHora">Data e Hora <span style="color:var(--gray-light);font-weight:400;">(opcional)</span></label>
+          <input type="datetime-local" id="dataHora" name="data_hora">
+        </div>
         <div class="form-group">
-          <label for="descricao">Descreva o Serviço</label>
+          <label for="urgencia">Urgência/Prioridade <span style="color:var(--gray-light);font-weight:400;">(opcional)</span></label>
+          <select id="urgencia" name="urgencia">
+            <option value="">Selecione a urgência</option>
+            <option value="Imediato">Imediato</option>
+            <option value="Dentro da semana">Dentro da semana</option>
+            <option value="Sem pressa">Sem pressa</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="orcamentoEstimado">Orçamento estimado <span style="color:var(--gray-light);font-weight:400;">(opcional)</span></label>
+          <input type="text" id="orcamentoEstimado" name="orcamento_estimado" placeholder="Quanto você pretende pagar por esse serviço">
+        </div>
+        <div class="form-group">
+          <label for="descricao">Descreva o Serviço <span style="color:var(--red-primary);">(Obrigatório)</span></label>
           <textarea id="descricao" name="descricao" placeholder="Descreva detalhadamente o serviço que precisa..." required></textarea>
         </div>
         <div class="modal-footer">

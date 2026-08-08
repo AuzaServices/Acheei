@@ -79,6 +79,31 @@ function formatarMoeda(valor) {
   return 'R$ ' + parseFloat(valor).toFixed(2).replace('.', ',');
 }
 
+// Som "chiclete" (estalo de goma de mascar) ao receber nova mensagem
+function tocarSomChiclete() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function estalo(quando, freqInicial) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freqInicial, quando);
+      osc.frequency.exponentialRampToValueAtTime(freqInicial * 0.5, quando + 0.08);
+      gain.gain.setValueAtTime(0.4, quando);
+      gain.gain.exponentialRampToValueAtTime(0.0001, quando + 0.09);
+      osc.start(quando);
+      osc.stop(quando + 0.1);
+    }
+    // Duplo estalo rápido, característico de "chiclete"
+    estalo(ctx.currentTime, 900);
+    estalo(ctx.currentTime + 0.12, 1200);
+  } catch (e) {
+    // Falha ao reproduzir o som - ignora
+  }
+}
+
 // ============================================
 // API Request com token
 // ============================================
@@ -326,6 +351,20 @@ function renderizarSolicitacoes() {
       : '';
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
+
+    // Campos opcionais (Data/Hora, Urgência, Orçamento) - exibe apenas quando preenchidos
+    var extrasHtml = '';
+    if (sol.data_hora) {
+      var dh = new Date(sol.data_hora);
+      extrasHtml += '<div class="item"><div class="label">Data e Hora</div><div class="value">' + dh.toLocaleString('pt-BR') + '</div></div>';
+    }
+    if (sol.urgencia) {
+      extrasHtml += '<div class="item"><div class="label">Urgência</div><div class="value">' + sol.urgencia + '</div></div>';
+    }
+    if (sol.orcamento_estimado) {
+      extrasHtml += '<div class="item"><div class="label">Orçamento estimado</div><div class="value">' + sol.orcamento_estimado + '</div></div>';
+    }
+
     card.innerHTML =
       '<div class="card-header">' +
         '<h4>' + sol.cliente_nome + '</h4>' +
@@ -333,6 +372,7 @@ function renderizarSolicitacoes() {
       '</div>' +
 '<div class="info-grid">' +
         '<div class="item"><div class="label">Pagamento</div><div class="value">' + badgeHtml + '</div></div>' +
+        extrasHtml +
       '</div>' +
       '<div class="descricao">' + sol.descricao + '</div>' +
       '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>';
@@ -1300,6 +1340,8 @@ async function widgetVerificarNovasMensagensProf() {
       badge.textContent = count + novasCliente;
       badge.classList.add('show');
     }
+    // Som "chiclete" ao receber nova mensagem do cliente
+    tocarSomChiclete();
   }
 }
 

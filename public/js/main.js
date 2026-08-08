@@ -571,6 +571,9 @@ async function enviarSolicitacao(event) {
 
   const descricao = document.getElementById('descricao').value.trim();
   const profissional_id = parseInt(document.getElementById('modalProfissionalId').value);
+  const data_hora = document.getElementById('dataHora').value;
+  const urgencia = document.getElementById('urgencia').value;
+  const orcamento_estimado = document.getElementById('orcamentoEstimado').value.trim();
 
   if (!descricao) {
     showToast('Descreva o serviço que você precisa', 'error');
@@ -590,7 +593,10 @@ try {
       const data = {
         descricao: descricao,
         profissional_id: profissional_id,
-        cliente_id: clienteLogado.id
+        cliente_id: clienteLogado.id,
+        data_hora: data_hora,
+        urgencia: urgencia,
+        orcamento_estimado: orcamento_estimado
       };
       const response = await fetch(`${API_BASE}/solicitacoes`, {
         method: 'POST',
@@ -692,7 +698,10 @@ try {
       cliente_telefone: telefone,
       descricao: descricao,
       profissional_id: profissional_id,
-      cliente_id: clienteId
+      cliente_id: clienteId,
+      data_hora: data_hora,
+      urgencia: urgencia,
+      orcamento_estimado: orcamento_estimado
     };
 
     const response = await fetch(`${API_BASE}/solicitacoes`, {

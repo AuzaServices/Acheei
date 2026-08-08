@@ -40,8 +40,20 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
   data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   status_pagamento ENUM('pendente', 'pago') DEFAULT 'pendente',
   preference_id VARCHAR(100),
+  data_hora DATETIME,
+  urgencia VARCHAR(50),
+  orcamento_estimado VARCHAR(100),
   FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
+-- ALTER TABLE para bancos já existentes
+-- (execute estes comandos no phpMyAdmin/console caso a tabela solicitacoes já exista sem as novas colunas)
+-- ============================================
+-- ALTER TABLE solicitacoes
+--   ADD COLUMN data_hora DATETIME NULL,
+--   ADD COLUMN urgencia VARCHAR(50) NULL,
+--   ADD COLUMN orcamento_estimado VARCHAR(100) NULL;
 
 -- ============================================
 -- Tabela: orcamentos

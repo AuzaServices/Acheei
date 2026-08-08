@@ -14,7 +14,7 @@ router.post('/', (req, res) => {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
     }
-    const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id } = req.body;
+const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, data_hora, urgencia, orcamento_estimado } = req.body;
 
     if (!descricao || !profissional_id) {
       return res.status(400).json({
@@ -43,9 +43,15 @@ router.post('/', (req, res) => {
             return res.status(404).json({ success: false, message: 'Profissional não encontrado ou não está disponível' });
           }
 
+          // Sanitiza e envia dados no formato esperado
+          var dadosExtras = {};
+          if (data_hora) dadosExtras.data_hora = new Date(data_hora);
+          if (urgencia) dadosExtras.urgencia = String(urgencia).trim();
+          if (orcamento_estimado) dadosExtras.orcamento_estimado = String(orcamento_estimado).trim();
+
           db.query(
-            'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, status_pagamento) VALUES (?, ?, ?, ?, ?, ?)',
-            [(nomeFinal || '').trim(), (telefoneFinal || '').trim(), (descricao || '').trim(), profissional_id, clienteIdFinal || null, 'pendente'],
+            'INSERT INTO solicitacoes (cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, data_hora, urgencia, orcamento_estimado, status_pagamento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [(nomeFinal || '').trim(), (telefoneFinal || '').trim(), (descricao || '').trim(), profissional_id, clienteIdFinal || null, dadosExtras.data_hora || null, dadosExtras.urgencia || null, dadosExtras.orcamento_estimado || null, 'pendente'],
             (err, result) => {
               if (err) {
                 console.error('Erro ao criar solicitação:', err);
