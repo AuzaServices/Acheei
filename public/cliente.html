@@ -224,6 +224,16 @@
       .chat-panel-footer { padding: 10px; }
       .chat-panel-footer input { min-width: 0; }
       .chat-input-area input { min-width: 0; }
+      /* Fundo fosco (desfocado) atrás do balão de chat, apenas no mobile */
+      body:has(.chat-panel.open)::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 9997;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+      }
     }
   </style>
 </head>

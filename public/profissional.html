@@ -268,6 +268,16 @@
       .chat-panel-footer { padding: 10px; }
       .chat-panel-footer input { min-width: 0; }
       .chat-container .chat-input input { min-width: 0; }
+      /* Fundo fosco (desfocado) atrás do balão de chat, apenas no mobile */
+      body:has(.chat-panel.open)::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 9997;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+      }
     }
     /* Widget de Chat Flutuante (Messenger) - espelhado do cliente */
     .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: none; }
