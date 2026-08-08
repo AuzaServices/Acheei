@@ -847,7 +847,7 @@ function renderizarMensagens(mensagens) {
       var texto = lida ? 'Visto' : 'Enviado';
       statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
     }
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
+div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>' + statusHtml;
     container.appendChild(div);
   }
   container.scrollTop = container.scrollHeight;
@@ -1390,6 +1390,12 @@ function fecharChatPainel() {
     widget.classList.add('active');
     widget.classList.remove('pulse');
   }
+  // Para o polling da conversa aberta e limpa o estado, para não marcar
+  // mensagens do cliente como lidas enquanto o painel está fechado.
+  if (widgetIntervaloMsgProf) { clearInterval(widgetIntervaloMsgProf); widgetIntervaloMsgProf = null; }
+  widgetConversaSelecionada = '';
+  var view = document.getElementById('widgetChatView');
+  if (view) view.classList.remove('open');
 }
 
 // Carrega a lista de conversas (estilo Messenger) com as conversas liberadas (pagas)
@@ -1610,7 +1616,7 @@ function renderizarWidgetMensagens(mensagens) {
       var texto = lida ? 'Visto' : 'Enviado';
       statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
     }
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
+div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>' + statusHtml;
     body.appendChild(div);
   }
   body.scrollTop = body.scrollHeight;

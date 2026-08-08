@@ -519,7 +519,7 @@ function renderizarMensagens(mensagens) {
       var texto = lida ? 'Visto' : 'Enviado';
       statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
     }
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
+div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>' + statusHtml;
     container.appendChild(div);
   }
   container.scrollTop = container.scrollHeight;
@@ -654,6 +654,12 @@ function toggleChatPainel() {
 function fecharChatPainel() {
   var panel = document.getElementById('chatPanel');
   if (panel) panel.classList.remove('open');
+  // Para o polling da conversa aberta e limpa o estado, para não marcar
+  // mensagens como lidas enquanto o painel está fechado.
+  if (widgetIntervaloMsg) { clearInterval(widgetIntervaloMsg); widgetIntervaloMsg = null; }
+  widgetConversaSelecionada = '';
+  var view = document.getElementById('widgetChatView');
+  if (view) view.classList.remove('open');
 }
 
 // Exibe o balão de chat flutuante (canto inferior direito)
@@ -872,7 +878,7 @@ function renderizarWidgetMensagens(mensagens) {
       var texto = lida ? 'Visto' : 'Enviado';
       statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
     }
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
+div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>' + statusHtml;
     body.appendChild(div);
   }
   body.scrollTop = body.scrollHeight;
