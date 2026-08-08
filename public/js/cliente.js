@@ -889,8 +889,20 @@ async function verificarNovasMensagensWidget() {
     totalNaoLidas += (parseInt(sol.qtd_nao_lidas) || 0);
   }
 
-  var panel = document.getElementById('chatPanel');
+var panel = document.getElementById('chatPanel');
   var chatAberto = panel && panel.classList.contains('open');
+
+  // Se o painel estiver aberto (lista de conversas visível), atualiza a lista
+  // ao vivo para que novas mensagens/snippets/badges apareçam ali mesmo.
+  if (chatAberto) {
+    widgetCarregarSolicitacoes();
+    // Garante o badge global zerado enquanto o painel está aberto
+    var badgeAberto = document.getElementById('chatBadge');
+    if (badgeAberto && badgeAberto.classList.contains('show')) {
+      badgeAberto.classList.remove('show');
+      badgeAberto.textContent = '0';
+    }
+  }
 
   if (totalNaoLidas > 0 && !chatAberto) {
     var bubble = document.getElementById('chatBubble');
