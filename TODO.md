@@ -9,13 +9,13 @@
 7. [x] Adicionar som chiclete para novas mensagens em `public/js/cliente.js` e `public/js/profissional.js`
 8. [x] Estilos dos novos campos em `public/css/style.css`
 
-## Pendente (banco de dados)
-- [ ] Executar no banco MySQL existente:
+## Observação importante
+- Para o funcionamento completo, é necessário **executar no banco de dados** o comando:
   ```sql
   ALTER TABLE solicitacoes
     ADD COLUMN data_hora DATETIME NULL,
     ADD COLUMN urgencia VARCHAR(50) NULL,
     ADD COLUMN orcamento_estimado VARCHAR(100) NULL;
   ```
-</content>
+  (Isso só é necessário se a tabela `solicitacoes` do banco JÁ existir sem essas colunas. O `schema.sql` já as inclui na criação.)
 
