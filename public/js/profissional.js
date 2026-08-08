@@ -829,13 +829,25 @@ function renderizarMensagens(mensagens) {
     container.innerHTML = '<div class="empty-state" style="padding:30px;"><span class="icon">💬</span><h3>Nenhuma mensagem</h3><p>Envie a primeira mensagem para o cliente.</p></div>';
     return;
   }
+  // Última mensagem enviada pelo profissional (status de visualização)
+  var ultimaEnviadaIdx = -1;
+  for (var i = mensagens.length - 1; i >= 0; i--) {
+    if (mensagens[i].remetente === 'profissional') { ultimaEnviadaIdx = i; break; }
+  }
   for (var i = 0; i < mensagens.length; i++) {
     var msg = mensagens[i];
     // No chat do profissional, ele mesmo aparece à direita (vermelho) e o cliente à esquerda (cinza)
     var div = document.createElement('div');
     div.className = 'chat-message ' + (msg.remetente === 'profissional' ? 'cliente' : 'profissional');
     var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
+    var statusHtml = '';
+    if (i === ultimaEnviadaIdx) {
+      var lida = msg.lida === 1 || msg.lida === true;
+      var simbolo = lida ? '✓✓' : '✓';
+      var texto = lida ? 'Visto' : 'Enviado';
+      statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
+    }
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
     container.appendChild(div);
   }
   container.scrollTop = container.scrollHeight;
@@ -1580,13 +1592,25 @@ function renderizarWidgetMensagens(mensagens) {
     body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Nenhuma mensagem ainda. Envie a primeira!</p></div>';
     return;
   }
+  // Última mensagem enviada pelo profissional (status de visualização)
+  var ultimaEnviadaIdx = -1;
+  for (var i = mensagens.length - 1; i >= 0; i--) {
+    if (mensagens[i].remetente === 'profissional') { ultimaEnviadaIdx = i; break; }
+  }
   for (var i = 0; i < mensagens.length; i++) {
     var msg = mensagens[i];
     var classe = msg.remetente === 'profissional' ? 'profissional' : 'cliente';
     var div = document.createElement('div');
     div.className = 'chat-panel-msg ' + classe;
     var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
+    var statusHtml = '';
+    if (i === ultimaEnviadaIdx) {
+      var lida = msg.lida === 1 || msg.lida === true;
+      var simbolo = lida ? '✓✓' : '✓';
+      var texto = lida ? 'Visto' : 'Enviado';
+      statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
+    }
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
     body.appendChild(div);
   }
   body.scrollTop = body.scrollHeight;

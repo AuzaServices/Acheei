@@ -140,8 +140,11 @@
     .chat-message .bubble { max-width: 75%; padding: 12px 16px; border-radius: var(--radius-md); font-size: 14px; line-height: 1.5; }
     .chat-message.cliente .bubble { background: var(--red-primary); color: var(--white); border-bottom-right-radius: 4px; }
     .chat-message.profissional .bubble { background: var(--gray-bg); color: var(--black-primary); border-bottom-left-radius: 4px; }
-    .chat-message .time { font-size: 11px; color: var(--gray-light); margin-top: 4px; }
+.chat-message .time { font-size: 11px; color: var(--gray-light); margin-top: 4px; }
     .chat-message.cliente .time { text-align: right; color: rgba(255,255,255,0.7); }
+    .msg-status { font-size: 11px; margin-top: 2px; text-align: right; }
+    .chat-message.cliente .msg-status, .chat-panel-msg.cliente .msg-status { color: rgba(255,255,255,0.75); }
+    .chat-message.profissional .msg-status, .chat-panel-msg.profissional .msg-status { color: var(--gray-light); }
     .chat-input-area { display: flex; gap: 8px; padding: 16px; border-top: 1px solid var(--gray-lighter); }
     .chat-input-area input { flex: 1; padding: 12px 16px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
     .chat-input-area input:focus { outline: none; border-color: var(--red-primary); }
@@ -176,8 +179,11 @@
     .chat-panel-msg.cliente { display: flex; justify-content: flex-end; }
     .chat-panel-msg.cliente .bubble { background: var(--red-primary); color: var(--white); border-bottom-right-radius: 4px; }
     .chat-panel-msg.profissional .bubble { background: var(--gray-bg); color: var(--black-primary); border-bottom-left-radius: 4px; }
-    .chat-panel-msg .time { font-size: 10px; color: var(--gray-light); margin-top: 4px; }
+.chat-panel-msg .time { font-size: 10px; color: var(--gray-light); margin-top: 4px; }
     .chat-panel-msg.cliente .time { text-align: right; color: rgba(255,255,255,0.7); }
+    .msg-status { font-size: 11px; margin-top: 2px; text-align: right; }
+    .chat-message.cliente .msg-status, .chat-panel-msg.cliente .msg-status { color: rgba(255,255,255,0.75); }
+    .chat-message.profissional .msg-status, .chat-panel-msg.profissional .msg-status { color: var(--gray-light); }
 /* ===== Interface estilo Messenger ===== */
     .chat-conversations { flex: 1; overflow-y: auto; min-height: 300px; max-height: 350px; padding: 8px 0; }
     .chat-conv-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; transition: background 0.15s ease; border-bottom: 1px solid var(--gray-lighter); }

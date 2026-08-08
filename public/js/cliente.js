@@ -501,13 +501,25 @@ function renderizarMensagens(mensagens) {
     container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--gray-medium);">Nenhuma mensagem ainda. Envie a primeira!</div>';
     return;
   }
+  // Última mensagem enviada pelo cliente (para exibir o status de visualização)
+  var ultimaEnviadaIdx = -1;
+  for (var i = mensagens.length - 1; i >= 0; i--) {
+    if (mensagens[i].remetente === 'cliente') { ultimaEnviadaIdx = i; break; }
+  }
   for (var i = 0; i < mensagens.length; i++) {
     var msg = mensagens[i];
     // Cliente à direita (vermelho), profissional à esquerda (cinza)
     var div = document.createElement('div');
     div.className = 'chat-message ' + (msg.remetente === 'cliente' ? 'cliente' : 'profissional');
     var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
+    var statusHtml = '';
+    if (i === ultimaEnviadaIdx) {
+      var lida = msg.lida === 1 || msg.lida === true;
+      var simbolo = lida ? '✓✓' : '✓';
+      var texto = lida ? 'Visto' : 'Enviado';
+      statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
+    }
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
     container.appendChild(div);
   }
   container.scrollTop = container.scrollHeight;
@@ -842,13 +854,25 @@ function renderizarWidgetMensagens(mensagens) {
     body.innerHTML = '<div class="chat-panel-empty"><span class="icon">💬</span><p>Nenhuma mensagem ainda.</p></div>';
     return;
   }
+  // Última mensagem enviada pelo cliente (status de visualização)
+  var ultimaEnviadaIdx = -1;
+  for (var i = mensagens.length - 1; i >= 0; i--) {
+    if (mensagens[i].remetente === 'cliente') { ultimaEnviadaIdx = i; break; }
+  }
   for (var i = 0; i < mensagens.length; i++) {
     var msg = mensagens[i];
     var classe = msg.remetente === 'cliente' ? 'cliente' : 'profissional';
     var div = document.createElement('div');
     div.className = 'chat-panel-msg ' + classe;
     var time = new Date(msg.data_envio).toLocaleTimeString('pt-BR');
-    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>';
+    var statusHtml = '';
+    if (i === ultimaEnviadaIdx) {
+      var lida = msg.lida === 1 || msg.lida === true;
+      var simbolo = lida ? '✓✓' : '✓';
+      var texto = lida ? 'Visto' : 'Enviado';
+      statusHtml = '<div class="msg-status">' + simbolo + ' ' + texto + '</div>';
+    }
+    div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div>' + statusHtml + '</div>';
     body.appendChild(div);
   }
   body.scrollTop = body.scrollHeight;
