@@ -1407,10 +1407,19 @@ async function widgetCarregarSolicitacoesProf() {
       ? '<img src="' + c.cliente_foto + '" alt="Foto">'
       : (c.cliente_nome ? c.cliente_nome.charAt(0).toUpperCase() : '👤');
 
-    var naoLidas = parseInt(c.qtd_nao_lidas) || 0;
+var naoLidas = parseInt(c.qtd_nao_lidas) || 0;
     var badgeHtml = naoLidas > 0
-      ? '<span class="chat-conv-badge">' + naoLidas + '</span>'
+      ? '<span class="chat-conv-badge">' + (naoLidas > 99 ? '99+' : naoLidas) + '</span>'
       : '';
+
+    // Última mensagem da conversa (fonte: backend)
+    var snippet = (c.descricao || 'Conversa liberada');
+    if (c.ultima_mensagem) {
+      var prefixo = c.ultima_mensagem_remetente === 'profissional' ? 'Você: ' : '';
+      var txt = c.ultima_mensagem.replace(/\n/g, ' ');
+      if (txt.length > 42) txt = txt.substring(0, 42) + '...';
+      snippet = prefixo + txt;
+    }
 
     item.innerHTML =
       '<span class="chat-conv-avatar">' + avatarHtml + '</span>' +
@@ -1419,7 +1428,7 @@ async function widgetCarregarSolicitacoesProf() {
           '<span class="chat-conv-name">' + (c.cliente_nome || 'Cliente') + '</span>' +
           badgeHtml +
         '</span>' +
-        '<span class="chat-conv-snippet">' + (c.descricao || 'Conversa liberada') + '</span>' +
+        '<span class="chat-conv-snippet">' + snippet + '</span>' +
       '</span>';
     list.appendChild(item);
   }
@@ -1431,10 +1440,19 @@ function widgetAtualizarItemConversa(convs) {
     var c = convs[i];
     var item = document.querySelector('.chat-conv-item[data-id="' + c.id + '"]');
     if (item) {
-      var name = item.querySelector('.chat-conv-name');
+var name = item.querySelector('.chat-conv-name');
       var snippet = item.querySelector('.chat-conv-snippet');
       if (name) name.textContent = c.cliente_nome || 'Cliente';
-      if (snippet) snippet.textContent = c.descricao || 'Conversa liberada';
+      if (snippet) {
+        var snip = (c.descricao || 'Conversa liberada');
+        if (c.ultima_mensagem) {
+          var pref = c.ultima_mensagem_remetente === 'profissional' ? 'Você: ' : '';
+          var tx = c.ultima_mensagem.replace(/\n/g, ' ');
+          if (tx.length > 42) tx = tx.substring(0, 42) + '...';
+          snip = pref + tx;
+        }
+        snippet.textContent = snip;
+      }
       // Atualiza badge de não lidas por conversa
       var badge = item.querySelector('.chat-conv-badge');
       var naoLidas = parseInt(c.qtd_nao_lidas) || 0;

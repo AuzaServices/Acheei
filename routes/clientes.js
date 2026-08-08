@@ -200,7 +200,9 @@ res.status(201).json({
 db.query(
       `SELECT s.*, p.nome_perfil, p.profissao, p.foto_perfil, p.cidade, p.estado,
         a.id AS avaliacao_id, a.nota AS avaliacao_nota,
-        (SELECT COUNT(*) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'profissional' AND m.lida = FALSE) AS qtd_nao_lidas
+        (SELECT COUNT(*) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'profissional' AND m.lida = FALSE) AS qtd_nao_lidas,
+        (SELECT m.texto FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem,
+        (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_remetente
        FROM solicitacoes s
        JOIN profissionais p ON s.profissional_id = p.id
        LEFT JOIN avaliacoes a ON a.solicitacao_id = s.id
