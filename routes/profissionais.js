@@ -22,7 +22,7 @@ module.exports = function(db, dbConnected) {
     var estado = req.query.estado;
     var profissao = req.query.profissao;
     
-    var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
+var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
       COALESCE(a.media_avaliacoes, 0) AS media_avaliacoes,
       COALESCE(a.ranking_score, 3.5) AS ranking_score
       FROM profissionais p

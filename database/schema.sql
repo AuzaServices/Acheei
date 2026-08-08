@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS profissionais (
   nome_perfil VARCHAR(100) NOT NULL,
   foto_perfil VARCHAR(255),
   profissao VARCHAR(100) NOT NULL,
-  fotos_servicos LONGTEXT,
+fotos_servicos LONGTEXT,
   status_aprovacao ENUM('pendente', 'aprovado', 'reprovado') DEFAULT 'pendente',
   data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   email VARCHAR(100) UNIQUE,

@@ -1,15 +1,11 @@
-# TODO - Correção do Balão de Mensagens (reset permanente) + Status "Visto/Enviado"
+# TODO - Corrigir Badge de Notificações de Mensagens
 
 ## Objetivo
-Quando abrir a conversa (ou o balão), a quantidade de mensagens não lidas deve ser removida **permanentemente** (não repetir após atualizar página ou fazer login), tanto para Cliente quanto para Profissional. Corrigir também o texto "Visto"/"Enviado" invisível no mobile.
+A quantidade de mensagens não lidas no balão deve resetar permanentemente ao abrir a conversa, mesmo após atualizar a página ou fazer login. A contagem deve ser baseada na coluna `lida` do banco (fonte de verdade), não em estado em memória.
 
-## Passos
-- [x] Analisar código (cliente.js, profissional.js, mensagens.js, clientes.js, solicitacoes.js, HTMLs)
-- [x] Backend: `routes/clientes.js` - adicionar `qtd_nao_lidas`, `ultima_mensagem`, `ultima_mensagem_remetente` no GET `/clientes/solicitacoes` (já presente)
-- [x] Backend: `routes/solicitacoes.js` - GET `/solicitacoes/profissional/:id` já retorna `qtd_nao_lidas`, `ultima_mensagem`, `ultima_mensagem_remetente`
-- [x] Frontend: `public/js/cliente.js` - `verificarNovasMensagensWidget()` usa `qtd_nao_lidas` (reset permanente) + badge por conversa
-- [x] Frontend: `public/js/profissional.js` - `widgetVerificarNovasMensagensProf()` usa `qtd_nao_lidas` (reset permanente) + badge por conversa (`widgetCarregarSolicitacoesProf`/`widgetAtualizarItemConversa`)
-- [x] CSS: remover regra `.msg-status` duplicada em `cliente.html`; cor legível `var(--gray-medium)` no balão do remetente em ambos HTMLs
-- [x] Verificado: badge por conversa (`chat-conv-badge`) e global (`chat-badge`) agora usam `qtd_nao_lidas` do backend (reset permanente ao abrir)
-- [x] Verificado: restaurar lista de conversas ao fechar/esconder o widget (evita estado "instalado" preso)
-- [ ] Testar manualmente
+## Tarefas
+- [x] 1. Analisar fluxo atual (cliente.js, profissional.js, mensagens.js, clientes.js)
+- [ ] 2. Backend: adicionar `qtd_nao_lidas` e `ultima_mensagem` no endpoint `/clientes/solicitacoes` (routes/clientes.js)
+- [ ] 3. Frontend profissional: usar `qtd_nao_lidas` do backend em `widgetVerificarNovasMensagensProf` (remover dependência de `widgetUltimasMensagensProf`)
+- [ ] 4. Garantir que abrir a conversa marca mensagens como lida (já implementado em /clientes/mensagens e /mensagens)
+- [ ] 5. Testar fluxo completo (abrir balão → resetar → atualizar página → badge não reaparece)
