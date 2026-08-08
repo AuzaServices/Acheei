@@ -197,9 +197,10 @@ res.status(201).json({
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-    db.query(
+db.query(
       `SELECT s.*, p.nome_perfil, p.profissao, p.foto_perfil, p.cidade, p.estado,
-        a.id AS avaliacao_id, a.nota AS avaliacao_nota
+        a.id AS avaliacao_id, a.nota AS avaliacao_nota,
+        (SELECT COUNT(*) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'profissional' AND m.lida = FALSE) AS qtd_nao_lidas
        FROM solicitacoes s
        JOIN profissionais p ON s.profissional_id = p.id
        LEFT JOIN avaliacoes a ON a.solicitacao_id = s.id

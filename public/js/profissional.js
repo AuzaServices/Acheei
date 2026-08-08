@@ -1308,40 +1308,33 @@ async function widgetVerificarNovasMensagensProf() {
   var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
   if (!result || !result.success) return;
 
-  var novasCliente = 0;
+  // Total de mensagens não lidas vindas do backend (fonte de verdade = coluna lida)
+  var totalNaoLidas = 0;
   for (var i = 0; i < result.data.length; i++) {
     var sol = result.data[i];
     if (sol.status_pagamento !== 'pago') continue;
-    var msgRes = await apiRequest(API_BASE + '/mensagens/' + sol.id);
-    if (!msgRes || !msgRes.success) continue;
-    var mensagens = msgRes.data;
-    if (!widgetUltimasMensagensProf[sol.id]) {
-      widgetUltimasMensagensProf[sol.id] = 0;
-    }
-    for (var j = 0; j < mensagens.length; j++) {
-      if (mensagens[j].id > widgetUltimasMensagensProf[sol.id] && mensagens[j].remetente === 'cliente') {
-        novasCliente++;
-      }
-    }
-    if (mensagens.length > 0) {
-      widgetUltimasMensagensProf[sol.id] = mensagens[mensagens.length - 1].id;
-    }
+    totalNaoLidas += (parseInt(sol.qtd_nao_lidas) || 0);
   }
 
   var panel = document.getElementById('chatPanel');
   var chatAberto = panel && panel.classList.contains('open');
 
-  if (novasCliente > 0 && !chatAberto) {
+  if (totalNaoLidas > 0 && !chatAberto) {
     var bubble = document.getElementById('chatBubble');
     if (bubble) bubble.classList.add('pulse');
     var badge = document.getElementById('chatBadge');
     if (badge) {
-      var count = parseInt(badge.textContent) || 0;
-      badge.textContent = count + novasCliente;
+      badge.textContent = totalNaoLidas;
       badge.classList.add('show');
     }
     // Som "chiclete" ao receber nova mensagem do cliente
     tocarSomChiclete();
+  } else {
+    var badge2 = document.getElementById('chatBadge');
+    if (badge2 && badge2.classList.contains('show')) {
+      badge2.classList.remove('show');
+      badge2.textContent = '0';
+    }
   }
 }
 
@@ -1414,11 +1407,17 @@ async function widgetCarregarSolicitacoesProf() {
       ? '<img src="' + c.cliente_foto + '" alt="Foto">'
       : (c.cliente_nome ? c.cliente_nome.charAt(0).toUpperCase() : '👤');
 
+    var naoLidas = parseInt(c.qtd_nao_lidas) || 0;
+    var badgeHtml = naoLidas > 0
+      ? '<span class="chat-conv-badge">' + naoLidas + '</span>'
+      : '';
+
     item.innerHTML =
       '<span class="chat-conv-avatar">' + avatarHtml + '</span>' +
       '<span class="chat-conv-info">' +
         '<span class="chat-conv-top">' +
           '<span class="chat-conv-name">' + (c.cliente_nome || 'Cliente') + '</span>' +
+          badgeHtml +
         '</span>' +
         '<span class="chat-conv-snippet">' + (c.descricao || 'Conversa liberada') + '</span>' +
       '</span>';
@@ -1436,6 +1435,24 @@ function widgetAtualizarItemConversa(convs) {
       var snippet = item.querySelector('.chat-conv-snippet');
       if (name) name.textContent = c.cliente_nome || 'Cliente';
       if (snippet) snippet.textContent = c.descricao || 'Conversa liberada';
+      // Atualiza badge de não lidas por conversa
+      var badge = item.querySelector('.chat-conv-badge');
+      var naoLidas = parseInt(c.qtd_nao_lidas) || 0;
+      if (naoLidas > 0) {
+        if (badge) {
+          badge.textContent = naoLidas;
+        } else {
+          var top = item.querySelector('.chat-conv-top');
+          if (top) {
+            var nb = document.createElement('span');
+            nb.className = 'chat-conv-badge';
+            nb.textContent = naoLidas;
+            top.appendChild(nb);
+          }
+        }
+      } else {
+        if (badge) badge.remove();
+      }
     }
   }
 }

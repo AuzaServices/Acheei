@@ -111,7 +111,11 @@ const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, 
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
     db.query(
-      'SELECT * FROM solicitacoes WHERE profissional_id = ? ORDER BY data_solicitacao DESC',
+      `SELECT s.*,
+        (SELECT COUNT(*) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'cliente' AND m.lida = FALSE) AS qtd_nao_lidas
+       FROM solicitacoes s
+       WHERE s.profissional_id = ?
+       ORDER BY s.data_solicitacao DESC`,
       [req.params.id],
       (err, results) => {
         if (err) {

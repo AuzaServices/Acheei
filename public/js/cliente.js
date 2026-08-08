@@ -608,6 +608,17 @@ function iniciarPollingWidget() {
   verificarNovasMensagensWidget();
 }
 
+// Zera o badge global do balão (usado ao abrir o painel / conversa)
+function zerarBadgeWidget() {
+  var badge = document.getElementById('chatBadge');
+  if (badge) {
+    badge.classList.remove('show');
+    badge.textContent = '0';
+  }
+  var bubble = document.getElementById('chatBubble');
+  if (bubble) bubble.classList.remove('pulse');
+}
+
 function pararPollingWidget() {
   if (widgetGlobalInterval) { clearInterval(widgetGlobalInterval); widgetGlobalInterval = null; }
   if (widgetIntervaloMsg) { clearInterval(widgetIntervaloMsg); widgetIntervaloMsg = null; }
@@ -686,13 +697,20 @@ async function widgetCarregarSolicitacoes() {
     item.className = 'chat-conv-item';
     item.setAttribute('data-id', c.id);
     item.setAttribute('onclick', "widgetAbrirConversa('" + c.id + "')");
-    var avatarHtml = c.foto_perfil
+var avatarHtml = c.foto_perfil
       ? '<img src="' + c.foto_perfil + '" alt="Foto">'
       : (c.nome_perfil ? c.nome_perfil.charAt(0).toUpperCase() : '👤');
+    var naoLidas = parseInt(c.qtd_nao_lidas) || 0;
+    var badgeHtml = naoLidas > 0
+      ? '<span class="chat-conv-badge">' + naoLidas + '</span>'
+      : '';
     item.innerHTML =
       '<span class="chat-conv-avatar">' + avatarHtml + '</span>' +
       '<span class="chat-conv-info">' +
-        '<span class="chat-conv-top"><span class="chat-conv-name">' + (c.nome_perfil || 'Profissional') + '</span></span>' +
+        '<span class="chat-conv-top">' +
+          '<span class="chat-conv-name">' + (c.nome_perfil || 'Profissional') + '</span>' +
+          badgeHtml +
+        '</span>' +
         '<span class="chat-conv-snippet">' + (c.descricao || 'Conversa liberada') + '</span>' +
       '</span>';
     list.appendChild(item);
@@ -708,6 +726,24 @@ function widgetAtualizarItemConversa(convs) {
       var snippet = item.querySelector('.chat-conv-snippet');
       if (name && c.nome_perfil) name.textContent = c.nome_perfil;
       if (snippet && c.descricao) snippet.textContent = c.descricao;
+      // Atualiza badge de não lidas por conversa
+      var badge = item.querySelector('.chat-conv-badge');
+      var naoLidas = parseInt(c.qtd_nao_lidas) || 0;
+      if (naoLidas > 0) {
+        if (badge) {
+          badge.textContent = naoLidas;
+        } else {
+          var top = item.querySelector('.chat-conv-top');
+          if (top) {
+            var nb = document.createElement('span');
+            nb.className = 'chat-conv-badge';
+            nb.textContent = naoLidas;
+            top.appendChild(nb);
+          }
+        }
+      } else {
+        if (badge) badge.remove();
+      }
     }
   }
 }
@@ -825,41 +861,34 @@ async function verificarNovasMensagensWidget() {
   var result = await apiRequest(API_BASE + '/clientes/solicitacoes');
   if (!result || !result.success) return;
 
-  var novasMensagens = 0;
+  // Total de mensagens não lidas vindas do backend (fonte de verdade = coluna lida)
+  var totalNaoLidas = 0;
   for (var i = 0; i < result.data.length; i++) {
     var sol = result.data[i];
     if (sol.status_pagamento !== 'pago') continue;
-    var msgRes = await apiRequest(API_BASE + '/clientes/mensagens/' + sol.id);
-    if (!msgRes || !msgRes.success) continue;
-    var mensagens = msgRes.data;
-    if (!widgetUltimasMensagens[sol.id]) {
-      widgetUltimasMensagens[sol.id] = 0;
-    }
-    for (var j = 0; j < mensagens.length; j++) {
-      if (mensagens[j].id > widgetUltimasMensagens[sol.id] && mensagens[j].remetente === 'profissional') {
-        novasMensagens++;
-      }
-    }
-    if (mensagens.length > 0) {
-      widgetUltimasMensagens[sol.id] = mensagens[mensagens.length - 1].id;
-    }
+    totalNaoLidas += (parseInt(sol.qtd_nao_lidas) || 0);
   }
 
-  if (novasMensagens > 0) {
-    var panel = document.getElementById('chatPanel');
-    var chatAberto = panel && panel.classList.contains('open');
-    if (!chatAberto) {
-      var bubble = document.getElementById('chatBubble');
-      if (bubble) bubble.classList.add('pulse');
-      var badge = document.getElementById('chatBadge');
-      if (badge) {
-        var count = parseInt(badge.textContent) || 0;
-        badge.textContent = count + novasMensagens;
-        badge.classList.add('show');
-      }
+  var panel = document.getElementById('chatPanel');
+  var chatAberto = panel && panel.classList.contains('open');
+
+  if (totalNaoLidas > 0 && !chatAberto) {
+    var bubble = document.getElementById('chatBubble');
+    if (bubble) bubble.classList.add('pulse');
+    var badge = document.getElementById('chatBadge');
+    if (badge) {
+      badge.textContent = totalNaoLidas;
+      badge.classList.add('show');
     }
     // Som chiclete ao receber nova mensagem
     tocarSomNotificacao();
+  } else {
+    // Nada não lido: garante badge zerado
+    var badge2 = document.getElementById('chatBadge');
+    if (badge2 && badge2.classList.contains('show')) {
+      badge2.classList.remove('show');
+      badge2.textContent = '0';
+    }
   }
 }
 

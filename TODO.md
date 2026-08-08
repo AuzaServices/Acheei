@@ -1,12 +1,13 @@
-# To-do: Corrigir botão de chat na Área do Cliente
+# TODO - Reset permanente do badge de mensagens não lidas
 
 ## Objetivo
-Remover o botão "💬 Conversar" abaixo das solicitações na área do cliente e exibir o balão de chat flutuante (canto inferior direito), igual à área do profissional.
+Ao abrir uma conversa, zerar permanentemente a contagem de mensagens não lidas do balão (mesmo após recarregar a página ou fazer login novamente). Usar a coluna `lida` do banco como fonte de verdade.
 
-## Passos
-- [x] 1. Remover o bloco `chatBtn` e o `.card-footer` em `renderizarSolicitacoes()` no `public/js/cliente.js`
-- [x] 2. Adicionar `mostrarWidgetChat()` e `esconderWidgetChat()` em `public/js/cliente.js` (espelhando a área do profissional)
-- [x] 3. Atualizar `switchTab()` para esconder o balão na aba Chat e mostrar nas demais
-- [x] 4. Chamar `mostrarWidgetChat()` ao exibir o dashboard (via `mostrarDashboard()`, usada no login, cadastro e verificação de token)
-- [x] 5. Validar sintaxe do arquivo com `node --check` (sem erros)
+## Etapas
 
+- [ ] 1. Backend: `routes/solicitacoes.js` - adicionar `qtd_nao_lidas` no GET `/profissional/:id` (mensagens do cliente não lidas)
+- [ ] 2. Backend: `routes/clientes.js` - adicionar `qtd_nao_lidas` no GET `/solicitacoes` (mensagens do profissional não lidas)
+- [ ] 3. Frontend cliente: `public/js/cliente.js` - usar `qtd_nao_lidas` no badge e adicionar badge por conversa no widget
+- [ ] 4. Frontend profissional: `public/js/profissional.js` - usar `qtd_nao_lidas` no badge e adicionar badge por conversa no widget
+- [ ] 5. CSS: adicionar estilo `.chat-conv-badge`
+- [ ] 6. Testar: enviar mensagens, recarregar página, verificar reset do badge ao abrir conversa
