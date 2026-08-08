@@ -143,6 +143,60 @@ db.query(
   });
 
 // ============================================
+  // DELETE /api/solicitacoes/:id/rejeitar
+  // Profissional rejeita uma solicitação.
+  // Apaga a solicitação e incrementa o contador de rejeições do profissional,
+  // o que reduz seu ranking nas buscas públicas.
+  // ============================================
+  router.delete('/:id/rejeitar', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query(
+      'SELECT profissional_id FROM solicitacoes WHERE id = ?',
+      [req.params.id],
+      (err, results) => {
+        if (err) {
+          console.error('Erro ao buscar solicitação para rejeitar:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao rejeitar solicitação' });
+        }
+        if (results.length === 0) {
+          return res.status(404).json({ success: false, message: 'Solicitação não encontrada' });
+        }
+        const profissionalId = results[0].profissional_id;
+
+        // Apaga a solicitação (mensagens e orçamentos associados são removidos em cascata)
+        db.query(
+          'DELETE FROM solicitacoes WHERE id = ?',
+          [req.params.id],
+          (err, delResult) => {
+            if (err) {
+              console.error('Erro ao excluir solicitação:', err);
+              return res.status(500).json({ success: false, message: 'Erro ao excluir solicitação' });
+            }
+            // Incrementa o contador de rejeições do profissional
+            db.query(
+              'UPDATE profissionais SET rejeicoes = rejeicoes + 1 WHERE id = ?',
+              [profissionalId],
+              (err2) => {
+                if (err2) {
+                  console.error('Erro ao atualizar rejeições:', err2);
+                  return res.status(500).json({ success: false, message: 'Solicitação excluída, mas erro ao atualizar pontuação' });
+                }
+                res.json({
+                  success: true,
+                  message: 'Solicitação rejeitada e excluída. Isso afetará sua posição nas buscas.',
+                  data: { solicitacao_id: req.params.id, rejeicoes_incrementadas: true }
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+
+  // ============================================
   // GET /api/solicitacoes
   // Listar todas as solicitações (admin)
   // ============================================

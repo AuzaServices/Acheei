@@ -89,7 +89,7 @@
     .section-card .section-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-lighter); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
     .section-card .section-header h3 { font-size: 18px; font-weight: 700; }
     .section-card .section-body { padding: 20px 24px; }
-    .solicitacao-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1px solid var(--gray-lighter); }
+.solicitacao-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1px solid var(--gray-lighter); position: relative; transition: transform 0.25s ease, opacity 0.25s ease; overflow: hidden; }
     .solicitacao-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
     .solicitacao-card .card-header h4 { font-size: 15px; font-weight: 700; }
     .solicitacao-card .card-header .date { font-size: 12px; color: var(--gray-medium); }
@@ -97,6 +97,40 @@
     .solicitacao-card .info-grid .item .label { font-size: 11px; color: var(--gray-medium); font-weight: 600; text-transform: uppercase; }
     .solicitacao-card .info-grid .item .value { font-size: 14px; color: var(--black-primary); }
     .solicitacao-card .descricao { font-size: 14px; color: var(--gray-dark); margin-bottom: 12px; padding: 12px; background: var(--white); border-radius: var(--radius-sm); }
+    /* Botão X vermelho minimalista (sem contorno) para rejeitar solicitação */
+    .solicitacao-rejeitar-btn {
+      position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
+      background: transparent; border: none; cursor: pointer; color: var(--red-primary);
+      display: flex; align-items: center; justify-content: center; border-radius: 50%;
+      transition: background 0.15s ease, transform 0.15s ease; z-index: 5; padding: 0;
+    }
+    .solicitacao-rejeitar-btn svg { width: 18px; height: 18px; }
+    .solicitacao-rejeitar-btn:hover { background: rgba(255,0,0,0.08); transform: scale(1.1); }
+    .solicitacao-rejeitar-btn:active { transform: scale(0.9); }
+    /* Botão de arrastar (swipe) para rejeitar - apenas mobile */
+    .sol-swipe-wrap { display: none; margin-top: 12px; }
+    .sol-swipe-track {
+      position: relative; height: 46px; background: var(--gray-lighter);
+      border-radius: 23px; overflow: hidden; cursor: grab; user-select: none; touch-action: none;
+    }
+    .sol-swipe-track.dragging { cursor: grabbing; }
+    .sol-swipe-label {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: var(--red-primary); pointer-events: none; gap: 6px;
+    }
+    .sol-swipe-thumb {
+      position: absolute; top: 4px; left: 4px; width: 38px; height: 38px; border-radius: 50%;
+      background: var(--red-primary); color: var(--white); display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-sm); transition: background 0.15s ease; z-index: 2;
+    }
+    .sol-swipe-thumb svg { width: 18px; height: 18px; }
+    .sol-swipe-track.complete .sol-swipe-thumb { background: var(--red-dark); }
+    /* Na área de pagamento, mantém o botão de pagar no desktop */
+    .sol-pay-btn { display: inline-flex; }
+    @media (max-width: 768px) {
+      .sol-pay-btn { display: none; }
+      .sol-swipe-wrap { display: block; }
+    }
     .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
     .badge.pendente { background: #fff3cd; color: #856404; }
     .badge.pago { background: #d4edda; color: #155724; }
@@ -694,6 +728,31 @@
       </p>
 
       <button type="button" class="btn btn-outline pix-close-btn" onclick="fecharModalPix()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REJEITAR SOLICITAÇÃO -->
+<div class="modal-overlay" id="rejeitarModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header" style="border-bottom:1px solid var(--gray-lighter);">
+      <h3 style="display:flex;align-items:center;gap:8px;color:var(--red-primary);">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M16 8l-8 8"/></svg>
+        Rejeitar solicitação
+      </h3>
+      <button class="modal-close" onclick="fecharModalRejeitar()">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:24px;">
+      <p style="font-size:14px;color:var(--gray-dark);line-height:1.6;margin-bottom:8px;">
+        Tem certeza que deseja <strong style="color:var(--red-primary);">rejeitar</strong> esta solicitação?
+      </p>
+      <p style="font-size:13px;color:var(--gray-medium);line-height:1.6;margin-bottom:20px;">
+        A solicitação será <strong>excluída permanentemente</strong> e isso <strong>influenciará negativamente na sua pontuação</strong> nas buscas. Quanto mais solicitações você rejeitar, mais para trás você aparecerá para novos clientes.
+      </p>
+    </div>
+    <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--gray-lighter);">
+      <button type="button" class="btn btn-outline" onclick="fecharModalRejeitar()">Cancelar</button>
+      <button type="button" class="btn btn-danger" id="btnConfirmarRejeitar" onclick="confirmarRejeicao()">Sim, rejeitar</button>
     </div>
   </div>
 </div>

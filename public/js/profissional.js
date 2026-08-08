@@ -346,11 +346,15 @@ function renderizarSolicitacoes() {
     var badgeHtml = statusPag === 'pago'
       ? '<span class="badge pago">Pago</span>'
       : '<span class="badge pendente">Pendente</span>';
-    var pagarBtn = statusPag === 'pendente'
-      ? '<button type="button" class="btn btn-primary btn-sm" data-solicitacao-id="' + sol.id + '" onclick="pagarSolicitacao(event, ' + sol.id + ')">Pagar R$14,99</button>'
+var pagarBtn = statusPag === 'pendente'
+      ? '<button type="button" class="btn btn-primary btn-sm sol-pay-btn" data-solicitacao-id="' + sol.id + '" onclick="pagarSolicitacao(event, ' + sol.id + ')">Pagar R$14,99</button>'
       : '';
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
+    var xBtn = '<button type="button" class="solicitacao-rejeitar-btn" title="Rejeitar solicitação" aria-label="Rejeitar solicitação" onclick="abrirModalRejeitar(' + sol.id + ')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
+    var swipeHtml = statusPag === 'pendente'
+      ? '<div class="sol-swipe-wrap"><div class="sol-swipe-track" data-sol-id="' + sol.id + '"><span class="sol-swipe-label">Arraste para rejeitar</span><span class="sol-swipe-thumb"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></span></div></div>'
+      : '';
 
     // Campos opcionais (Data/Hora, Urgência, Orçamento) - exibe apenas quando preenchidos
     var extrasHtml = '';
@@ -365,7 +369,8 @@ function renderizarSolicitacoes() {
       extrasHtml += '<div class="item"><div class="label">Orçamento estimado</div><div class="value">' + sol.orcamento_estimado + '</div></div>';
     }
 
-    card.innerHTML =
+card.innerHTML =
+      xBtn +
       '<div class="card-header">' +
         '<h4>' + sol.cliente_nome + '</h4>' +
         '<span class="date">' + new Date(sol.data_solicitacao).toLocaleString('pt-BR') + '</span>' +
@@ -375,10 +380,132 @@ function renderizarSolicitacoes() {
         extrasHtml +
       '</div>' +
       '<div class="descricao">' + sol.descricao + '</div>' +
-      '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>';
+      '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>' +
+      swipeHtml;
     container.appendChild(card);
   }
+  configurarSwipeSolicitacoes();
 }
+
+// ============================================
+// Rejeição de Solicitação (X vermelho + swipe no mobile)
+// ============================================
+let rejeitarSolicitacaoId = null;
+
+function abrirModalRejeitar(id) {
+  rejeitarSolicitacaoId = id;
+  var modal = document.getElementById('rejeitarModal');
+  if (modal) {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function fecharModalRejeitar() {
+  rejeitarSolicitacaoId = null;
+  var modal = document.getElementById('rejeitarModal');
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+async function confirmarRejeicao() {
+  var id = rejeitarSolicitacaoId;
+  if (!id) { fecharModalRejeitar(); return; }
+  var btn = document.getElementById('btnConfirmarRejeitar');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Rejeitando...';
+  }
+  var result = await apiRequest(API_BASE + '/solicitacoes/' + id + '/rejeitar', { method: 'DELETE' });
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = 'Sim, rejeitar';
+  }
+  fecharModalRejeitar();
+  if (result && result.success) {
+    showToast(result.message || 'Solicitação rejeitada', 'info');
+    await carregarSolicitacoes();
+  }
+}
+
+// Configura o gesto de arrastar (swipe) para rejeitar, apenas no mobile
+function configurarSwipeSolicitacoes() {
+  var tracks = document.querySelectorAll('.sol-swipe-track');
+  for (var i = 0; i < tracks.length; i++) {
+    (function(track) {
+      if (track.dataset.swipeReady) return;
+      track.dataset.swipeReady = '1';
+      var thumb = track.querySelector('.sol-swipe-thumb');
+      var solId = track.getAttribute('data-sol-id');
+      var startX = 0;
+      var currentX = 0;
+      var dragging = false;
+      var limiar = 0.7; // precisa arrastar 70% da largura para rejeitar
+
+      function larguraUtil() { return track.clientWidth - 42; }
+
+      function reset() {
+        dragging = false;
+        track.classList.remove('dragging');
+        if (thumb) thumb.style.left = '4px';
+        track.classList.remove('complete');
+      }
+
+      function onStart(e) {
+        var ev = e.touches ? e.touches[0] : e;
+        startX = ev.clientX;
+        currentX = 0;
+        dragging = true;
+        track.classList.add('dragging');
+      }
+
+      function onMove(e) {
+        if (!dragging) return;
+        var ev = e.touches ? e.touches[0] : e;
+        var dx = ev.clientX - startX;
+        if (dx < 0) dx = 0;
+        currentX = dx;
+        var max = larguraUtil();
+        if (currentX > max) currentX = max;
+        if (thumb) thumb.style.left = (4 + currentX) + 'px';
+        if (e.cancelable) e.preventDefault();
+      }
+
+      function onEnd() {
+        if (!dragging) return;
+        dragging = false;
+        track.classList.remove('dragging');
+        var max = larguraUtil();
+        if (currentX >= max * limiar) {
+          track.classList.add('complete');
+          setTimeout(function() { abrirModalRejeitar(solId); reset(); }, 200);
+        } else {
+          reset();
+        }
+      }
+
+      track.addEventListener('touchstart', onStart, { passive: true });
+      track.addEventListener('touchmove', onMove, { passive: false });
+      track.addEventListener('touchend', onEnd);
+      track.addEventListener('mousedown', onStart);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+    })(tracks[i]);
+  }
+}
+
+// Fecha o modal de rejeição ao clicar no overlay ou com Escape
+document.addEventListener('DOMContentLoaded', function() {
+  var rm = document.getElementById('rejeitarModal');
+  if (rm) {
+    rm.addEventListener('click', function(e) { if (e.target === this) fecharModalRejeitar(); });
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') fecharModalRejeitar();
+  });
+});
 
 // ============================================
 // Pagamento via Mercado Pago (PIX Transparente)

@@ -24,7 +24,8 @@ module.exports = function(db, dbConnected) {
     
 var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
       COALESCE(a.media_avaliacoes, 0) AS media_avaliacoes,
-      COALESCE(a.ranking_score, 3.5) AS ranking_score
+      COALESCE(a.ranking_score, 3.5) AS ranking_score,
+      COALESCE(p.rejeicoes, 0) AS rejeicoes
       FROM profissionais p
       LEFT JOIN (
         SELECT profissional_id, COUNT(*) AS total_avaliacoes, ROUND(AVG(nota), 1) AS media_avaliacoes,
@@ -38,7 +39,9 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
     if (estado) { sql += ' AND p.estado = ?'; params.push(estado.toUpperCase()); }
     if (profissao) { sql += ' AND p.profissao LIKE ?'; params.push('%' + profissao + '%'); }
 
-    sql += ' ORDER BY ranking_score DESC, total_avaliacoes DESC, p.data_cadastro DESC';
+    // Penaliza o ranking por rejeições: cada rejeição subtrai 0.5 ponto do ranking_score.
+    // Assim, quanto mais solicitações o profissional rejeita, mais para trás ele aparece.
+    sql += ' ORDER BY (ranking_score - COALESCE(p.rejeicoes, 0) * 0.5) DESC, total_avaliacoes DESC, p.data_cadastro DESC';
 
     db.query(sql, params, function(err, results) {
       if (err) {

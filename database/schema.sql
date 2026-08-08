@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS profissionais (
   profissao VARCHAR(100) NOT NULL,
 fotos_servicos LONGTEXT,
   status_aprovacao ENUM('pendente', 'aprovado', 'reprovado') DEFAULT 'pendente',
+  rejeicoes INT NOT NULL DEFAULT 0,
   data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   email VARCHAR(100) UNIQUE,
   senha VARCHAR(255)
@@ -54,6 +55,13 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
 --   ADD COLUMN data_hora DATETIME NULL,
 --   ADD COLUMN urgencia VARCHAR(50) NULL,
 --   ADD COLUMN orcamento_estimado VARCHAR(100) NULL;
+
+-- ============================================
+-- ALTER TABLE para adicionar a coluna rejeicoes em profissionais
+-- (execute caso a tabela profissionais já exista sem a coluna rejeicoes)
+-- ============================================
+-- ALTER TABLE profissionais
+--   ADD COLUMN rejeicoes INT NOT NULL DEFAULT 0;
 
 -- ============================================
 -- Tabela: orcamentos
