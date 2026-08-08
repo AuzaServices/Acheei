@@ -660,6 +660,9 @@ function fecharChatPainel() {
   widgetConversaSelecionada = '';
   var view = document.getElementById('widgetChatView');
   if (view) view.classList.remove('open');
+  // Restaura a visibilidade da lista de conversas (o widgetAbrirConversa esconde ela)
+  var list = document.getElementById('widgetChatList');
+  if (list) list.style.display = '';
 }
 
 // Exibe o balão de chat flutuante (canto inferior direito)
@@ -679,8 +682,11 @@ function esconderWidgetChat() {
     badge.classList.remove('show');
     badge.textContent = '0';
   }
-  var panel = document.getElementById('chatPanel');
+var panel = document.getElementById('chatPanel');
   if (panel) panel.classList.remove('open');
+  // Restaura a visibilidade da lista de conversas
+  var list = document.getElementById('widgetChatList');
+  if (list) list.style.display = '';
 }
 
 async function widgetCarregarSolicitacoes() {
