@@ -9,5 +9,13 @@
 7. [x] Adicionar som chiclete para novas mensagens em `public/js/cliente.js` e `public/js/profissional.js`
 8. [x] Estilos dos novos campos em `public/css/style.css`
 
-> **Nota:** Para bancos já existentes, execute no phpMyAdmin/console os `ALTER TABLE` presentes no final de `database/schema.sql` para adicionar as colunas `data_hora`, `urgencia` e `orcamento_estimado` à tabela `solicitacoes`.
+## Pendente (banco de dados)
+- [ ] Executar no banco MySQL existente:
+  ```sql
+  ALTER TABLE solicitacoes
+    ADD COLUMN data_hora DATETIME NULL,
+    ADD COLUMN urgencia VARCHAR(50) NULL,
+    ADD COLUMN orcamento_estimado VARCHAR(100) NULL;
+  ```
+</content>
 
