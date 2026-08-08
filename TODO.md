@@ -1,21 +1,12 @@
-# TODO - Novos campos na Solicitação + Som Chiclete
+# To-do: Corrigir botão de chat na Área do Cliente
 
-1. [x] Adicionar colunas `data_hora`, `urgencia`, `orcamento_estimado` em `database/schema.sql` + ALTERs
-2. [x] Adicionar os 4 inputs opcionais acima de "Descreva o Serviço" em `public/index.html`
-3. [x] Incluir os novos campos no payload em `public/js/main.js` (enviarSolicitacao)
-4. [x] Limpar sanitização da `urgencia` em `routes/solicitacoes.js`
-5. [x] Exibir os campos na área do profissional (`public/js/profissional.js`)
-6. [x] Exibir os campos na área do admin (`public/js/painel.js`)
-7. [x] Adicionar som chiclete para novas mensagens em `public/js/cliente.js` e `public/js/profissional.js`
-8. [x] Estilos dos novos campos em `public/css/style.css`
+## Objetivo
+Remover o botão "💬 Conversar" abaixo das solicitações na área do cliente e exibir o balão de chat flutuante (canto inferior direito), igual à área do profissional.
 
-## Observação importante
-- Para o funcionamento completo, é necessário **executar no banco de dados** o comando:
-  ```sql
-  ALTER TABLE solicitacoes
-    ADD COLUMN data_hora DATETIME NULL,
-    ADD COLUMN urgencia VARCHAR(50) NULL,
-    ADD COLUMN orcamento_estimado VARCHAR(100) NULL;
-  ```
-  (Isso só é necessário se a tabela `solicitacoes` do banco JÁ existir sem essas colunas. O `schema.sql` já as inclui na criação.)
+## Passos
+- [x] 1. Remover o bloco `chatBtn` e o `.card-footer` em `renderizarSolicitacoes()` no `public/js/cliente.js`
+- [x] 2. Adicionar `mostrarWidgetChat()` e `esconderWidgetChat()` em `public/js/cliente.js` (espelhando a área do profissional)
+- [x] 3. Atualizar `switchTab()` para esconder o balão na aba Chat e mostrar nas demais
+- [x] 4. Chamar `mostrarWidgetChat()` ao exibir o dashboard (via `mostrarDashboard()`, usada no login, cadastro e verificação de token)
+- [x] 5. Validar sintaxe do arquivo com `node --check` (sem erros)
 

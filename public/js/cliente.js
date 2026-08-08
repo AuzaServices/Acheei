@@ -143,6 +143,7 @@ function mostrarDashboard() {
   var dash = document.getElementById('dashboard');
   if (auth) auth.style.display = 'none';
   if (dash) dash.style.display = 'block';
+  mostrarWidgetChat();
 }
 
 function switchAuthTab(tab) {
@@ -283,11 +284,15 @@ function switchTab(tab, btn) {
   var map = { solicitacoes: 'tabSolicitacoes', orcamentos: 'tabOrcamentos', chat: 'tabChat' };
   document.getElementById(map[tab]).classList.add('active');
   if (tab === 'chat') {
+    esconderWidgetChat();
     carregarChatSolicitacoes();
-  } else if (tab === 'solicitacoes') {
-    carregarSolicitacoes();
-  } else if (tab === 'orcamentos') {
-    carregarOrcamentos();
+  } else {
+    mostrarWidgetChat();
+    if (tab === 'solicitacoes') {
+      carregarSolicitacoes();
+    } else if (tab === 'orcamentos') {
+      carregarOrcamentos();
+    }
   }
 }
 
@@ -355,11 +360,6 @@ function renderizarSolicitacoes() {
       avaliacaoHtml = '<div class="avaliacao-disponivel"><p>Como foi o atendimento deste profissional?</p><button class="btn btn-outline btn-sm" onclick="abrirModalAvaliacao(' + sol.id + ', ' + sol.profissional_id + ')">Avaliar profissional</button></div>';
     }
 
-    var chatBtn = '';
-    if (sol.status_pagamento === 'pago') {
-      chatBtn = '<button class="btn btn-primary btn-sm" onclick="abrirChatSolicitacao(' + sol.id + ')">💬 Conversar</button>';
-    }
-
     card.innerHTML =
       '<div class="card-header">' +
         '<div class="prof-info">' + fotoHtml + '<div><h4>' + (sol.nome_perfil || '') + '</h4><div class="profissao">' + (sol.profissao || '') + '</div></div></div>' +
@@ -368,8 +368,7 @@ function renderizarSolicitacoes() {
       '<div class="descricao">' + sol.descricao + '</div>' +
       extrasHtml +
       '<div style="margin-bottom:8px;">' + statusPag + '</div>' +
-      avaliacaoHtml +
-      '<div class="card-footer">' + chatBtn + '</div>';
+      avaliacaoHtml;
     container.appendChild(card);
   }
 }
@@ -630,6 +629,27 @@ function toggleChatPainel() {
 }
 
 function fecharChatPainel() {
+  var panel = document.getElementById('chatPanel');
+  if (panel) panel.classList.remove('open');
+}
+
+// Exibe o balão de chat flutuante (canto inferior direito)
+function mostrarWidgetChat() {
+  var widget = document.getElementById('chatWidget');
+  if (widget) widget.classList.add('active');
+}
+
+// Esconde o balão de chat flutuante (usado na aba Chat, igual à área do profissional)
+function esconderWidgetChat() {
+  var widget = document.getElementById('chatWidget');
+  if (widget) widget.classList.remove('active');
+  var bubble = document.getElementById('chatBubble');
+  if (bubble) bubble.classList.remove('pulse');
+  var badge = document.getElementById('chatBadge');
+  if (badge) {
+    badge.classList.remove('show');
+    badge.textContent = '0';
+  }
   var panel = document.getElementById('chatPanel');
   if (panel) panel.classList.remove('open');
 }
