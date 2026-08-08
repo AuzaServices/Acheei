@@ -251,10 +251,10 @@ async function ativarNotificacoesCadastro() {
       notice.style.borderColor = '#28a745';
       notice.innerHTML = '<strong>✅ Notificações ativadas!</strong>';
     }
-    if (btn) btn.disabled = false;
-  } else {
-    if (btn) btn.disabled = true;
   }
+  // As notificações são opcionais: o botão "Criar Conta" permanece sempre habilitado,
+  // mesmo que o usuário recuse ou o navegador não suporte notificações push.
+  if (btn) btn.disabled = false;
 }
 
 function logout() {
