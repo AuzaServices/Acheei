@@ -1625,7 +1625,18 @@ function renderizarWidgetMensagens(mensagens) {
 div.innerHTML = '<div class="bubble">' + msg.texto + '<div class="time">' + time + '</div></div>' + statusHtml;
     body.appendChild(div);
   }
-  body.scrollTop = body.scrollHeight;
+  // Rola até a última mensagem (garante que funcione mesmo quando o painel
+  // acabou de ser exibido, usando requestAnimationFrame/Timeout)
+  function rolarParaUltima() {
+    body.scrollTop = body.scrollHeight;
+  }
+  if (window.requestAnimationFrame) {
+    requestAnimationFrame(rolarParaUltima);
+    setTimeout(rolarParaUltima, 50);
+    setTimeout(rolarParaUltima, 150);
+  } else {
+    setTimeout(rolarParaUltima, 50);
+  }
 }
 
 async function widgetEnviarMensagem() {

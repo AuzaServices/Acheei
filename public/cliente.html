@@ -200,14 +200,17 @@
     .chat-view { display: none; flex: 1; flex-direction: column; min-height: 300px; max-height: 350px; }
     .chat-view.open { display: flex; }
     .chat-view-header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--gray-lighter); }
-    .chat-view-header .btn-back { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray-dark); padding: 4px 6px; }
+.chat-view-header .btn-back { background: none; border: none; cursor: pointer; color: var(--gray-dark); padding: 4px 6px; display: flex; align-items: center; justify-content: center; }
+    .chat-view-header .btn-back:hover { color: var(--red-primary); }
     .chat-view-header .chat-conv-avatar { width: 36px; height: 36px; font-size: 18px; }
     .chat-view-header .chat-conv-name { font-size: 15px; }
     .chat-view-body { flex: 1; overflow-y: auto; padding: 12px; }
     .chat-view-footer { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--gray-lighter); }
     .chat-view-footer input { flex: 1; min-width: 0; padding: 10px 14px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); font-size: 14px; }
     .chat-view-footer input:focus { outline: none; border-color: var(--red-primary); }
-    .chat-view-footer .btn { padding: 10px 16px; }
+    .chat-send-btn { width: 46px; height: 46px; flex-shrink: 0; border: none; border-radius: 50%; background: var(--red-primary); color: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .chat-send-btn:hover { background: var(--red-dark); transform: scale(1.05); }
+    .chat-send-btn:active { transform: scale(0.95); }
 @media (max-width: 768px) {
       .auth-container { flex-direction: column; }
       .auth-visual, .auth-divider { display: none; }
@@ -433,7 +436,9 @@
   </div>
   <div class="chat-view" id="widgetChatView">
     <div class="chat-view-header">
-      <button class="btn-back" onclick="widgetVoltarParaLista()" aria-label="Voltar">&larr;</button>
+<button class="btn-back" onclick="widgetVoltarParaLista()" aria-label="Voltar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
       <span class="chat-conv-avatar" id="widgetChatViewAvatar">👤</span>
       <span class="chat-conv-name" id="widgetChatViewNome">Conversa</span>
     </div>
@@ -445,7 +450,9 @@
     </div>
     <div class="chat-view-footer" id="widgetChatFooter" style="display:none;">
       <input type="text" id="widgetChatInput" placeholder="Digite sua mensagem..." onkeypress="if(event.key==='Enter') widgetEnviarMensagem()">
-      <button class="btn btn-primary" onclick="widgetEnviarMensagem()">Enviar</button>
+      <button class="chat-send-btn" onclick="widgetEnviarMensagem()" aria-label="Enviar mensagem">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
     </div>
   </div>
 </div>
