@@ -704,13 +704,14 @@ var avatarHtml = c.foto_perfil
     var badgeHtml = naoLidas > 0
       ? '<span class="chat-conv-badge">' + naoLidas + '</span>'
       : '';
-    item.innerHTML =
+item.innerHTML =
       '<span class="chat-conv-avatar">' + avatarHtml + '</span>' +
       '<span class="chat-conv-info">' +
         '<span class="chat-conv-top">' +
           '<span class="chat-conv-name">' + (c.nome_perfil || 'Profissional') + '</span>' +
           badgeHtml +
         '</span>' +
+        '<span class="chat-conv-profissao">' + (c.profissao || '') + '</span>' +
         '<span class="chat-conv-snippet">' + (c.descricao || 'Conversa liberada') + '</span>' +
       '</span>';
     list.appendChild(item);
