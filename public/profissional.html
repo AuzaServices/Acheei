@@ -90,7 +90,7 @@
     .section-card .section-header h3 { font-size: 18px; font-weight: 700; }
     .section-card .section-body { padding: 20px 24px; }
 .solicitacao-card { background: var(--gray-bg); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; border: 1px solid var(--gray-lighter); position: relative; transition: transform 0.25s ease, opacity 0.25s ease; overflow: hidden; }
-    .solicitacao-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+.solicitacao-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; padding-right: 40px; }
     .solicitacao-card .card-header h4 { font-size: 15px; font-weight: 700; }
     .solicitacao-card .card-header .date { font-size: 12px; color: var(--gray-medium); }
     .solicitacao-card .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
@@ -107,24 +107,24 @@
     .solicitacao-rejeitar-btn svg { width: 18px; height: 18px; }
     .solicitacao-rejeitar-btn:hover { background: rgba(255,0,0,0.08); transform: scale(1.1); }
     .solicitacao-rejeitar-btn:active { transform: scale(0.9); }
-    /* Botão de arrastar (swipe) para rejeitar - apenas mobile */
+/* Botão de arrastar (swipe) para liberar o chat - apenas mobile */
     .sol-swipe-wrap { display: none; margin-top: 12px; }
     .sol-swipe-track {
-      position: relative; height: 46px; background: var(--gray-lighter);
+      position: relative; height: 46px; background: #d4edda;
       border-radius: 23px; overflow: hidden; cursor: grab; user-select: none; touch-action: none;
     }
     .sol-swipe-track.dragging { cursor: grabbing; }
     .sol-swipe-label {
       position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600; color: var(--red-primary); pointer-events: none; gap: 6px;
+      font-size: 13px; font-weight: 600; color: #1e7e34; pointer-events: none; gap: 6px;
     }
     .sol-swipe-thumb {
       position: absolute; top: 4px; left: 4px; width: 38px; height: 38px; border-radius: 50%;
-      background: var(--red-primary); color: var(--white); display: flex; align-items: center; justify-content: center;
+      background: #28a745; color: var(--white); display: flex; align-items: center; justify-content: center;
       box-shadow: var(--shadow-sm); transition: background 0.15s ease; z-index: 2;
     }
     .sol-swipe-thumb svg { width: 18px; height: 18px; }
-    .sol-swipe-track.complete .sol-swipe-thumb { background: var(--red-dark); }
+    .sol-swipe-track.complete .sol-swipe-thumb { background: #1e7e34; }
     /* Na área de pagamento, mantém o botão de pagar no desktop */
     .sol-pay-btn { display: inline-flex; }
     @media (max-width: 768px) {

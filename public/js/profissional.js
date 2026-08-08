@@ -352,8 +352,8 @@ var pagarBtn = statusPag === 'pendente'
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
     var xBtn = '<button type="button" class="solicitacao-rejeitar-btn" title="Rejeitar solicitação" aria-label="Rejeitar solicitação" onclick="abrirModalRejeitar(' + sol.id + ')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>';
-    var swipeHtml = statusPag === 'pendente'
-      ? '<div class="sol-swipe-wrap"><div class="sol-swipe-track" data-sol-id="' + sol.id + '"><span class="sol-swipe-label">Arraste para rejeitar</span><span class="sol-swipe-thumb"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></span></div></div>'
+var swipeHtml = statusPag === 'pendente'
+      ? '<div class="sol-swipe-wrap"><div class="sol-swipe-track" data-sol-id="' + sol.id + '"><span class="sol-swipe-label">Arraste para liberar o chat</span><span class="sol-swipe-thumb"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg></span></div></div>'
       : '';
 
     // Campos opcionais (Data/Hora, Urgência, Orçamento) - exibe apenas quando preenchidos
@@ -478,9 +478,9 @@ function configurarSwipeSolicitacoes() {
         dragging = false;
         track.classList.remove('dragging');
         var max = larguraUtil();
-        if (currentX >= max * limiar) {
+if (currentX >= max * limiar) {
           track.classList.add('complete');
-          setTimeout(function() { abrirModalRejeitar(solId); reset(); }, 200);
+          setTimeout(function() { pagarSolicitacao(null, solId); reset(); }, 200);
         } else {
           reset();
         }
