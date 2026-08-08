@@ -1,13 +1,13 @@
-# TODO - Reset permanente do badge de mensagens não lidas
+# TODO - Correção do Balão de Mensagens (reset permanente) + Status "Visto/Enviado"
 
 ## Objetivo
-Ao abrir uma conversa, zerar permanentemente a contagem de mensagens não lidas do balão (mesmo após recarregar a página ou fazer login novamente). Usar a coluna `lida` do banco como fonte de verdade.
+Quando abrir a conversa (ou o balão), a quantidade de mensagens não lidas deve ser removida **permanentemente** (não repetir após atualizar página ou fazer login), tanto para Cliente quanto para Profissional. Corrigir também o texto "Visto"/"Enviado" invisível no mobile.
 
-## Etapas
-
-- [x] 1. Backend: `routes/solicitacoes.js` - adicionar `qtd_nao_lidas` no GET `/profissional/:id` (mensagens do cliente não lidas)
-- [x] 2. Backend: `routes/clientes.js` - adicionar `qtd_nao_lidas` no GET `/solicitacoes` (mensagens do profissional não lidas)
-- [x] 3. Frontend cliente: `public/js/cliente.js` - usar `qtd_nao_lidas` no badge e adicionar badge por conversa no widget
-- [x] 4. Frontend profissional: `public/js/profissional.js` - usar `qtd_nao_lidas` no badge e adicionar badge por conversa no widget
-- [x] 5. CSS: adicionar estilo `.chat-conv-badge`
-- [ ] 6. Testar: enviar mensagens, recarregar página, verificar reset do badge ao abrir conversa
+## Passos
+- [x] Analisar código (cliente.js, profissional.js, mensagens.js, clientes.js, solicitacoes.js, HTMLs)
+- [x] Backend: `routes/clientes.js` - adicionar `qtd_nao_lidas`, `ultima_mensagem`, `ultima_mensagem_remetente` no GET `/clientes/solicitacoes` (já presente)
+- [x] Backend: `routes/solicitacoes.js` - GET `/solicitacoes/profissional/:id` já retorna `qtd_nao_lidas`, `ultima_mensagem`, `ultima_mensagem_remetente`
+- [x] Frontend: `public/js/cliente.js` - `verificarNovasMensagensWidget()` usa `qtd_nao_lidas` (reset permanente) + badge por conversa
+- [x] Frontend: `public/js/profissional.js` - `widgetVerificarNovasMensagensProf()` usa `qtd_nao_lidas` (reset permanente) + badge por conversa (`widgetCarregarSolicitacoesProf`/`widgetAtualizarItemConversa`)
+- [x] CSS: remover regra `.msg-status` duplicada em `cliente.html`; cor legível `var(--gray-medium)` no balão do remetente em ambos HTMLs
+- [ ] Testar
