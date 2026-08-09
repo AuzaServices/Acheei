@@ -53,8 +53,16 @@
     .auth-divider { width: 1px; background: linear-gradient(180deg, transparent, var(--red-primary), transparent); flex-shrink: 0; }
 
     /* Painel do formulário à direita */
-    .auth-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--gray-bg); }
-    .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); }
+.auth-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--gray-bg); }
+    .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); position: relative; }
+    .auth-home-btn {
+      position: absolute; top: 16px; left: 16px; width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%; background: var(--gray-bg); border: 1px solid var(--gray-lighter);
+      color: var(--gray-dark); transition: var(--transition); z-index: 5;
+    }
+    .auth-home-btn:hover { background: var(--red-primary); color: #fff; border-color: var(--red-primary); transform: translateY(-2px); }
+    .auth-home-btn svg { width: 20px; height: 20px; }
     .auth-mobile-logo { display: none; text-align: center; margin-bottom: 22px; }
     .auth-mobile-logo h1 { font-size: 30px; color: var(--red-primary); font-weight: 800; }
     .auth-mobile-logo p { color: var(--gray-medium); font-size: 14px; margin-top: 4px; }
@@ -273,9 +281,12 @@
   <!-- Divisor -->
   <div class="auth-divider"></div>
 
-  <!-- Painel do formulário à direita -->
+<!-- Painel do formulário à direita -->
   <div class="auth-panel">
     <div class="auth-card">
+      <a href="/" class="auth-home-btn" aria-label="Voltar ao início" title="Início">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      </a>
       <div class="auth-mobile-logo">
         <h1>Acheei</h1>
         <p>Área do Cliente</p>
