@@ -603,10 +603,13 @@ try {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      const result = await response.json();
+const result = await response.json();
       if (result.success) {
-        showToast('Solicitação enviada! Acesse a Área do Cliente para acompanhar.', 'success');
+        showToast('Solicitação enviada! Direcionando para sua área...', 'success');
         fecharModal();
+        setTimeout(function() {
+          window.location.href = 'cliente.html';
+        }, 1200);
       } else {
         showToast(result.message, 'error');
       }
@@ -712,18 +715,13 @@ try {
 
     const result = await response.json();
 
-    if (result.success) {
-      // Redireciona para a área do cliente APENAS quando é cadastro novo
-      if (foiCadastroNovo) {
-        showToast('Conta criada! Solicitação enviada. Direcionando para sua área...', 'success');
-        fecharModal();
-        setTimeout(function() {
-          window.location.href = 'cliente.html';
-        }, 1200);
-      } else {
-        showToast('Solicitação enviada! Acesse a Área do Cliente para acompanhar.', 'success');
-        fecharModal();
-      }
+if (result.success) {
+      // Sempre redireciona para a área do cliente (aba de solicitações)
+      showToast('Solicitação enviada! Direcionando para sua área...', 'success');
+      fecharModal();
+      setTimeout(function() {
+        window.location.href = 'cliente.html';
+      }, 1200);
     } else {
       showToast(result.message, 'error');
     }
