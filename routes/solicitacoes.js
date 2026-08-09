@@ -115,7 +115,15 @@ db.query(
         (SELECT COUNT(*) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'cliente' AND m.lida = FALSE) AS qtd_nao_lidas,
         (SELECT m.texto FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem,
         (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_remetente,
-        (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_data
+        (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_data,
+        (CASE
+          WHEN s.status_pagamento = 'pago'
+           AND (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) = 'profissional'
+           AND (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) IS NOT NULL
+           AND TIMESTAMPDIFF(MINUTE, (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1), NOW()) >= 5
+          THEN 1
+          ELSE 0
+        END) AS pode_chamar_whatsapp
        FROM solicitacoes s
        WHERE s.profissional_id = ?
        ORDER BY s.data_solicitacao DESC`,

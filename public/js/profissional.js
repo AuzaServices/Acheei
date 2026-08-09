@@ -367,19 +367,14 @@ function montarLinkWhatsApp(sol, nomeProfissional, profissao) {
   return 'https://wa.me/' + telefone + '?text=' + montarMensagemWhatsApp(sol, nomeProfissional, profissao);
 }
 
-// Decide se o botão "Chamar no WhatsApp" deve aparecer:
-// - Chat pago (status_pagamento === 'pago')
-// - A última mensagem foi enviada pelo profissional
-// - Há mais de 5 minutos desde a última mensagem (cliente não respondeu)
+// Decide se o botão "Chamar no WhatsApp" deve aparecer.
+// Usa o flag autoritativo `pode_chamar_whatsapp` calculado no backend (MySQL),
+// que só é 1 quando: chat pago + última mensagem foi do profissional +
+// há mais de 5 minutos sem resposta do cliente. Isso evita problemas de
+// fuso horário/interpretação de data no navegador.
 function deveMostrarBotaoWhatsApp(sol) {
-  if (!sol || sol.status_pagamento !== 'pago') return false;
-  if (!sol.ultima_mensagem_data) return false;
-  if (sol.ultima_mensagem_remetente === 'cliente') return false;
-  var agora = new Date();
-  var ultima = new Date(sol.ultima_mensagem_data);
-  if (isNaN(ultima.getTime())) return false;
-  var minutosSemResposta = (agora.getTime() - ultima.getTime()) / 60000;
-  return minutosSemResposta >= 5;
+  if (!sol) return false;
+  return sol.pode_chamar_whatsapp === 1 || sol.pode_chamar_whatsapp === '1' || sol.pode_chamar_whatsapp === true;
 }
 
 function renderizarSolicitacoes() {
