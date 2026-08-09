@@ -351,12 +351,34 @@ function formatarTelefoneWhatsApp(telefone) {
 function montarMensagemWhatsApp(sol, nomeProfissional, profissao) {
   var nomeProf = (nomeProfissional || profissional && profissional.nome_perfil || 'Profissional');
   var profArea = (profissao || profissional && profissional.profissao || 'profissional');
-  var descricao = (sol.descricao || 'Seu serviço solicitado').replace(/\n/g, ' ');
+
+  var detalhes = [];
+
+  if (sol.data_hora) {
+    var dh = new Date(sol.data_hora);
+    if (!isNaN(dh.getTime())) {
+      detalhes.push('📅 *Data e Hora:* ' + dh.toLocaleString('pt-BR'));
+    }
+  }
+  if (sol.urgencia) {
+    detalhes.push('⚡ *Urgência:* ' + sol.urgencia);
+  }
+  if (sol.orcamento_estimado) {
+    detalhes.push('💰 *Orçamento estimado:* ' + sol.orcamento_estimado);
+  }
+  if (sol.descricao) {
+    detalhes.push('📝 *Descrição:* ' + String(sol.descricao).replace(/\n/g, ' '));
+  }
+
+  var detalhesTexto = detalhes.length > 0
+    ? detalhes.join('\n')
+    : 'Seu serviço solicitado';
+
   var mensagem =
     'Olá ' + (sol.cliente_nome || 'cliente') + '! Tudo bem? 🙂\n\n' +
     'Aqui é o(a) *' + nomeProf + '*, ' + profArea.toLowerCase() + ' do Acheei.\n\n' +
     'Você solicitou um serviço conosco e ainda não respondemos no chat. Para agilizar seu atendimento, estou entrando em contato por aqui.\n\n' +
-    '📋 *Detalhes da sua solicitação:*\n' + descricao + '\n\n' +
+    '📋 *Detalhes da sua solicitação:*\n' + detalhesTexto + '\n\n' +
     'Me chame quando puder para combinarmos os próximos passos. 😊';
   return encodeURIComponent(mensagem);
 }
