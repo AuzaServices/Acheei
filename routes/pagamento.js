@@ -129,9 +129,9 @@ module.exports = function(db, dbConnected) {
                 ],
                 payer: payerData,
                 back_urls: {
-                  success: `${mp.APP_URL}/profissional.html?status=success&solicitacao_id=${solicitacao_id}`,
-                  pending: `${mp.APP_URL}/profissional.html?status=pending&solicitacao_id=${solicitacao_id}`,
-                  failure: `${mp.APP_URL}/profissional.html?status=failure&solicitacao_id=${solicitacao_id}`
+                  success: `${mp.APP_URL}/profissional?status=success&solicitacao_id=${solicitacao_id}`,
+                  pending: `${mp.APP_URL}/profissional?status=pending&solicitacao_id=${solicitacao_id}`,
+                  failure: `${mp.APP_URL}/profissional?status=failure&solicitacao_id=${solicitacao_id}`
                 },
                 notification_url: `${mp.APP_URL}/api/pagamento/webhook`,
                 external_reference: uniqueReference,
@@ -245,9 +245,9 @@ module.exports = function(db, dbConnected) {
             ],
             payer: payerData,
             back_urls: {
-              success: `${mp.APP_URL}/profissional.html?status=success&solicitacao_id=${solicitacao_id}`,
-              pending: `${mp.APP_URL}/profissional.html?status=pending&solicitacao_id=${solicitacao_id}`,
-              failure: `${mp.APP_URL}/profissional.html?status=failure&solicitacao_id=${solicitacao_id}`
+              success: `${mp.APP_URL}/profissional?status=success&solicitacao_id=${solicitacao_id}`,
+              pending: `${mp.APP_URL}/profissional?status=pending&solicitacao_id=${solicitacao_id}`,
+              failure: `${mp.APP_URL}/profissional?status=failure&solicitacao_id=${solicitacao_id}`
             },
             notification_url: `${mp.APP_URL}/api/pagamento/webhook`,
             external_reference: `solicitacao_${solicitacao_id}`,

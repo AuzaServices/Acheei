@@ -138,17 +138,30 @@ app.use('/api/upload', require('./routes/upload')());
 app.use('/api/clientes', require('./routes/clientes')(db, () => dbConnected));
 app.use('/api/pagamento', require('./routes/pagamento')(db, () => dbConnected));
 
+// Mapa de rotas limpas (sem extensão .html)
+const PAGINAS = {
+  '/': 'index.html',
+  '/index': 'index.html',
+  '/contato': 'contato.html',
+  '/sobre': 'sobre.html',
+  '/cliente': 'cliente.html',
+  '/profissional': 'profissional.html',
+  '/cadastro': 'cadastro.html',
+  '/termos': 'termos.html',
+  '/politica': 'politica.html',
+  '/painel': 'painel.html'
+};
+
 // Rota de fallback
 app.get('*', function(req, res, next) {
   if (req.path.match(/\.(css|js|json|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
     return next();
   }
-  var filePath = path.join(__dirname, 'public', req.path);
-  var ext = path.extname(req.path);
-  if (ext === '.html') {
-    return res.sendFile(filePath, function(err) {
-      if (err) res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    });
+  // Remove a extensão .html ao buscar no mapa (URLs adicionadas sem .html)
+  var pathNome = req.path.replace(/\.html$/, '');
+  var pagina = PAGINAS[pathNome];
+  if (pagina) {
+    return res.sendFile(path.join(__dirname, 'public', pagina));
   }
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

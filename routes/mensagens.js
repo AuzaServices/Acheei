@@ -117,7 +117,7 @@ module.exports = function(db, dbConnected) {
                   title: `💬 ${sol.nome_perfil} (${sol.profissao})`,
                   body: textoCurto,
                   tag: `chat_${solicitacao_id}`,
-                  url: `/cliente.html?chat=${solicitacao_id}`,
+url: `/cliente?chat=${solicitacao_id}`,
                   solicitacao_id: solicitacao_id
                 };
                 notificarCliente(db, sol.cliente_id, payload).catch(() => {});

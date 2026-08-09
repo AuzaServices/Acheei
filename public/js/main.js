@@ -328,8 +328,8 @@ function atualizarHeaderProfissional() {
     if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
     if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
     if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
-    if (userAreaLink) userAreaLink.href = 'cliente.html';
-    if (mobileUserAreaLink) mobileUserAreaLink.href = 'cliente.html';
+if (userAreaLink) userAreaLink.href = 'cliente';
+    if (mobileUserAreaLink) mobileUserAreaLink.href = 'cliente';
     if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
     if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
     var nome = clienteLogado.nome || 'Cliente';
@@ -345,8 +345,8 @@ function atualizarHeaderProfissional() {
     if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
     if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
     if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
-    if (userAreaLink) userAreaLink.href = 'profissional.html';
-    if (mobileUserAreaLink) mobileUserAreaLink.href = 'profissional.html';
+if (userAreaLink) userAreaLink.href = 'profissional';
+    if (mobileUserAreaLink) mobileUserAreaLink.href = 'profissional';
     if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
     if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
     var pnome = profissionalLogado.nome_perfil || profissionalLogado.nome || 'Profissional';
@@ -607,8 +607,8 @@ const result = await response.json();
       if (result.success) {
         showToast('Solicitação enviada! Direcionando para sua área...', 'success');
         fecharModal();
-        setTimeout(function() {
-          window.location.href = 'cliente.html';
+setTimeout(function() {
+          window.location.href = 'cliente';
         }, 1200);
       } else {
         showToast(result.message, 'error');
@@ -719,8 +719,8 @@ if (result.success) {
       // Sempre redireciona para a área do cliente (aba de solicitações)
       showToast('Solicitação enviada! Direcionando para sua área...', 'success');
       fecharModal();
-      setTimeout(function() {
-        window.location.href = 'cliente.html';
+setTimeout(function() {
+        window.location.href = 'cliente';
       }, 1200);
     } else {
       showToast(result.message, 'error');
@@ -1005,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Dropdown do usuário (avatar + nome)
   setupUserDropdown();
 
-  // Em páginas que não têm a busca da home (ex: sobre.html, contato.html),
+// Em páginas que não têm a busca da home (ex: sobre, contato),
   // encerra aqui para não acessar elementos que não existem nessa página.
   if (!document.getElementById('searchForm')) {
     return;

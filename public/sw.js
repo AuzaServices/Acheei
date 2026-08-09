@@ -45,7 +45,7 @@ self.addEventListener('push', (event) => {
     icon: data.icon || '/icons/icon-192.svg',
     badge: data.badge || '/icons/icon-96.svg',
     data: {
-      url: data.url || '/cliente.html',
+      url: data.url || '/cliente',
       solicitacaoId: data.solicitacao_id || null
     },
     vibrate: [100, 50, 100],
@@ -64,7 +64,7 @@ self.addEventListener('notificationclick', (event) => {
 
   const url = event.notification.data && event.notification.data.url
     ? event.notification.data.url
-    : '/cliente.html';
+    : '/cliente';
 
   const solicitacaoId = event.notification.data && event.notification.data.solicitacaoId;
 
@@ -73,7 +73,7 @@ self.addEventListener('notificationclick', (event) => {
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
-        if (client.url.includes('/cliente.html') && 'focus' in client) {
+        if (client.url.includes('/cliente') && 'focus' in client) {
           return client.focus();
         }
       }
@@ -81,4 +81,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-

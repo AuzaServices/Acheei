@@ -10,7 +10,7 @@
   <script>document.documentElement.classList.add('js');</script>
   <script src="js/reveal.js" defer></script>
   <style>
-    /* ===== Página Legal - Termos ===== */
+    /* ===== PÃ¡gina Legal - Termos ===== */
     .legal-body { background: var(--gray-bg); color: var(--black-primary); }
 
     .legal-header {
@@ -37,7 +37,7 @@
     .legal-hero h1 .hl { color: var(--red-primary); }
     .legal-hero p { font-size: 17px; color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto; line-height: 1.7; }
 
-    /* Conteúdo */
+    /* ConteÃºdo */
     .legal-main { max-width: 860px; margin: 0 auto; padding: 60px 20px; }
     .legal-card {
       background: #fff; border-radius: var(--radius-lg); padding: 48px 44px;
@@ -85,19 +85,19 @@
     <nav class="navbar">
       <a href="/" class="logo"><span>Acheei</span></a>
       <div class="nav-links">
-        <a href="/">Início</a>
-        <a href="sobre.html">Sobre Nós</a>
-        <a href="contato.html">Contato</a>
+        <a href="/">InÃ­cio</a>
+        <a href="sobre">Sobre NÃ³s</a>
+        <a href="contato">Contato</a>
         <div class="user-area" id="userArea" style="display: none;">
           <div class="user-dropdown" id="userDropdown">
             <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
-              <span class="user-avatar" id="userAvatar">👤</span>
+              <span class="user-avatar" id="userAvatar">ðŸ‘¤</span>
               <span class="user-name" id="userName">Cliente</span>
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
             <div class="user-dropdown-menu" id="userDropdownMenu">
-              <a href="cliente.html" class="user-dropdown-item" id="userAreaLink">
-                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
+              <a href="cliente" class="user-dropdown-item" id="userAreaLink">
+                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Ãrea</span>
               </a>
               <button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
                 <span data-icon="log-out"></span> Sair
@@ -105,16 +105,16 @@
             </div>
           </div>
         </div>
-        <a href="cliente.html" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Área do Cliente</a>
-        <a href="profissional.html" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Área do Profissional</a>
+        <a href="cliente" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Ãrea do Cliente</a>
+        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Ãrea do Profissional</a>
       </div>
       <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
     </nav>
   </header>
 
   <script>
-    // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
-    // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
+    // Estado otimista do header: aplica imediatamente (de forma sÃ­ncrona) o estado
+    // logado/deslogado assim que o HTML Ã© montado, eliminando qualquer "flash".
     (function() {
       function aplicarUsuarioLogado(cache, ehProfissional) {
         var userArea = document.getElementById('userArea');
@@ -128,7 +128,7 @@
         var mobileUserAreaLink = document.getElementById('mobileUserAreaLink');
         var mobileUserAreaLinkText = document.getElementById('mobileUserAreaLinkText');
 
-        var mine = ehProfissional ? 'profissional.html' : 'cliente.html';
+        var mine = ehProfissional ? '' : '';
 
         if (userArea) userArea.style.display = 'flex';
         if (btnAreaCliente) btnAreaCliente.style.display = 'none';
@@ -138,13 +138,13 @@
         if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
 
         if (userAreaLink) userAreaLink.href = mine;
-        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
+        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Ãrea';
         if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
-        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
+        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Ãrea';
 
         if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
         if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
-        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
+        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : 'ðŸ‘¤';
         if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
         if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
       }
@@ -188,22 +188,22 @@
     <div class="menu-items">
       <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
         <div class="user-info">
-          <span class="user-avatar" id="mobileUserAvatar">👤</span>
+          <span class="user-avatar" id="mobileUserAvatar">ðŸ‘¤</span>
           <span class="user-name" id="mobileUserName">Cliente</span>
         </div>
-        <a href="cliente.html" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
-          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
+        <a href="cliente" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
+          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Ãrea</span>
         </a>
         <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
           Sair
         </button>
       </div>
-      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">Início</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="sobre.html" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre Nós</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="contato.html" class="menu-item"><span class="item-icon" data-icon="send"></span><span class="item-text">Contato</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">InÃ­cio</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="sobre" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre NÃ³s</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="contato" class="menu-item"><span class="item-icon" data-icon="send"></span><span class="item-text">Contato</span><span class="item-arrow" data-icon="arrow-right"></span></a>
       <div class="menu-divider"></div>
-      <a href="cliente.html" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Área do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="profissional.html" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Área do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Ãrea do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Ãrea do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
     </div>
     <div class="menu-footer"><p>&copy; 2026 Acheei. Todos os direitos reservados.</p></div>
   </div>
@@ -213,77 +213,77 @@
     <div class="container">
       <span class="badge"><span data-icon="file-text" style="width:16px;height:16px;display:inline-flex;"></span> Documento Legal</span>
       <h1>Termos de <span class="hl">Responsabilidade</span></h1>
-      <p>Leia atentamente. Ao utilizar a plataforma Acheei, você concorda com os termos abaixo.</p>
+      <p>Leia atentamente. Ao utilizar a plataforma Acheei, vocÃª concorda com os termos abaixo.</p>
     </div>
   </section>
 
-  <!-- Conteúdo -->
+  <!-- ConteÃºdo -->
   <section class="legal-main">
     <div class="legal-card">
-      <p class="updated">Última atualização: [data]. Versão 1.0</p>
+      <p class="updated">Ãšltima atualizaÃ§Ã£o: [data]. VersÃ£o 1.0</p>
 
-      <h2>1. Introdução e Natureza da Plataforma</h2>
-      <p>O Acheei é uma plataforma digital de <strong>intermediação de serviços</strong> que tem como única finalidade conectar <strong>clientes</strong> (usuários que procuram serviços) a <strong>profissionais</strong> (usuários que oferecem serviços) cadastrados. A Acheei <strong>não presta, não executa, não coordena e não supervisiona</strong> qualquer serviço anunciado, contratado ou combinado por meio da plataforma.</p>
-      <p>Ao cadastrar-se e utilizar a plataforma, tanto o cliente quanto o profissional reconhecem e aceitam que a relação jurídica efetivamente estabelecida para a prestação do serviço se dá <strong>exclusivamente entre o cliente e o profissional</strong>, não havendo qualquer vínculo empregatício, societário, de representação ou de prestação de serviço entre a Acheei e os usuários.</p>
+      <h2>1. IntroduÃ§Ã£o e Natureza da Plataforma</h2>
+      <p>O Acheei Ã© uma plataforma digital de <strong>intermediaÃ§Ã£o de serviÃ§os</strong> que tem como Ãºnica finalidade conectar <strong>clientes</strong> (usuÃ¡rios que procuram serviÃ§os) a <strong>profissionais</strong> (usuÃ¡rios que oferecem serviÃ§os) cadastrados. A Acheei <strong>nÃ£o presta, nÃ£o executa, nÃ£o coordena e nÃ£o supervisiona</strong> qualquer serviÃ§o anunciado, contratado ou combinado por meio da plataforma.</p>
+      <p>Ao cadastrar-se e utilizar a plataforma, tanto o cliente quanto o profissional reconhecem e aceitam que a relaÃ§Ã£o jurÃ­dica efetivamente estabelecida para a prestaÃ§Ã£o do serviÃ§o se dÃ¡ <strong>exclusivamente entre o cliente e o profissional</strong>, nÃ£o havendo qualquer vÃ­nculo empregatÃ­cio, societÃ¡rio, de representaÃ§Ã£o ou de prestaÃ§Ã£o de serviÃ§o entre a Acheei e os usuÃ¡rios.</p>
 
       <h2>2. Papel Intermediador da Acheei</h2>
-      <p>A Acheei atua <strong>estritamente como intermediadora</strong>, limitando-se a disponibilizar ferramentas tecnológicas para aproximar as partes, tais como: cadastro de perfis, busca de profissionais, envio de solicitações, orçamentos, mensagens e avaliações. A plataforma <strong>não participa</strong> da execução, da qualidade, do prazo, da medição, da entrega ou de qualquer aspecto operacional do serviço contratado.</p>
-      <p>As informações cadastradas pelos profissionais (descrições, valores, fotos, qualificações, experiências) são de <strong>responsabilidade exclusiva do próprio profissional</strong>. A Acheei não garante a veracidade, atualidade ou exatidão de tais informações, tampouco se responsabiliza por eventuais divergências.</p>
+      <p>A Acheei atua <strong>estritamente como intermediadora</strong>, limitando-se a disponibilizar ferramentas tecnolÃ³gicas para aproximar as partes, tais como: cadastro de perfis, busca de profissionais, envio de solicitaÃ§Ãµes, orÃ§amentos, mensagens e avaliaÃ§Ãµes. A plataforma <strong>nÃ£o participa</strong> da execuÃ§Ã£o, da qualidade, do prazo, da mediÃ§Ã£o, da entrega ou de qualquer aspecto operacional do serviÃ§o contratado.</p>
+      <p>As informaÃ§Ãµes cadastradas pelos profissionais (descriÃ§Ãµes, valores, fotos, qualificaÃ§Ãµes, experiÃªncias) sÃ£o de <strong>responsabilidade exclusiva do prÃ³prio profissional</strong>. A Acheei nÃ£o garante a veracidade, atualidade ou exatidÃ£o de tais informaÃ§Ãµes, tampouco se responsabiliza por eventuais divergÃªncias.</p>
 
       <h2>3. Responsabilidade dos Profissionais</h2>
-      <p>O profissional é o <strong>único e exclusivo responsável</strong> pela prestação do serviço, pela sua qualidade, por sua execução técnica, por sua segurança e pelo cumprimento de todas as normas legais, regulatórias e de segurança aplicáveis à sua atividade.</p>
+      <p>O profissional Ã© o <strong>Ãºnico e exclusivo responsÃ¡vel</strong> pela prestaÃ§Ã£o do serviÃ§o, pela sua qualidade, por sua execuÃ§Ã£o tÃ©cnica, por sua seguranÃ§a e pelo cumprimento de todas as normas legais, regulatÃ³rias e de seguranÃ§a aplicÃ¡veis Ã  sua atividade.</p>
       <ul>
-        <li>Executar o serviço de forma técnica, profissional e dentro dos padrões e prazos acordados com o cliente;</li>
-        <li>Responder por todos os danos materiais, morais, físicos ou de qualquer natureza causados ao cliente ou a terceiros em decorrência da execução do serviço;</li>
-        <li>Possuir licenças, alvarás, habilitações e seguros exigidos pela legislação para o exercício da sua profissão;</li>
-        <li>Manter-se qualificado, atualizado e apto para a realização do serviço contratado;</li>
-        <li>Arcar integralmente com tributos e obrigações fiscais decorrentes da sua atividade.</li>
+        <li>Executar o serviÃ§o de forma tÃ©cnica, profissional e dentro dos padrÃµes e prazos acordados com o cliente;</li>
+        <li>Responder por todos os danos materiais, morais, fÃ­sicos ou de qualquer natureza causados ao cliente ou a terceiros em decorrÃªncia da execuÃ§Ã£o do serviÃ§o;</li>
+        <li>Possuir licenÃ§as, alvarÃ¡s, habilitaÃ§Ãµes e seguros exigidos pela legislaÃ§Ã£o para o exercÃ­cio da sua profissÃ£o;</li>
+        <li>Manter-se qualificado, atualizado e apto para a realizaÃ§Ã£o do serviÃ§o contratado;</li>
+        <li>Arcar integralmente com tributos e obrigaÃ§Ãµes fiscais decorrentes da sua atividade.</li>
       </ul>
-      <p>A Acheei poderá, a seu critério, aplicar sanções administrativas na plataforma (como suspensão ou exclusão de cadastro) em caso de conduta inadequada, porém isso <strong>não substitui nem absorve</strong> a responsabilidade civil e criminal do profissional perante o cliente e perante terceiros.</p>
+      <p>A Acheei poderÃ¡, a seu critÃ©rio, aplicar sanÃ§Ãµes administrativas na plataforma (como suspensÃ£o ou exclusÃ£o de cadastro) em caso de conduta inadequada, porÃ©m isso <strong>nÃ£o substitui nem absorve</strong> a responsabilidade civil e criminal do profissional perante o cliente e perante terceiros.</p>
 
       <h2>4. Responsabilidade dos Clientes</h2>
-      <p>O cliente é o <strong>único responsável</strong> pela contratação do profissional, pela escolha do serviço, pela verificação das informações apresentadas e pela descrição correta e completa do que deseja. O cliente compromete-se a:</p>
+      <p>O cliente Ã© o <strong>Ãºnico responsÃ¡vel</strong> pela contrataÃ§Ã£o do profissional, pela escolha do serviÃ§o, pela verificaÃ§Ã£o das informaÃ§Ãµes apresentadas e pela descriÃ§Ã£o correta e completa do que deseja. O cliente compromete-se a:</p>
       <ul>
-        <li>Fornecer informações verdadeiras e precisas sobre o serviço solicitado;</li>
+        <li>Fornecer informaÃ§Ãµes verdadeiras e precisas sobre o serviÃ§o solicitado;</li>
         <li>Realizar o pagamento acordado com o profissional, na forma e prazo combinados;</li>
-        <li>Proporcionar condições adequadas e seguras para a execução do serviço em seu imóvel ou local indicado;</li>
-        <li>Verificar a idoneidade e as qualificações do profissional antes de contratá-lo.</li>
+        <li>Proporcionar condiÃ§Ãµes adequadas e seguras para a execuÃ§Ã£o do serviÃ§o em seu imÃ³vel ou local indicado;</li>
+        <li>Verificar a idoneidade e as qualificaÃ§Ãµes do profissional antes de contratÃ¡-lo.</li>
       </ul>
 
-      <h2>5. Limitação de Responsabilidade da Acheei</h2>
-      <p>Considerando que a Acheei atua apenas como intermediadora, ela <strong>não se responsabiliza</strong>, em hipótese alguma, por:</p>
+      <h2>5. LimitaÃ§Ã£o de Responsabilidade da Acheei</h2>
+      <p>Considerando que a Acheei atua apenas como intermediadora, ela <strong>nÃ£o se responsabiliza</strong>, em hipÃ³tese alguma, por:</p>
       <ul>
-        <li>Serviços realizados de forma insatisfatória, incompleta, defeituosa ou não conforme o combinado;</li>
-        <li>Não realização, atraso, interrupção ou abandono de serviço pelo profissional;</li>
-        <li>Danos materiais, morais ou físicos, perdas, roubos, furtos ou prejuízos ocorridos durante ou em razão da execução do serviço;</li>
-        <li>Divergências de valores, qualidade, prazo ou condições combinadas diretamente entre cliente e profissional;</li>
-        <li>Atos, condutas, omissões ou declarações de qualquer profissional ou cliente;</li>
+        <li>ServiÃ§os realizados de forma insatisfatÃ³ria, incompleta, defeituosa ou nÃ£o conforme o combinado;</li>
+        <li>NÃ£o realizaÃ§Ã£o, atraso, interrupÃ§Ã£o ou abandono de serviÃ§o pelo profissional;</li>
+        <li>Danos materiais, morais ou fÃ­sicos, perdas, roubos, furtos ou prejuÃ­zos ocorridos durante ou em razÃ£o da execuÃ§Ã£o do serviÃ§o;</li>
+        <li>DivergÃªncias de valores, qualidade, prazo ou condiÃ§Ãµes combinadas diretamente entre cliente e profissional;</li>
+        <li>Atos, condutas, omissÃµes ou declaraÃ§Ãµes de qualquer profissional ou cliente;</li>
         <li>Perdas de oportunidade, lucros cessantes ou danos indiretos e consequentes.</li>
       </ul>
       <div class="destaque">
-        <strong>Importante:</strong> A Acheei não é parte na relação de consumo ou de prestação de serviços estabelecida entre cliente e profissional. Quaisquer reclamações, disputas, divergências ou processos relativos à execução, qualidade ou pagamento do serviço devem ser resolvidos <strong>diretamente entre as partes</strong>, sem qualquer responsabilidade solidária, subsidiária ou concorrente da plataforma.
+        <strong>Importante:</strong> A Acheei nÃ£o Ã© parte na relaÃ§Ã£o de consumo ou de prestaÃ§Ã£o de serviÃ§os estabelecida entre cliente e profissional. Quaisquer reclamaÃ§Ãµes, disputas, divergÃªncias ou processos relativos Ã  execuÃ§Ã£o, qualidade ou pagamento do serviÃ§o devem ser resolvidos <strong>diretamente entre as partes</strong>, sem qualquer responsabilidade solidÃ¡ria, subsidiÃ¡ria ou concorrente da plataforma.
       </div>
 
-      <h2>6. Conformidade e Boas Práticas na Plataforma</h2>
-      <p>Os usuários comprometem-se a não utilizar a plataforma para práticas ilícitas, fraudulentas, ofensivas, discriminatórias ou que violem direitos de terceiros. A Acheei poderá excluir, suspender ou negar acesso a qualquer usuário que descumpra estes Termos, sem prejuízo das medidas legais cabíveis.</p>
+      <h2>6. Conformidade e Boas PrÃ¡ticas na Plataforma</h2>
+      <p>Os usuÃ¡rios comprometem-se a nÃ£o utilizar a plataforma para prÃ¡ticas ilÃ­citas, fraudulentas, ofensivas, discriminatÃ³rias ou que violem direitos de terceiros. A Acheei poderÃ¡ excluir, suspender ou negar acesso a qualquer usuÃ¡rio que descumpra estes Termos, sem prejuÃ­zo das medidas legais cabÃ­veis.</p>
 
       <h2>7. Pagamentos Processados por Terceiros</h2>
-      <p>Eventuais pagamentos efetuados por meio da plataforma são processados por instituições de pagamento e operadoras financeiras parceiras. A Acheei não retém, não administra e não se responsabiliza pela guarda de valores, sendo as transações regidas pelas regras das respectivas instituições e pela legislação aplicável.</p>
+      <p>Eventuais pagamentos efetuados por meio da plataforma sÃ£o processados por instituiÃ§Ãµes de pagamento e operadoras financeiras parceiras. A Acheei nÃ£o retÃ©m, nÃ£o administra e nÃ£o se responsabiliza pela guarda de valores, sendo as transaÃ§Ãµes regidas pelas regras das respectivas instituiÃ§Ãµes e pela legislaÃ§Ã£o aplicÃ¡vel.</p>
 
-      <h2>8. Privacidade e Proteção de Dados (LGPD)</h2>
-      <p>O tratamento de dados pessoais realizado pela Acheei, inclusive dados de clientes e profissionais, observa a <strong>Lei nº 13.709/2018 (Lei Geral de Proteção de Dados – LGPD)</strong>. Para mais detalhes sobre coleta, uso, compartilhamento e direitos dos titulares, consulte a nossa <a href="politica.html">Política de Privacidade</a>.</p>
+      <h2>8. Privacidade e ProteÃ§Ã£o de Dados (LGPD)</h2>
+      <p>O tratamento de dados pessoais realizado pela Acheei, inclusive dados de clientes e profissionais, observa a <strong>Lei nÂº 13.709/2018 (Lei Geral de ProteÃ§Ã£o de Dados â€“ LGPD)</strong>. Para mais detalhes sobre coleta, uso, compartilhamento e direitos dos titulares, consulte a nossa <a href="politica">PolÃ­tica de Privacidade</a>.</p>
       <div class="destaque-lgpd">
-        <strong>Aos profissionais:</strong> ao se cadastrarem na plataforma, os profissionais autorizam o tratamento de seus dados pessoais, incluindo dados cadastrais (nome, CPF, endereço, e-mail, telefone) e dados profissionais (fotos, serviços, qualificações), para fins de divulgação de seus perfis e viabilização da intermediação de serviços, nos termos da LGPD. O profissional pode exercer seus direitos de titular (acesso, correção, exclusão, portabilidade, entre outros) a qualquer momento junto à Acheei.
+        <strong>Aos profissionais:</strong> ao se cadastrarem na plataforma, os profissionais autorizam o tratamento de seus dados pessoais, incluindo dados cadastrais (nome, CPF, endereÃ§o, e-mail, telefone) e dados profissionais (fotos, serviÃ§os, qualificaÃ§Ãµes), para fins de divulgaÃ§Ã£o de seus perfis e viabilizaÃ§Ã£o da intermediaÃ§Ã£o de serviÃ§os, nos termos da LGPD. O profissional pode exercer seus direitos de titular (acesso, correÃ§Ã£o, exclusÃ£o, portabilidade, entre outros) a qualquer momento junto Ã  Acheei.
       </div>
 
-      <h2>9. Legislação Aplicável e Foro</h2>
-      <p>Estes Termos são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da comarca do domicílio do usuário para dirimir quaisquer controvérsias, com expressa renúncia a qualquer outro, por mais privilegiado que seja, ressalvadas as hipóteses de competência legal e cogente.</p>
+      <h2>9. LegislaÃ§Ã£o AplicÃ¡vel e Foro</h2>
+      <p>Estes Termos sÃ£o regidos pelas leis da RepÃºblica Federativa do Brasil. Fica eleito o foro da comarca do domicÃ­lio do usuÃ¡rio para dirimir quaisquer controvÃ©rsias, com expressa renÃºncia a qualquer outro, por mais privilegiado que seja, ressalvadas as hipÃ³teses de competÃªncia legal e cogente.</p>
 
-      <h2>10. Alterações dos Termos</h2>
-      <p>A Acheei poderá alterar estes Termos a qualquer momento, mediante notificação aos usuários ou publicação na plataforma. A continuidade do uso do serviço após a publicação de alterações implica a sua aceitação.</p>
+      <h2>10. AlteraÃ§Ãµes dos Termos</h2>
+      <p>A Acheei poderÃ¡ alterar estes Termos a qualquer momento, mediante notificaÃ§Ã£o aos usuÃ¡rios ou publicaÃ§Ã£o na plataforma. A continuidade do uso do serviÃ§o apÃ³s a publicaÃ§Ã£o de alteraÃ§Ãµes implica a sua aceitaÃ§Ã£o.</p>
 
       <h2>11. Contato</h2>
-      <p>Em caso de dúvidas sobre estes Termos de Responsabilidade, entre em contato pelo e-mail <a href="mailto:contato@acheei.com.br">contato@acheei.com.br</a> ou pela nossa <a href="contato.html">página de contato</a>.</p>
+      <p>Em caso de dÃºvidas sobre estes Termos de Responsabilidade, entre em contato pelo e-mail <a href="mailto:contato@acheei.com.br">contato@acheei.com.br</a> ou pela nossa <a href="contato">pÃ¡gina de contato</a>.</p>
     </div>
   </section>
 
@@ -295,7 +295,7 @@
 <a href="/" class="brand-logo">
           <span>Acheei</span>
         </a>
-        <p>Plataforma de intermediação de serviços que conecta clientes aos melhores profissionais da sua região.</p>
+        <p>Plataforma de intermediaÃ§Ã£o de serviÃ§os que conecta clientes aos melhores profissionais da sua regiÃ£o.</p>
         <div class="footer-social-title">Siga a Acheei</div>
         <div class="footer-social">
           <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><span data-icon="instagram"></span></a>
@@ -306,27 +306,27 @@
         </div>
       </div>
       <div class="footer-section">
-        <h4>Navegação</h4>
+        <h4>NavegaÃ§Ã£o</h4>
         <ul>
-          <li><a href="/">Início</a></li>
-          <li><a href="sobre.html">Sobre Nós</a></li>
-          <li><a href="contato.html">Contato</a></li>
+          <li><a href="/">InÃ­cio</a></li>
+          <li><a href="sobre">Sobre NÃ³s</a></li>
+          <li><a href="contato">Contato</a></li>
         </ul>
       </div>
       <div class="footer-section">
         <h4>Legal</h4>
         <ul>
-          <li><a href="termos.html">Termos de Responsabilidade</a></li>
-          <li><a href="politica.html">Política de Privacidade</a></li>
+          <li><a href="termos">Termos de Responsabilidade</a></li>
+          <li><a href="politica">PolÃ­tica de Privacidade</a></li>
         </ul>
       </div>
     </div>
 <div class="footer-bottom">
       <p>&copy; 2026 Acheei. Todos os direitos reservados.</p>
       <ul class="footer-bottom-links">
-        <li><a href="termos.html">Termos</a></li>
-        <li><a href="politica.html">Privacidade</a></li>
-        <li><a href="contato.html">Contato</a></li>
+        <li><a href="termos">Termos</a></li>
+        <li><a href="politica">Privacidade</a></li>
+        <li><a href="contato">Contato</a></li>
       </ul>
     </div>
   </footer>

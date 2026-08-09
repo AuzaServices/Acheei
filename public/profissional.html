@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acheei - Área do Profissional</title>
-  <meta name="description" content="Área do profissional Acheei - Gerencie solicitações, orçamentos e converse com clientes.">
+  <title>Acheei - Ãrea do Profissional</title>
+  <meta name="description" content="Ãrea do profissional Acheei - Gerencie solicitaÃ§Ãµes, orÃ§amentos e converse com clientes.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
   <style>
 .prof-body { background: #f0f0f0; }
     .login-container { min-height: 100vh; display: flex; padding: 0; background: var(--gray-bg); }
 
-/* ===== Painel visual à esquerda ===== */
+/* ===== Painel visual Ã  esquerda ===== */
     .login-visual {
       flex: 1.1; display: flex; flex-direction: column; justify-content: space-between;
       background:
@@ -48,7 +48,7 @@
     /* ===== Divisor ===== */
     .login-divider { width: 1px; background: linear-gradient(180deg, transparent, var(--red-primary), transparent); flex-shrink: 0; }
 
-    /* ===== Painel do formulário à direita ===== */
+    /* ===== Painel do formulÃ¡rio Ã  direita ===== */
 .login-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--gray-bg); }
     .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); position: relative; }
     .login-home-btn {
@@ -106,7 +106,7 @@
     .solicitacao-card .info-grid .item .label { font-size: 11px; color: var(--gray-medium); font-weight: 600; text-transform: uppercase; }
     .solicitacao-card .info-grid .item .value { font-size: 14px; color: var(--black-primary); }
     .solicitacao-card .descricao { font-size: 14px; color: var(--gray-dark); margin-bottom: 12px; padding: 12px; background: var(--white); border-radius: var(--radius-sm); }
-    /* Botão X vermelho minimalista (sem contorno) para rejeitar solicitação */
+    /* BotÃ£o X vermelho minimalista (sem contorno) para rejeitar solicitaÃ§Ã£o */
     .solicitacao-rejeitar-btn {
       position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
       background: transparent; border: none; cursor: pointer; color: var(--red-primary);
@@ -116,7 +116,7 @@
     .solicitacao-rejeitar-btn svg { width: 18px; height: 18px; }
     .solicitacao-rejeitar-btn:hover { background: rgba(255,0,0,0.08); transform: scale(1.1); }
     .solicitacao-rejeitar-btn:active { transform: scale(0.9); }
-/* Botão de arrastar (swipe) para liberar o chat - apenas mobile */
+/* BotÃ£o de arrastar (swipe) para liberar o chat - apenas mobile */
     .sol-swipe-wrap { display: none; margin-top: 12px; }
     .sol-swipe-track {
       position: relative; height: 46px; background: #d4edda;
@@ -134,7 +134,7 @@
     }
     .sol-swipe-thumb svg { width: 18px; height: 18px; }
     .sol-swipe-track.complete .sol-swipe-thumb { background: #1e7e34; }
-/* Na área de pagamento, mantém o botão de pagar no desktop */
+/* Na Ã¡rea de pagamento, mantÃ©m o botÃ£o de pagar no desktop */
     .sol-pay-btn { display: inline-flex; }
     @media (max-width: 768px) {
       .sol-pay-btn { display: none; }
@@ -143,7 +143,7 @@
 .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
     .badge.pendente { background: #fff3cd; color: #856404; }
     .badge.pago { background: #d4edda; color: #155724; }
-    /* Botão verde "Chamar no Whatsapp" (cliente não respondeu há 5+ min) */
+    /* BotÃ£o verde "Chamar no Whatsapp" (cliente nÃ£o respondeu hÃ¡ 5+ min) */
     .sol-whats-block { margin-top: 4px; }
     .sol-whats-block .label { font-size: 11px; color: var(--gray-medium); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
     .btn-whatsapp {
@@ -241,7 +241,7 @@
     .ferramenta-card .icon { font-size: 36px; display: block; margin-bottom: 8px; }
     .ferramenta-card .name { font-size: 14px; font-weight: 600; }
     .ferramenta-card .desc { font-size: 12px; color: var(--gray-medium); margin-top: 4px; }
-/* Chat idêntico ao da área do cliente */
+/* Chat idÃªntico ao da Ã¡rea do cliente */
     .chat-container { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; min-height: 400px; display: flex; flex-direction: column; }
     .chat-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-lighter); font-weight: 700; font-size: 15px; background: var(--white); }
 .chat-messages { padding: 20px; max-height: 400px; overflow-y: auto; flex: 1; }
@@ -323,7 +323,7 @@
       .chat-panel-footer { padding: 10px; }
       .chat-panel-footer input { min-width: 0; }
       .chat-container .chat-input input { min-width: 0; }
-      /* Fundo fosco (desfocado) atrás do balão de chat, apenas no mobile */
+      /* Fundo fosco (desfocado) atrÃ¡s do balÃ£o de chat, apenas no mobile */
       body:has(.chat-panel.open)::before {
         content: '';
         position: fixed;
@@ -449,17 +449,17 @@
   <!-- Painel visual da lateral esquerda -->
   <div class="login-visual">
     <div class="vis-brand">
-      <div class="logo-badge">🔧</div>
+      <div class="logo-badge">ðŸ”§</div>
       <span>Acheei<span class="dot">.</span></span>
     </div>
 
     <div class="vis-hero">
-      <span class="vis-eyebrow"><span data-icon="hard-hat"></span> Área do Profissional</span>
-      <h2>Gerencie seu negócio e <span class="hl">conquiste mais clientes</span></h2>
-      <p>Receba solicitações, envie orçamentos e converse com seus clientes em um só lugar.</p>
+      <span class="vis-eyebrow"><span data-icon="hard-hat"></span> Ãrea do Profissional</span>
+      <h2>Gerencie seu negÃ³cio e <span class="hl">conquiste mais clientes</span></h2>
+      <p>Receba solicitaÃ§Ãµes, envie orÃ§amentos e converse com seus clientes em um sÃ³ lugar.</p>
 
       <div class="vis-features">
-        <div class="vis-feature"><span class="f-icon"><span data-icon="bell"></span></span> Receba solicitações em tempo real</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="bell"></span></span> Receba solicitaÃ§Ãµes em tempo real</div>
         <div class="vis-feature"><span class="f-icon"><span data-icon="chat"></span></span> Converse direto com o cliente</div>
         <div class="vis-feature"><span class="f-icon"><span data-icon="settings"></span></span> Ferramentas e calculadora inclusas</div>
       </div>
@@ -473,7 +473,7 @@
           <div class="nm">Carlos Mendes</div>
           <div class="role">Eletricista</div>
         </div>
-        <div class="stars">★★★★★</div>
+        <div class="stars">â˜…â˜…â˜…â˜…â˜…</div>
       </div>
     </div>
   </div>
@@ -481,19 +481,19 @@
   <!-- Divisor -->
   <div class="login-divider"></div>
 
-<!-- Painel do formulário à direita -->
+<!-- Painel do formulÃ¡rio Ã  direita -->
   <div class="login-panel">
     <div class="login-card">
-      <a href="/" class="login-home-btn" aria-label="Voltar ao início" title="Início">
+      <a href="/" class="login-home-btn" aria-label="Voltar ao inÃ­cio" title="InÃ­cio">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
       </a>
       <div class="login-mobile-logo">
         <h1>Acheei</h1>
-        <p>Área do Profissional</p>
+        <p>Ãrea do Profissional</p>
       </div>
       <div class="logo">
         <h1>Acheei <span style="color:var(--red-primary);">Profissional</span></h1>
-        <p>Acesse sua conta para gerenciar seus serviços</p>
+        <p>Acesse sua conta para gerenciar seus serviÃ§os</p>
       </div>
       <div class="form-title">Bem-vindo de volta</div>
       <div class="form-sub">Entre para continuar</div>
@@ -506,11 +506,11 @@
           <label for="senha">Senha</label>
           <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password">
         </div>
-        <button type="submit" class="btn btn-primary btn-lg">Entrar na Área</button>
-        <div class="login-error" id="loginError">E-mail ou senha inválidos</div>
+        <button type="submit" class="btn btn-primary btn-lg">Entrar na Ãrea</button>
+        <div class="login-error" id="loginError">E-mail ou senha invÃ¡lidos</div>
       </form>
       <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--gray-medium);">
-        Ainda não tem conta? <a href="cadastro.html" style="color:var(--red-primary);font-weight:600;">Cadastre-se</a>
+        Ainda nÃ£o tem conta? <a href="cadastro" style="color:var(--red-primary);font-weight:600;">Cadastre-se</a>
       </p>
     </div>
   </div>
@@ -526,20 +526,20 @@
 <div class="user-area" id="userArea">
         <div class="user-dropdown" id="userDropdown">
           <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
-            <span class="user-avatar" id="userAvatar">👤</span>
+            <span class="user-avatar" id="userAvatar">ðŸ‘¤</span>
             <span class="user-name" id="userName">Profissional</span>
             <span class="user-caret" data-icon="chevron-down"></span>
           </button>
 <div class="user-dropdown-menu" id="userDropdownMenu">
             <a href="/" class="user-dropdown-item">
-              <span data-icon="home"></span> Início
+              <span data-icon="home"></span> InÃ­cio
             </a>
-            <a href="contato.html" class="user-dropdown-item">
+            <a href="contato" class="user-dropdown-item">
               <span data-icon="send"></span> Contato
             </a>
             <div class="user-dropdown-divider"></div>
             <button type="button" class="user-dropdown-item" onclick="abrirConfiguracoes()">
-              <span data-icon="settings"></span> Configurações
+              <span data-icon="settings"></span> ConfiguraÃ§Ãµes
             </button>
             <button type="button" class="user-dropdown-item" onclick="logout()">
               <span data-icon="log-out"></span> Sair
@@ -552,35 +552,35 @@
 
 <div class="dashboard-content">
     <div class="dashboard-tabs">
-      <button class="dashboard-tab active" onclick="switchTab('solicitacoes', this)">Solicitações <span class="count" id="countSolicitacoes">0</span></button>
-      <button class="dashboard-tab" onclick="switchTab('orcamentos', this)">Orçamentos</button>
+      <button class="dashboard-tab active" onclick="switchTab('solicitacoes', this)">SolicitaÃ§Ãµes <span class="count" id="countSolicitacoes">0</span></button>
+      <button class="dashboard-tab" onclick="switchTab('orcamentos', this)">OrÃ§amentos</button>
       <button class="dashboard-tab" onclick="switchTab('calculadora', this)">Calculadora</button>
       <button class="dashboard-tab" onclick="switchTab('ferramentas', this)">Ferramentas</button>
       <button class="dashboard-tab" onclick="switchTab('chat', this)">Chat</button>
     </div>
 
-    <!-- ABA SOLICITAÇÕES -->
+    <!-- ABA SOLICITAÃ‡Ã•ES -->
     <div class="tab-content active" id="tabSolicitacoes">
       <div class="section-card">
         <div class="section-header">
-          <h3>Solicitações de Serviço</h3>
-          <span id="solCount" style="font-size:13px;color:var(--gray-medium);">0 solicitações</span>
+          <h3>SolicitaÃ§Ãµes de ServiÃ§o</h3>
+          <span id="solCount" style="font-size:13px;color:var(--gray-medium);">0 solicitaÃ§Ãµes</span>
         </div>
         <div class="section-body" id="solicitacoesList">
-          <div class="empty-state"><span class="icon">📋</span><h3>Nenhuma solicitação ainda</h3><p>Quando clientes solicitarem seus serviços, aparecerão aqui.</p></div>
+          <div class="empty-state"><span class="icon">ðŸ“‹</span><h3>Nenhuma solicitaÃ§Ã£o ainda</h3><p>Quando clientes solicitarem seus serviÃ§os, aparecerÃ£o aqui.</p></div>
         </div>
       </div>
     </div>
 
-    <!-- ABA ORÇAMENTOS -->
+    <!-- ABA ORÃ‡AMENTOS -->
     <div class="tab-content" id="tabOrcamentos">
       <div class="section-card">
         <div class="section-header">
-          <h3>Orçamentos</h3>
-          <button class="btn btn-primary btn-sm" onclick="abrirModalOrcamento()">➕ Novo Orçamento</button>
+          <h3>OrÃ§amentos</h3>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalOrcamento()">âž• Novo OrÃ§amento</button>
         </div>
         <div class="section-body" id="orcamentosList">
-          <div class="empty-state"><span class="icon">💰</span><h3>Nenhum orçamento ainda</h3><p>Crie orçamentos para seus clientes aqui.</p></div>
+          <div class="empty-state"><span class="icon">ðŸ’°</span><h3>Nenhum orÃ§amento ainda</h3><p>Crie orÃ§amentos para seus clientes aqui.</p></div>
         </div>
       </div>
     </div>
@@ -588,26 +588,26 @@
     <!-- ABA CALCULADORA -->
     <div class="tab-content" id="tabCalculadora">
       <div class="section-card">
-        <div class="section-header"><h3>🧮 Calculadora</h3></div>
+        <div class="section-header"><h3>ðŸ§® Calculadora</h3></div>
         <div class="section-body">
           <div class="calc-panel">
             <div class="calc-display">
-              <div class="calc-mode">Padrão</div>
+              <div class="calc-mode">PadrÃ£o</div>
               <input type="text" id="calcDisplay" class="calc-screen" value="0" readonly aria-label="Display da calculadora">
             </div>
             <div class="calc-buttons">
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcClearAll()">CE</button>
-              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcDelete()">⌫</button>
+              <button type="button" class="calc-btn calc-btn-secondary" onclick="calcDelete()">âŒ«</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcPercent()">%</button>
-              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('÷')">÷</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('Ã·')">Ã·</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('7')">7</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('8')">8</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('9')">9</button>
-              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('×')">×</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('Ã—')">Ã—</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('4')">4</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('5')">5</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('6')">6</button>
-              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('-')">−</button>
+              <button type="button" class="calc-btn calc-btn-operator" onclick="calcInput('-')">âˆ’</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('1')">1</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('2')">2</button>
               <button type="button" class="calc-btn calc-btn-secondary" onclick="calcInput('3')">3</button>
@@ -625,26 +625,26 @@
     <!-- ABA FERRAMENTAS -->
     <div class="tab-content" id="tabFerramentas">
       <div class="section-card">
-        <div class="section-header"><h3>🛠️ Ferramentas</h3></div>
+        <div class="section-header"><h3>ðŸ› ï¸ Ferramentas</h3></div>
         <div class="section-body">
           <div class="ferramentas-grid">
             <div class="ferramenta-card" onclick="converterMedida()">
-              <span class="icon">📏</span>
+              <span class="icon">ðŸ“</span>
               <span class="name">Conversor de Medidas</span>
-              <span class="desc">Metros, centímetros, polegadas</span>
+              <span class="desc">Metros, centÃ­metros, polegadas</span>
             </div>
             <div class="ferramenta-card" onclick="converterPeso()">
-              <span class="icon">⚖️</span>
+              <span class="icon">âš–ï¸</span>
               <span class="name">Conversor de Peso</span>
               <span class="desc">Quilos, libras, gramas</span>
             </div>
             <div class="ferramenta-card" onclick="converterVolume()">
-              <span class="icon">🧊</span>
+              <span class="icon">ðŸ§Š</span>
               <span class="name">Conversor de Volume</span>
-              <span class="desc">Litros, metros cúbicos, galões</span>
+              <span class="desc">Litros, metros cÃºbicos, galÃµes</span>
             </div>
             <div class="ferramenta-card" onclick="converterTemperatura()">
-              <span class="icon">🌡️</span>
+              <span class="icon">ðŸŒ¡ï¸</span>
               <span class="name">Conversor de Temperatura</span>
               <span class="desc">Celsius, Fahrenheit, Kelvin</span>
             </div>
@@ -657,19 +657,19 @@
     <!-- ABA CHAT -->
     <div class="tab-content" id="tabChat">
       <div class="section-card">
-        <div class="section-header"><h3>💬 Chat com Cliente</h3></div>
+        <div class="section-header"><h3>ðŸ’¬ Chat com Cliente</h3></div>
         <div class="section-body">
           <div class="chat-select">
             <select id="chatSolicitacaoSelect" onchange="selecionarChat()">
-              <option value="">Selecione uma solicitação para conversar</option>
+              <option value="">Selecione uma solicitaÃ§Ã£o para conversar</option>
             </select>
           </div>
 <div class="chat-container" id="chatContainer">
-            <div class="chat-header" id="chatHeader">Selecione uma solicitação acima</div>
+            <div class="chat-header" id="chatHeader">Selecione uma solicitaÃ§Ã£o acima</div>
             <div class="chat-messages" id="chatMessages">
               <div class="chat-locked">
-                <span class="icon">💬</span>
-                <p>Selecione uma solicitação para iniciar o chat</p>
+                <span class="icon">ðŸ’¬</span>
+                <p>Selecione uma solicitaÃ§Ã£o para iniciar o chat</p>
               </div>
             </div>
             <div class="chat-input-area" id="chatInputArea" style="display:none;">
@@ -683,11 +683,11 @@
   </div>
 </div>
 
-<!-- MODAL NOVO ORÇAMENTO -->
+<!-- MODAL NOVO ORÃ‡AMENTO -->
 <div class="modal-overlay" id="orcamentoModal">
   <div class="modal">
     <div class="modal-header">
-      <h3>Novo Orçamento</h3>
+      <h3>Novo OrÃ§amento</h3>
       <button class="modal-close" onclick="fecharModalOrcamento()">&times;</button>
     </div>
     <form id="orcamentoForm" class="modal-body" onsubmit="criarOrcamento(event)">
@@ -696,8 +696,8 @@
         <input type="text" id="orcCliente" placeholder="Nome do cliente" required>
       </div>
       <div class="form-group">
-        <label for="orcDescricao">Descrição do Serviço</label>
-        <textarea id="orcDescricao" placeholder="Descreva o serviço e os detalhes do orçamento" required></textarea>
+        <label for="orcDescricao">DescriÃ§Ã£o do ServiÃ§o</label>
+        <textarea id="orcDescricao" placeholder="Descreva o serviÃ§o e os detalhes do orÃ§amento" required></textarea>
       </div>
       <div class="form-group">
         <label for="orcValor">Valor (R$)</label>
@@ -705,7 +705,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="fecharModalOrcamento()">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Criar Orçamento</button>
+        <button type="submit" class="btn btn-primary">Criar OrÃ§amento</button>
       </div>
     </form>
   </div>
@@ -724,13 +724,13 @@
       <div class="pix-value-block">
         <span class="pix-value-label">Valor</span>
         <span class="pix-value" id="pixValor">R$ 14,99</span>
-        <span class="pix-exp" id="pixExpiracao">Válido por 30 minutos</span>
+        <span class="pix-exp" id="pixExpiracao">VÃ¡lido por 30 minutos</span>
       </div>
 
       <div class="pix-qr-box">
         <div id="pixQrCode" class="pix-qr-area">
           <div class="pix-qr-loading">
-            <span class="pix-qr-icon">📱</span>
+            <span class="pix-qr-icon">ðŸ“±</span>
             <p>Gerando QR Code...</p>
           </div>
         </div>
@@ -747,8 +747,8 @@
       </div>
 
       <p class="pix-note">
-        O pagamento é verificado automaticamente.
-        <br>Após a confirmação, o chat será liberado.
+        O pagamento Ã© verificado automaticamente.
+        <br>ApÃ³s a confirmaÃ§Ã£o, o chat serÃ¡ liberado.
       </p>
 
       <button type="button" class="btn btn-outline pix-close-btn" onclick="fecharModalPix()">Fechar</button>
@@ -756,22 +756,22 @@
   </div>
 </div>
 
-<!-- MODAL REJEITAR SOLICITAÇÃO -->
+<!-- MODAL REJEITAR SOLICITAÃ‡ÃƒO -->
 <div class="modal-overlay" id="rejeitarModal">
   <div class="modal" style="max-width:420px;">
     <div class="modal-header" style="border-bottom:1px solid var(--gray-lighter);">
       <h3 style="display:flex;align-items:center;gap:8px;color:var(--red-primary);">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M16 8l-8 8"/></svg>
-        Rejeitar solicitação
+        Rejeitar solicitaÃ§Ã£o
       </h3>
       <button class="modal-close" onclick="fecharModalRejeitar()">&times;</button>
     </div>
     <div class="modal-body" style="padding:24px;">
       <p style="font-size:14px;color:var(--gray-dark);line-height:1.6;margin-bottom:8px;">
-        Tem certeza que deseja <strong style="color:var(--red-primary);">rejeitar</strong> esta solicitação?
+        Tem certeza que deseja <strong style="color:var(--red-primary);">rejeitar</strong> esta solicitaÃ§Ã£o?
       </p>
       <p style="font-size:13px;color:var(--gray-medium);line-height:1.6;margin-bottom:20px;">
-        A solicitação será <strong>excluída permanentemente</strong> e isso <strong>influenciará negativamente na sua pontuação</strong> nas buscas. Quanto mais solicitações você rejeitar, mais para trás você aparecerá para novos clientes.
+        A solicitaÃ§Ã£o serÃ¡ <strong>excluÃ­da permanentemente</strong> e isso <strong>influenciarÃ¡ negativamente na sua pontuaÃ§Ã£o</strong> nas buscas. Quanto mais solicitaÃ§Ãµes vocÃª rejeitar, mais para trÃ¡s vocÃª aparecerÃ¡ para novos clientes.
       </p>
     </div>
     <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--gray-lighter);">
@@ -781,11 +781,11 @@
   </div>
 </div>
 
-<!-- MODAL CONFIGURAÇÕES -->
+<!-- MODAL CONFIGURAÃ‡Ã•ES -->
 <div class="modal-overlay" id="configModal">
   <div class="modal config-modal" style="max-width:640px;">
     <div class="modal-header">
-      <h3><span data-icon="settings"></span> Configurações</h3>
+      <h3><span data-icon="settings"></span> ConfiguraÃ§Ãµes</h3>
       <button class="modal-close" onclick="fecharConfiguracoes()">&times;</button>
     </div>
     <div class="modal-body config-modal-body">
@@ -808,7 +808,7 @@
   </div>
 <div class="chat-conversations" id="widgetChatList">
     <div class="chat-conv-empty">
-      <span class="icon">💬</span>
+      <span class="icon">ðŸ’¬</span>
       <p>Carregando conversas...</p>
     </div>
   </div>
@@ -817,7 +817,7 @@
 <button class="btn-back" onclick="widgetVoltarParaLista()" aria-label="Voltar">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <span class="chat-conv-avatar" id="widgetChatViewAvatar">👤</span>
+      <span class="chat-conv-avatar" id="widgetChatViewAvatar">ðŸ‘¤</span>
       <span class="chat-conv-name" id="widgetChatViewNome">Conversa</span>
     </div>
     <div class="chat-view-body" id="widgetChatBody"></div>
