@@ -333,6 +333,55 @@ async function carregarSolicitacoes() {
   }
 }
 
+// ============================================
+// Chamar Cliente no WhatsApp (se não responder em 5 min)
+// ============================================
+function formatarTelefoneWhatsApp(telefone) {
+  if (!telefone) return '';
+  var dig = String(telefone).replace(/\D/g, '');
+  // Se tiver 13 dígitos (55 + DDD + número), já está no formato internacional
+  if (dig.length === 13) return dig;
+  // Se tiver 11 dígitos (DDD + número), adiciona o código do Brasil (55)
+  if (dig.length === 11) return '55' + dig;
+  // Se tiver 10 dígitos (DDD + número fixo), adiciona o 55 e um 9 antes do número
+  if (dig.length === 10) return '55' + dig.charAt(0) + '9' + dig.substring(1);
+  return dig;
+}
+
+function montarMensagemWhatsApp(sol, nomeProfissional, profissao) {
+  var nomeProf = (nomeProfissional || profissional && profissional.nome_perfil || 'Profissional');
+  var profArea = (profissao || profissional && profissional.profissao || 'profissional');
+  var descricao = (sol.descricao || 'Seu serviço solicitado').replace(/\n/g, ' ');
+  var mensagem =
+    'Olá ' + (sol.cliente_nome || 'cliente') + '! Tudo bem? 🙂\n\n' +
+    'Aqui é o(a) *' + nomeProf + '*, ' + profArea.toLowerCase() + ' do Acheei.\n\n' +
+    'Você solicitou um serviço conosco e ainda não respondemos no chat. Para agilizar seu atendimento, estou entrando em contato por aqui.\n\n' +
+    '📋 *Detalhes da sua solicitação:*\n' + descricao + '\n\n' +
+    'Me chame quando puder para combinarmos os próximos passos. 😊';
+  return encodeURIComponent(mensagem);
+}
+
+function montarLinkWhatsApp(sol, nomeProfissional, profissao) {
+  var telefone = formatarTelefoneWhatsApp(sol.cliente_telefone);
+  if (!telefone) return '#';
+  return 'https://wa.me/' + telefone + '?text=' + montarMensagemWhatsApp(sol, nomeProfissional, profissao);
+}
+
+// Decide se o botão "Chamar no WhatsApp" deve aparecer:
+// - Chat pago (status_pagamento === 'pago')
+// - A última mensagem foi enviada pelo profissional
+// - Há mais de 5 minutos desde a última mensagem (cliente não respondeu)
+function deveMostrarBotaoWhatsApp(sol) {
+  if (!sol || sol.status_pagamento !== 'pago') return false;
+  if (!sol.ultima_mensagem_data) return false;
+  if (sol.ultima_mensagem_remetente === 'cliente') return false;
+  var agora = new Date();
+  var ultima = new Date(sol.ultima_mensagem_data);
+  if (isNaN(ultima.getTime())) return false;
+  var minutosSemResposta = (agora.getTime() - ultima.getTime()) / 60000;
+  return minutosSemResposta >= 5;
+}
+
 function renderizarSolicitacoes() {
   var container = document.getElementById('solicitacoesList');
   container.innerHTML = '';
@@ -365,9 +414,25 @@ var swipeHtml = statusPag === 'pendente'
     if (sol.urgencia) {
       extrasHtml += '<div class="item"><div class="label">Urgência do serviço</div><div class="value">' + sol.urgencia + '</div></div>';
     }
-    if (sol.orcamento_estimado) {
+if (sol.orcamento_estimado) {
       extrasHtml += '<div class="item"><div class="label">Orçamento estimado pelo cliente</div><div class="value">' + sol.orcamento_estimado + '</div></div>';
     }
+
+    // Botão "Chamar no Whatsapp" (verde) - aparece quando o cliente não responde há 5+ min (chat pago)
+    var whatsBtn = '';
+    if (deveMostrarBotaoWhatsApp(sol)) {
+      var linkWhats = montarLinkWhatsApp(sol, profissional ? profissional.nome_perfil : null, profissional ? profissional.profissao : null);
+      whatsBtn =
+        '<div class="item sol-whats-block">' +
+          '<div class="label">Cliente não respondeu</div>' +
+          '<a class="btn btn-whatsapp" href="' + linkWhats + '" target="_blank" rel="noopener" aria-label="Chamar no Whatsapp">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+            'Chamar no Whatsapp' +
+          '</a>' +
+        '</div>';
+    }
+
+    var acoesHtml = '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + pagarBtn + whatsBtn + '</div>';
 
 card.innerHTML =
       xBtn +
@@ -380,7 +445,7 @@ card.innerHTML =
         extrasHtml +
       '</div>' +
       '<div class="descricao">' + sol.descricao + '</div>' +
-      '<div style="display:flex;gap:8px;">' + pagarBtn + '</div>' +
+      acoesHtml +
       swipeHtml;
     container.appendChild(card);
   }

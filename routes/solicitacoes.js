@@ -111,10 +111,11 @@ const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, 
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
 db.query(
-      `SELECT s.*,
+`SELECT s.*,
         (SELECT COUNT(*) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'cliente' AND m.lida = FALSE) AS qtd_nao_lidas,
         (SELECT m.texto FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem,
-        (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_remetente
+        (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_remetente,
+        (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_data
        FROM solicitacoes s
        WHERE s.profissional_id = ?
        ORDER BY s.data_solicitacao DESC`,

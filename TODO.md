@@ -25,3 +25,15 @@ Permitir que o profissional rejeite solicitações. Ao rejeitar, a solicitação
 - [x] 8. Corrigir sobreposição: o X e a data/hora da solicitação não ficam mais juntos no desktop (padding no card-header)
 - [ ] 9. Executar o ALTER TABLE no banco para adicionar a coluna `rejeicoes` (em bancos já existentes)
 - [ ] 10. Testar fluxo completo
+
+# TODO - Botão "Chamar no Whatsapp" (cliente não respondeu há 5+ min)
+
+## Objetivo
+Se o cliente não responder no chat em até 5 minutos, o profissional deve ter um botão verde "Chamar no Whatsapp" (com o ícone oficial do WhatsApp) na solicitação, para chamar o cliente diretamente no WhatsApp. Esta regra só vale **após o pagamento** (chat pago).
+
+### Tarefas
+- [x] 1. Backend: rota `GET /api/solicitacoes/profissional/:id` agora retorna `ultima_mensagem_data` (timestamp da última mensagem)
+- [x] 2. Frontend (`profissional.js`): funções auxiliares `formatarTelefoneWhatsApp`, `montarMensagemWhatsApp`, `montarLinkWhatsApp` e `deveMostrarBotaoWhatsApp` (só aparece se `status_pagamento === 'pago'` + última msg do profissional + >5 min sem resposta)
+- [x] 3. Frontend (`profissional.js`): botão verde renderizado no card da solicitação com ícone oficial do WhatsApp
+- [x] 4. Frontend (`profissional.html`): CSS do botão `.btn-whatsapp` (verde #25D366) e do bloco `.sol-whats-block`
+- [x] 5. Mensagem pré-definida estratégica: contém nome do profissional, profissão e a descrição completa do serviço do cliente
