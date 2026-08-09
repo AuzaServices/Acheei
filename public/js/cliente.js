@@ -337,7 +337,7 @@ function renderizarSolicitacoes() {
 
     var statusPag = sol.status_pagamento === 'pago'
       ? '<span class="status-badge aprovado">Chat liberado</span>'
-      : '<span class="status-badge pendente">Aguardando liberação</span>';
+      : '<span class="status-badge pendente">Aguarde a liberação do chat</span>';
 
     // Data/Hora, Urgência, Orçamento (opcionais)
     var extrasHtml = '';
