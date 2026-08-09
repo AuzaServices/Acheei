@@ -391,7 +391,7 @@ function renderizarSolicitacoes() {
       ? '<span class="badge pago">Pago</span>'
       : '<span class="badge pendente">Pendente</span>';
 var pagarBtn = statusPag === 'pendente'
-      ? '<button type="button" class="btn btn-primary btn-sm sol-pay-btn" data-solicitacao-id="' + sol.id + '" onclick="pagarSolicitacao(event, ' + sol.id + ')">Pagar R$14,99</button>'
+      ? '<button type="button" class="btn btn-primary btn-sm sol-pay-btn" data-solicitacao-id="' + sol.id + '" onclick="pagarSolicitacao(event, ' + sol.id + ')">Pagar R$7,99</button>'
       : '';
     var card = document.createElement('div');
     card.className = 'solicitacao-card';
@@ -588,7 +588,7 @@ function abrirModalPix(data) {
   document.getElementById('pixCopiaCola').value = data.qr_code || '';
 
   // Exibe valor
-  document.getElementById('pixValor').textContent = 'R$ ' + (data.transaction_amount || 14.99).toFixed(2).replace('.', ',');
+document.getElementById('pixValor').textContent = 'R$ ' + (data.transaction_amount || 7.99).toFixed(2).replace('.', ',');
 
   // Exibe tempo de expiração
   if (data.date_of_expiration) {
@@ -701,7 +701,7 @@ async function pagarSolicitacao(event, id) {
 if (btn) {
       btn.disabled = false;
       btn.dataset.processing = 'false';
-      btn.innerHTML = 'Pagar R$14,99';
+btn.innerHTML = 'Pagar R$7,99';
     }
 
     if (result && result.success && result.data) {
@@ -728,7 +728,7 @@ if (btn) {
     if (btn) {
       btn.disabled = false;
       btn.dataset.processing = 'false';
-      btn.innerHTML = '💳 Pagar R$14,99';
+btn.innerHTML = '💳 Pagar R$7,99';
     }
     showToast('Erro ao processar pagamento PIX', 'error');
   }
@@ -990,7 +990,7 @@ function selecionarChat() {
   document.getElementById('chatHeader').textContent = '💬 ' + sol.cliente_nome;
   if (sol.status_pagamento !== 'pago') {
     document.getElementById('chatMessages').innerHTML =
-      '<div class="chat-locked"><span class="icon">🔒</span><p>Chat bloqueado. Realize o pagamento de R$14,99 na aba "Solicitações" para liberar o chat com este cliente.</p></div>';
+'<div class="chat-locked"><span class="icon">🔒</span><p>Chat bloqueado. Realize o pagamento de R$7,99 na aba "Solicitações" para liberar o chat com este cliente.</p></div>';
     document.getElementById('chatInputArea').style.display = 'none';
     if (chatTimer) { clearInterval(chatTimer); chatTimer = null; }
     return;

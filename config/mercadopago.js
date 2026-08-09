@@ -8,7 +8,7 @@ const ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN || '';
 const isConfigured = ACCESS_TOKEN.length > 0 && ACCESS_TOKEN !== 'SEU_TOKEN_AQUI';
 
 // Valor cobrado para liberar o chat com o cliente
-const VALOR_LIBERACAO_CHAT = 14.99;
+const VALOR_LIBERACAO_CHAT = 7.99;
 
 // Instancia o SDK apenas se houver token configurado
 const client = isConfigured ? new MercadoPagoConfig({ accessToken: ACCESS_TOKEN }) : null;
