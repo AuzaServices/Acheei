@@ -377,7 +377,7 @@ function montarMensagemWhatsApp(sol, nomeProfissional, profissao) {
   var mensagem =
     'Olá ' + (sol.cliente_nome || 'cliente') + '! Tudo bem? 🙂\n\n' +
     'Aqui é o(a) *' + nomeProf + '*, ' + profArea.toLowerCase() + ' do Acheei.\n\n' +
-    'Você solicitou um serviço conosco e ainda não respondemos no chat. Para agilizar seu atendimento, estou entrando em contato por aqui.\n\n' +
+    'Você solicitou um serviço conosco e ainda não respondeu no chat. Para agilizar seu atendimento, estou entrando em contato por aqui.\n\n' +
     '📋 *Detalhes da sua solicitação:*\n' + detalhesTexto + '\n\n' +
     'Me chame quando puder para combinarmos os próximos passos. 😊';
   return encodeURIComponent(mensagem);
