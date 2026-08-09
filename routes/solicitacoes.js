@@ -1,4 +1,4 @@
-// ============================================
+aywy6// ============================================
 // Rotas de Solicitações
 // ============================================
 const express = require('express');
@@ -116,11 +116,10 @@ db.query(
         (SELECT m.texto FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem,
         (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_remetente,
         (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) AS ultima_mensagem_data,
-        (CASE
+(CASE
           WHEN s.status_pagamento = 'pago'
-           AND (SELECT m.remetente FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) = 'profissional'
-           AND (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1) IS NOT NULL
-           AND TIMESTAMPDIFF(MINUTE, (SELECT m.data_envio FROM mensagens m WHERE m.solicitacao_id = s.id ORDER BY m.data_envio DESC, m.id DESC LIMIT 1), NOW()) >= 5
+           AND (SELECT MAX(m.data_envio) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'profissional') IS NOT NULL
+           AND TIMESTAMPDIFF(MINUTE, (SELECT MAX(m.data_envio) FROM mensagens m WHERE m.solicitacao_id = s.id AND m.remetente = 'profissional'), NOW()) >= 5
           THEN 1
           ELSE 0
         END) AS pode_chamar_whatsapp
