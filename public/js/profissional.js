@@ -366,7 +366,7 @@ var swipeHtml = statusPag === 'pendente'
       extrasHtml += '<div class="item"><div class="label">Urgência</div><div class="value">' + sol.urgencia + '</div></div>';
     }
     if (sol.orcamento_estimado) {
-      extrasHtml += '<div class="item"><div class="label">Orçamento estimado</div><div class="value">' + sol.orcamento_estimado + '</div></div>';
+      extrasHtml += '<div class="item"><div class="label">Orçamento estimado pelo cliente</div><div class="value">' + sol.orcamento_estimado + '</div></div>';
     }
 
 card.innerHTML =
