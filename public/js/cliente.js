@@ -928,12 +928,43 @@ async function verificarNovasMensagensWidget() {
   var result = await apiRequest(API_BASE + '/clientes/solicitacoes');
   if (!result || !result.success) return;
 
-  // Total de mensagens não lidas vindas do backend (fonte de verdade = coluna lida)
+// Total de mensagens não lidas vindas do backend (fonte de verdade = coluna lida)
   var totalNaoLidas = 0;
   for (var i = 0; i < result.data.length; i++) {
     var sol = result.data[i];
     if (sol.status_pagamento !== 'pago') continue;
     totalNaoLidas += (parseInt(sol.qtd_nao_lidas) || 0);
+  }
+
+// ===== Sincronização em tempo real =====
+  // Atualiza a lista de solicitações/orçamentos sem precisar recarregar a página,
+  // refletindo mudanças como profissional pagou (chat liberado) ou solicitação excluída.
+  var mudouSolicitacoes = JSON.stringify(solicitacoesData) !== JSON.stringify(result.data);
+  solicitacoesData = result.data;
+  if (mudouSolicitacoes) {
+    var tabSolCliente = document.getElementById('tabSolicitacoes');
+    if (tabSolCliente && tabSolCliente.classList.contains('active')) {
+      renderizarSolicitacoes();
+    }
+    // Se uma solicitação ficou paga, o seletor de chat deve refletir isso
+    var selChat = document.getElementById('chatSolicitacaoSelect');
+    if (selChat && selChat.value) {
+      carregarChatSolicitacoes();
+    }
+  }
+
+  // Sincroniza orçamentos em tempo real (novo orçamento criado/excluído pelo profissional)
+  var resOrc = await apiRequest(API_BASE + '/clientes/orcamentos');
+  if (resOrc && resOrc.success) {
+    if (JSON.stringify(orcamentosData) !== JSON.stringify(resOrc.data)) {
+      orcamentosData = resOrc.data;
+      var tabOrc = document.getElementById('tabOrcamentos');
+      if (tabOrc && tabOrc.classList.contains('active')) {
+        renderizarOrcamentos();
+      }
+      var cntOrc = document.getElementById('countOrcamentos');
+      if (cntOrc) cntOrc.textContent = resOrc.total;
+    }
   }
 
 var panel = document.getElementById('chatPanel');

@@ -1515,6 +1515,29 @@ async function widgetVerificarNovasMensagensProf() {
   var result = await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id);
   if (!result || !result.success) return;
 
+  // ===== Sincronização em tempo real =====
+  // Atualiza a lista de solicitações/orçamentos sem recarregar a página, refletindo
+  // mudanças como cliente pagou, solicitação excluída, ou novo botão de WhatsApp ativo.
+  var mudouSolicitacoes = JSON.stringify(solicitacoesData) !== JSON.stringify(result.data);
+  solicitacoesData = result.data;
+  if (mudouSolicitacoes) {
+    var tabSol = document.getElementById('tabSolicitacoes');
+    if (tabSol && tabSol.classList.contains('active')) {
+      renderizarSolicitacoes();
+    }
+    // Atualiza o contador da aba
+    var cntSol = document.getElementById('countSolicitacoes');
+    if (cntSol) cntSol.textContent = result.total;
+    var solCnt = document.getElementById('solCount');
+    if (solCnt) solCnt.textContent = result.total + ' solicitação' + (result.total !== 1 ? 'ões' : '');
+    // Se houver chat aberto na aba, atualiza o seletor/estado
+    if (chatSolicitacaoSelecionada) {
+      carregarChatSolicitacoes();
+    }
+    // O widget de conversas também deve refletir novas conversas pagas
+    widgetCarregarSolicitacoesProf();
+  }
+
   // Total de mensagens não lidas vindas do backend (fonte de verdade = coluna lida)
   var totalNaoLidas = 0;
   for (var i = 0; i < result.data.length; i++) {
