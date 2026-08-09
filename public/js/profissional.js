@@ -360,10 +360,10 @@ var swipeHtml = statusPag === 'pendente'
     var extrasHtml = '';
     if (sol.data_hora) {
       var dh = new Date(sol.data_hora);
-      extrasHtml += '<div class="item"><div class="label">Data e Hora</div><div class="value">' + dh.toLocaleString('pt-BR') + '</div></div>';
+      extrasHtml += '<div class="item"><div class="label">Data e Hora do serviço</div><div class="value">' + dh.toLocaleString('pt-BR') + '</div></div>';
     }
     if (sol.urgencia) {
-      extrasHtml += '<div class="item"><div class="label">Urgência</div><div class="value">' + sol.urgencia + '</div></div>';
+      extrasHtml += '<div class="item"><div class="label">Urgência do serviço</div><div class="value">' + sol.urgencia + '</div></div>';
     }
     if (sol.orcamento_estimado) {
       extrasHtml += '<div class="item"><div class="label">Orçamento estimado pelo cliente</div><div class="value">' + sol.orcamento_estimado + '</div></div>';
