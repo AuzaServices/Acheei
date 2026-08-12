@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acheei - Sobre Nós</title>
-  <meta name="description" content="Conheça a Acheei, a plataforma que conecta clientes aos melhores profissionais da sua região.">
+  <title>Acheei - Sobre NÃ³s</title>
+  <meta name="description" content="ConheÃ§a a Acheei, a plataforma que conecta clientes aos melhores profissionais da sua regiÃ£o.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF0000' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E" type="image/svg+xml">
   <script>document.documentElement.classList.add('js');</script>
   <script src="js/reveal.js" defer></script>
   <style>
-    /* ===== Página Sobre - Estilos ===== */
+    /* ===== PÃ¡gina Sobre - Estilos ===== */
     .sobre-body { background: var(--gray-bg); color: var(--black-primary); }
 
     /* Header */
@@ -22,7 +22,7 @@
       position: sticky; top: 0; z-index: 1000; padding: 0 20px;
     }
 
-    /* Hero com gradiente dramático */
+    /* Hero com gradiente dramÃ¡tico */
     .sobre-hero {
       background: linear-gradient(135deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
       color: #fff; padding: 90px 20px 100px; text-align: center; position: relative; overflow: hidden;
@@ -54,14 +54,14 @@
     .stat-card .num { font-size: 42px; font-weight: 800; color: var(--red-primary); line-height: 1; }
     .stat-card .lbl { font-size: 14px; color: var(--gray-medium); margin-top: 10px; font-weight: 600; }
 
-    /* Seções de conteúdo */
+    /* SeÃ§Ãµes de conteÃºdo */
     .sobre-section { max-width: 1200px; margin: 0 auto; padding: 70px 20px; }
     .sobre-section .sec-head { text-align: center; max-width: 640px; margin: 0 auto 48px; }
     .sobre-section .sec-head .eyebrow { color: var(--red-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 13px; margin-bottom: 10px; }
     .sobre-section .sec-head h2 { font-size: 36px; font-weight: 800; margin-bottom: 14px; }
     .sobre-section .sec-head p { color: var(--gray-medium); font-size: 16px; line-height: 1.7; }
 
-    /* Missão / Visão / Valores */
+    /* MissÃ£o / VisÃ£o / Valores */
     .mvv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .mvv-card {
       background: #fff; border-radius: var(--radius-lg); padding: 36px 28px; box-shadow: var(--shadow-sm);
@@ -129,19 +129,19 @@
     <nav class="navbar">
       <a href="/" class="logo"><span>Acheei</span></a>
 <div class="nav-links">
-        <a href="/">Início</a>
-        <a href="sobre" style="color:var(--red-primary);font-weight:700;">Sobre Nós</a>
+        <a href="/">InÃ­cio</a>
+        <a href="sobre" style="color:var(--red-primary);font-weight:700;">Sobre NÃ³s</a>
         <a href="contato">Contato</a>
         <div class="user-area" id="userArea" style="display: none;">
           <div class="user-dropdown" id="userDropdown">
             <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
-              <span class="user-avatar" id="userAvatar">👤</span>
+              <span class="user-avatar" id="userAvatar">ðŸ‘¤</span>
               <span class="user-name" id="userName">Cliente</span>
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
             <div class="user-dropdown-menu" id="userDropdownMenu">
               <a href="cliente" class="user-dropdown-item" id="userAreaLink">
-                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
+                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Ãrea</span>
               </a>
               <button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
                 <span data-icon="log-out"></span> Sair
@@ -149,16 +149,16 @@
             </div>
           </div>
         </div>
-        <a href="cliente" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Área do Cliente</a>
-        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Área do Profissional</a>
+        <a href="cliente" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Ãrea do Cliente</a>
+        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Ãrea do Profissional</a>
       </div>
       <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
     </nav>
   </header>
 
   <script>
-    // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
-    // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
+    // Estado otimista do header: aplica imediatamente (de forma sÃ­ncrona) o estado
+    // logado/deslogado assim que o HTML Ã© montado, eliminando qualquer "flash".
     (function() {
       function aplicarUsuarioLogado(cache, ehProfissional) {
         var userArea = document.getElementById('userArea');
@@ -182,13 +182,13 @@
         if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
 
         if (userAreaLink) userAreaLink.href = mine;
-        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
+        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Ãrea';
         if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
-        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
+        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Ãrea';
 
         if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
         if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
-        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
+        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : 'ðŸ‘¤';
         if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
         if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
       }
@@ -232,22 +232,22 @@
     <div class="menu-items">
       <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
         <div class="user-info">
-          <span class="user-avatar" id="mobileUserAvatar">👤</span>
+          <span class="user-avatar" id="mobileUserAvatar">ðŸ‘¤</span>
           <span class="user-name" id="mobileUserName">Cliente</span>
         </div>
         <a href="cliente" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
-          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
+          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Ãrea</span>
         </a>
         <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
           Sair
         </button>
       </div>
-      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">Início</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="sobre" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre Nós</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">InÃ­cio</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="sobre" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre NÃ³s</span><span class="item-arrow" data-icon="arrow-right"></span></a>
       <a href="contato" class="menu-item"><span class="item-icon" data-icon="send"></span><span class="item-text">Contato</span><span class="item-arrow" data-icon="arrow-right"></span></a>
       <div class="menu-divider"></div>
-      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Área do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Área do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Ãrea do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Ãrea do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
     </div>
     <div class="menu-footer"><p>&copy; 2026 Acheei. Todos os direitos reservados.</p></div>
   </div>
@@ -255,9 +255,9 @@
   <!-- Hero -->
   <section class="sobre-hero">
     <div class="container">
-<span class="badge"><span data-icon="rocket" style="width:16px;height:16px;display:inline-flex;"></span> Nossa História</span>
-      <h1>Conectando você aos <span class="hl">melhores profissionais</span> do Brasil</h1>
-      <p>A Acheei nasceu com uma missão simples: acabar com a dificuldade de encontrar profissionais de confiança perto de você. De forma rápida, fácil e sem burocracia.</p>
+<span class="badge"><span data-icon="rocket" style="width:16px;height:16px;display:inline-flex;"></span> Nossa HistÃ³ria</span>
+      <h1>Conectando vocÃª aos <span class="hl">melhores profissionais</span> do Brasil</h1>
+      <p>A Acheei nasceu com uma missÃ£o simples: acabar com a dificuldade de encontrar profissionais de confianÃ§a perto de vocÃª. De forma rÃ¡pida, fÃ¡cil e sem burocracia.</p>
       <div class="cta-row">
         <a href="#buscar" class="btn btn-primary btn-lg">Encontrar Profissional</a>
         <a href="contato" class="btn btn-outline btn-lg" style="background:#fff;">Fale Conosco</a>
@@ -269,34 +269,34 @@
   <section class="stats-section">
     <div class="stats-grid">
       <div class="stat-card"><div class="num">+5mil</div><div class="lbl">Profissionais cadastrados</div></div>
-      <div class="stat-card"><div class="num">+12mil</div><div class="lbl">Serviços realizados</div></div>
+      <div class="stat-card"><div class="num">+12mil</div><div class="lbl">ServiÃ§os realizados</div></div>
       <div class="stat-card"><div class="num">+27</div><div class="lbl">Estados atendidos</div></div>
       <div class="stat-card"><div class="num">98%</div><div class="lbl">Clientes satisfeitos</div></div>
     </div>
   </section>
 
-  <!-- Missão / Visão / Valores -->
+  <!-- MissÃ£o / VisÃ£o / Valores -->
   <section class="sobre-section">
     <div class="sec-head">
       <div class="eyebrow">Nossos Pilares</div>
       <h2>O que nos move</h2>
-      <p>Acreditamos que cada serviço bem feito transforma a vida das pessoas. Por isso, construímos uma plataforma que valoriza a confiança, a qualidade e a segurança.</p>
+      <p>Acreditamos que cada serviÃ§o bem feito transforma a vida das pessoas. Por isso, construÃ­mos uma plataforma que valoriza a confianÃ§a, a qualidade e a seguranÃ§a.</p>
     </div>
     <div class="mvv-grid">
       <div class="mvv-card">
         <div class="icon"><span data-icon="target"></span></div>
-        <h3>Nossa Missão</h3>
-        <p>Conectar clientes e profissionais da sua região de forma rápida, transparente e segura, gerando oportunidades e simplificando o dia a dia de todos.</p>
+        <h3>Nossa MissÃ£o</h3>
+        <p>Conectar clientes e profissionais da sua regiÃ£o de forma rÃ¡pida, transparente e segura, gerando oportunidades e simplificando o dia a dia de todos.</p>
       </div>
       <div class="mvv-card">
         <div class="icon"><span data-icon="eye"></span></div>
-        <h3>Nossa Visão</h3>
-        <p>Ser a maior e mais confiável plataforma de intermediação de serviços do Brasil, sendo referência em qualidade e inovação.</p>
+        <h3>Nossa VisÃ£o</h3>
+        <p>Ser a maior e mais confiÃ¡vel plataforma de intermediaÃ§Ã£o de serviÃ§os do Brasil, sendo referÃªncia em qualidade e inovaÃ§Ã£o.</p>
       </div>
       <div class="mvv-card">
         <div class="icon"><span data-icon="lightbulb"></span></div>
         <h3>Nossos Valores</h3>
-        <p>Confiança, transparência, qualidade, comprometimento e tecnologia a serviço das pessoas. É assim que fazemos a diferença todos os dias.</p>
+        <p>ConfianÃ§a, transparÃªncia, qualidade, comprometimento e tecnologia a serviÃ§o das pessoas. Ã‰ assim que fazemos a diferenÃ§a todos os dias.</p>
       </div>
     </div>
   </section>
@@ -306,32 +306,32 @@
     <div class="sec-head">
       <div class="eyebrow">Simples assim</div>
       <h2>Como funciona</h2>
-      <p>Encontrar o profissional ideal é mais fácil do que você imagina. Veja o passo a passo:</p>
+      <p>Encontrar o profissional ideal Ã© mais fÃ¡cil do que vocÃª imagina. Veja o passo a passo:</p>
     </div>
     <div class="steps">
       <div class="step-card">
         <span class="step-num">1</span>
         <span class="icon"><span data-icon="search"></span></span>
-        <h4>Busque o Serviço</h4>
-        <p>Digite o serviço que você precisa e escolha sua cidade e estado.</p>
+        <h4>Busque o ServiÃ§o</h4>
+        <p>Digite o serviÃ§o que vocÃª precisa e escolha sua cidade e estado.</p>
       </div>
       <div class="step-card">
         <span class="step-num">2</span>
         <span class="icon"><span data-icon="hard-hat"></span></span>
         <h4>Escolha o Profissional</h4>
-        <p>Compare perfis, fotos e avaliações dos profissionais da sua região.</p>
+        <p>Compare perfis, fotos e avaliaÃ§Ãµes dos profissionais da sua regiÃ£o.</p>
       </div>
       <div class="step-card">
         <span class="step-num">3</span>
         <span class="icon"><span data-icon="mail"></span></span>
-        <h4>Solicite o Orçamento</h4>
-        <p>Descreva seu serviço e receba orçamentos diretamente no chat.</p>
+        <h4>Solicite o OrÃ§amento</h4>
+        <p>Descreva seu serviÃ§o e receba orÃ§amentos diretamente no chat.</p>
       </div>
       <div class="step-card">
         <span class="step-num">4</span>
         <span class="icon"><span data-icon="check-circle"></span></span>
-        <h4>Conclua com Segurança</h4>
-        <p>Combine a entrega, pague com segurança e avalie o serviço.</p>
+        <h4>Conclua com SeguranÃ§a</h4>
+        <p>Combine a entrega, pague com seguranÃ§a e avalie o serviÃ§o.</p>
       </div>
     </div>
   </section>
@@ -343,12 +343,12 @@
       <h2>O que valorizamos todos os dias</h2>
     </div>
 <div class="values-grid">
-      <div class="value-item"><div class="v-icon"><span data-icon="users"></span></div><div><h5>Confiança</h5><p>Cada profissional passa por um processo de verificação para garantir que você está contratando alguém de verdade.</p></div></div>
-      <div class="value-item"><div class="v-icon"><span data-icon="shield"></span></div><div><h5>Segurança</h5><p>Pagamentos protegidos e comunicação centralizada na plataforma para a sua tranquilidade.</p></div></div>
-      <div class="value-item"><div class="v-icon"><span data-icon="zap"></span></div><div><h5>Agilidade</h5><p>Receba orçamentos e respostas em minutos para não perder tempo.</p></div></div>
-      <div class="value-item"><div class="v-icon"><span data-icon="star"></span></div><div><h5>Qualidade</h5><p>Filtramos e acompanhamos a qualidade dos serviços prestados por nossos profissionais.</p></div></div>
-      <div class="value-item"><div class="v-icon"><span data-icon="chat"></span></div><div><h5>Comunicação</h5><p>Chat direto e integrado para você conversar com o profissional sem complicação.</p></div></div>
-      <div class="value-item"><div class="v-icon"><span data-icon="globe"></span></div><div><h5>Proximidade</h5><p>Focamos em profissionais da sua região, garantindo atendimento perto de você.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="users"></span></div><div><h5>ConfianÃ§a</h5><p>Cada profissional passa por um processo de verificaÃ§Ã£o para garantir que vocÃª estÃ¡ contratando alguÃ©m de verdade.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="shield"></span></div><div><h5>SeguranÃ§a</h5><p>Pagamentos protegidos e comunicaÃ§Ã£o centralizada na plataforma para a sua tranquilidade.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="zap"></span></div><div><h5>Agilidade</h5><p>Receba orÃ§amentos e respostas em minutos para nÃ£o perder tempo.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="star"></span></div><div><h5>Qualidade</h5><p>Filtramos e acompanhamos a qualidade dos serviÃ§os prestados por nossos profissionais.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="chat"></span></div><div><h5>ComunicaÃ§Ã£o</h5><p>Chat direto e integrado para vocÃª conversar com o profissional sem complicaÃ§Ã£o.</p></div></div>
+      <div class="value-item"><div class="v-icon"><span data-icon="globe"></span></div><div><h5>Proximidade</h5><p>Focamos em profissionais da sua regiÃ£o, garantindo atendimento perto de vocÃª.</p></div></div>
     </div>
   </section>
 
@@ -356,7 +356,7 @@
   <section class="cta-band" id="buscar">
     <div class="container">
       <h2>Pronto para encontrar o profissional ideal?</h2>
-      <p>Junte-se a milhares de clientes e profissionais que já usam a Acheei todos os dias.</p>
+      <p>Junte-se a milhares de clientes e profissionais que jÃ¡ usam a Acheei todos os dias.</p>
       <a href="/" class="btn btn-primary btn-lg">Buscar Profissionais</a>
     </div>
   </section>
@@ -369,7 +369,7 @@
 <a href="/" class="brand-logo">
           <span>Acheei</span>
         </a>
-        <p>Plataforma de intermediação de serviços que conecta clientes aos melhores profissionais da sua região.</p>
+        <p>Plataforma de intermediaÃ§Ã£o de serviÃ§os que conecta clientes aos melhores profissionais da sua regiÃ£o.</p>
         <div class="footer-social-title">Siga a Acheei</div>
         <div class="footer-social">
           <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><span data-icon="instagram"></span></a>
@@ -380,18 +380,18 @@
         </div>
       </div>
       <div class="footer-section">
-        <h4>Navegação</h4>
+        <h4>NavegaÃ§Ã£o</h4>
         <ul>
-          <li><a href="/">Início</a></li>
-          <li><a href="sobre">Sobre Nós</a></li>
+          <li><a href="/">InÃ­cio</a></li>
+          <li><a href="sobre">Sobre NÃ³s</a></li>
           <li><a href="contato">Contato</a></li>
         </ul>
       </div>
       <div class="footer-section">
         <h4>Acesso</h4>
         <ul>
-          <li><a href="cliente">Área do Cliente</a></li>
-          <li><a href="profissional">Área do Profissional</a></li>
+          <li><a href="cliente">Ãrea do Cliente</a></li>
+          <li><a href="profissional">Ãrea do Profissional</a></li>
           <li><a href="cadastro">Cadastre-se</a></li>
         </ul>
       </div>
@@ -399,7 +399,7 @@
         <h4>Legal</h4>
         <ul>
           <li><a href="termos">Termos de Responsabilidade</a></li>
-          <li><a href="politica">Política de Privacidade</a></li>
+          <li><a href="politica">PolÃ­tica de Privacidade</a></li>
         </ul>
       </div>
     </div>
@@ -429,7 +429,7 @@
       hamburger.addEventListener('click', toggleMenu);
       overlay.addEventListener('click', toggleMenu);
 
-      // Dropdown do usuário (avatar + nome)
+      // Dropdown do usuÃ¡rio (avatar + nome)
       setupUserDropdown();
     });
   </script>

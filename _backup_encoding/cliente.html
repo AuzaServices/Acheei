@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acheei - Área do Cliente</title>
-  <meta name="description" content="Acompanhe seus orçamentos e converse com profissionais.">
+  <title>Acheei - Ãrea do Cliente</title>
+  <meta name="description" content="Acompanhe seus orÃ§amentos e converse com profissionais.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
 <style>
-    /* Ambos ocultos por padrão; o JS decide qual exibir (evita flash) */
+    /* Ambos ocultos por padrÃ£o; o JS decide qual exibir (evita flash) */
 .cliente-body { background: #f0f0f0; }
     #authScreen, #dashboard { display: none; }
 
     /* ===== Tela de Login em Split-Screen (moderna) ===== */
     .auth-container { min-height: 100vh; display: flex; padding: 0; background: var(--gray-bg); }
 
-/* Painel visual à esquerda */
+/* Painel visual Ã  esquerda */
     .auth-visual {
       flex: 1.1; display: flex; flex-direction: column; justify-content: space-between;
       background:
@@ -52,7 +52,7 @@
     /* Divisor entre o painel e o login */
     .auth-divider { width: 1px; background: linear-gradient(180deg, transparent, var(--red-primary), transparent); flex-shrink: 0; }
 
-    /* Painel do formulário à direita */
+    /* Painel do formulÃ¡rio Ã  direita */
 .auth-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; background: var(--gray-bg); }
     .auth-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); position: relative; }
     .auth-home-btn {
@@ -232,7 +232,7 @@
       .chat-panel-footer { padding: 10px; }
       .chat-panel-footer input { min-width: 0; }
       .chat-input-area input { min-width: 0; }
-      /* Fundo fosco (desfocado) atrás do balão de chat, apenas no mobile */
+      /* Fundo fosco (desfocado) atrÃ¡s do balÃ£o de chat, apenas no mobile */
       body:has(.chat-panel.open)::before {
         content: '';
         position: fixed;
@@ -256,18 +256,18 @@
     </div>
 
     <div class="vis-hero">
-      <h2>Encontre o <span class="hl">profissional ideal</span> para cada serviço</h2>
-      <p>Na Acheei você encontra profissionais de confiança perto de você. Rápido, fácil e seguro.</p>
+      <h2>Encontre o <span class="hl">profissional ideal</span> para cada serviÃ§o</h2>
+      <p>Na Acheei vocÃª encontra profissionais de confianÃ§a perto de vocÃª. RÃ¡pido, fÃ¡cil e seguro.</p>
 
       <div class="vis-features">
-        <div class="vis-feature"><span class="f-icon"><span data-icon="search"></span></span> Busque por serviço, cidade e estado</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="search"></span></span> Busque por serviÃ§o, cidade e estado</div>
         <div class="vis-feature"><span class="f-icon"><span data-icon="chat"></span></span> Converse direto com o profissional</div>
-        <div class="vis-feature"><span class="f-icon"><span data-icon="star"></span></span> Acompanhe orçamentos e avaliações</div>
+        <div class="vis-feature"><span class="f-icon"><span data-icon="star"></span></span> Acompanhe orÃ§amentos e avaliaÃ§Ãµes</div>
       </div>
     </div>
 
     <div class="vis-review">
-      <p>"Encontrei um excelente eletricista em minutos. Incrível!"</p>
+      <p>"Encontrei um excelente eletricista em minutos. IncrÃ­vel!"</p>
       <div class="who">
 <div class="avatar"><span data-icon="user"></span></div>
         <div>
@@ -281,19 +281,19 @@
   <!-- Divisor -->
   <div class="auth-divider"></div>
 
-<!-- Painel do formulário à direita -->
+<!-- Painel do formulÃ¡rio Ã  direita -->
   <div class="auth-panel">
     <div class="auth-card">
-      <a href="/" class="auth-home-btn" aria-label="Voltar ao início" title="Início">
+      <a href="/" class="auth-home-btn" aria-label="Voltar ao inÃ­cio" title="InÃ­cio">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
       </a>
       <div class="auth-mobile-logo">
         <h1>Acheei</h1>
-        <p>Área do Cliente</p>
+        <p>Ãrea do Cliente</p>
       </div>
       <div class="logo">
         <h1>Acheei <span style="color:var(--red-primary);">Cliente</span></h1>
-        <p>Acesse sua conta para gerenciar seus serviços</p>
+        <p>Acesse sua conta para gerenciar seus serviÃ§os</p>
       </div>
 <div class="form-title">Bem-vindo de volta</div>
       <div class="form-sub">Entre para continuar</div>
@@ -312,14 +312,14 @@
         <input type="password" id="loginSenha" placeholder="Sua senha" required autocomplete="current-password">
       </div>
       <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
-      <div class="auth-error" id="loginError">Email ou senha inválidos</div>
+      <div class="auth-error" id="loginError">Email ou senha invÃ¡lidos</div>
     </form>
 
     <form class="auth-form" id="cadastroForm">
       <div class="push-notice" id="pushNotice">
-<strong><span data-icon="bell"></span> Ative as notificações!</strong>
-        <p style="margin: 8px 0 0;">Precisamos da sua autorização para enviar notificações quando o profissional responder. Você receberá alertas no navegador.</p>
-<button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacoesCadastro()" style="width:100%;justify-content:center;"><span data-icon="bell"></span> Aceitar Notificações</button>
+<strong><span data-icon="bell"></span> Ative as notificaÃ§Ãµes!</strong>
+        <p style="margin: 8px 0 0;">Precisamos da sua autorizaÃ§Ã£o para enviar notificaÃ§Ãµes quando o profissional responder. VocÃª receberÃ¡ alertas no navegador.</p>
+<button type="button" class="btn btn-primary btn-sm" onclick="ativarNotificacoesCadastro()" style="width:100%;justify-content:center;"><span data-icon="bell"></span> Aceitar NotificaÃ§Ãµes</button>
       </div>
       <div class="form-group">
         <label for="cadastroNome">Nome Completo</label>
@@ -330,11 +330,11 @@
         <input type="email" id="cadastroEmail" placeholder="seu@email.com" required>
       </div>
       <div class="form-group">
-        <label for="cadastroSenha">Senha (mínimo 6 caracteres)</label>
+        <label for="cadastroSenha">Senha (mÃ­nimo 6 caracteres)</label>
         <input type="password" id="cadastroSenha" placeholder="Sua senha" required minlength="6">
       </div>
 <div class="form-group">
-        <label for="cadastroTelefone">WhatsApp (obrigatório)</label>
+        <label for="cadastroTelefone">WhatsApp (obrigatÃ³rio)</label>
         <input type="tel" id="cadastroTelefone" placeholder="(11) 99999-9999" required>
       </div>
 <button type="submit" class="btn btn-primary btn-lg" id="btnCriarConta">Criar Conta</button>
@@ -361,7 +361,7 @@
             </button>
 <div class="user-dropdown-menu" id="userDropdownMenu">
               <a href="/" class="user-dropdown-item">
-                <span data-icon="home"></span> Início
+                <span data-icon="home"></span> InÃ­cio
               </a>
               <a href="/#categorias" class="user-dropdown-item">
                 <span data-icon="grid"></span> Categorias
@@ -383,10 +383,10 @@
   <div class="dashboard-content">
     <div class="dashboard-tabs">
       <button class="dashboard-tab active" onclick="switchTab('solicitacoes', this)">
-        Solicitações <span class="count" id="countSolicitacoes">0</span>
+        SolicitaÃ§Ãµes <span class="count" id="countSolicitacoes">0</span>
       </button>
       <button class="dashboard-tab" onclick="switchTab('orcamentos', this)">
-        Orçamentos <span class="count" id="countOrcamentos">0</span>
+        OrÃ§amentos <span class="count" id="countOrcamentos">0</span>
       </button>
       <button class="dashboard-tab" onclick="switchTab('chat', this)">
         Chat
@@ -404,7 +404,7 @@
     <div class="tab-content" id="tabChat">
       <div class="chat-selector">
         <select id="chatSolicitacaoSelect" onchange="carregarChat()">
-          <option value="">Selecione uma solicitação...</option>
+          <option value="">Selecione uma solicitaÃ§Ã£o...</option>
         </select>
       </div>
       <div class="chat-container" id="chatContainer" style="display: none;">
@@ -416,8 +416,8 @@
       </div>
 <div id="chatEmptyState" class="empty-state">
         <span class="icon"><span data-icon="chat"></span></span>
-        <h3>Selecione uma solicitação</h3>
-        <p>Escolha uma solicitação acima para conversar com o profissional.</p>
+        <h3>Selecione uma solicitaÃ§Ã£o</h3>
+        <p>Escolha uma solicitaÃ§Ã£o acima para conversar com o profissional.</p>
       </div>
     </div>
   </div>
@@ -429,10 +429,10 @@
     <form id="avaliacaoForm" class="modal-body">
       <input type="hidden" id="avaliacaoSolicitacaoId"><input type="hidden" id="avaliacaoNota">
       <p id="avaliacaoProfissional" style="margin:0;color:var(--gray-medium);"></p>
-      <div class="pergunta"><label for="avaliacaoRespeito">Esse profissional demonstrou respeito no relacionamento com colegas e clientes?</label><select id="avaliacaoRespeito" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">Não</option></select></div>
-      <div class="pergunta"><label for="avaliacaoComprometimento">Esse profissional manteve comprometimento com as metas e responsabilidades atribuídas?</label><select id="avaliacaoComprometimento" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">Não</option></select></div>
-      <div class="pergunta"><label for="avaliacaoQualidade">Esse profissional entregou resultados com a qualidade esperada e dentro dos padrões estabelecidos?</label><select id="avaliacaoQualidade" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">Não</option></select></div>
-      <div class="modal-footer" style="padding:0;border:0;background:transparent;"><button type="button" class="btn btn-outline" onclick="fecharModalAvaliacao()">Cancelar</button><button type="submit" class="btn btn-primary">Enviar avaliação</button></div>
+      <div class="pergunta"><label for="avaliacaoRespeito">Esse profissional demonstrou respeito no relacionamento com colegas e clientes?</label><select id="avaliacaoRespeito" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">NÃ£o</option></select></div>
+      <div class="pergunta"><label for="avaliacaoComprometimento">Esse profissional manteve comprometimento com as metas e responsabilidades atribuÃ­das?</label><select id="avaliacaoComprometimento" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">NÃ£o</option></select></div>
+      <div class="pergunta"><label for="avaliacaoQualidade">Esse profissional entregou resultados com a qualidade esperada e dentro dos padrÃµes estabelecidos?</label><select id="avaliacaoQualidade" required><option value="">Selecione uma resposta</option><option value="sim">Sim</option><option value="parcialmente">Parcialmente</option><option value="nao">NÃ£o</option></select></div>
+      <div class="modal-footer" style="padding:0;border:0;background:transparent;"><button type="button" class="btn btn-outline" onclick="fecharModalAvaliacao()">Cancelar</button><button type="submit" class="btn btn-primary">Enviar avaliaÃ§Ã£o</button></div>
     </form>
   </div>
 </div>
@@ -460,7 +460,7 @@
 <button class="btn-back" onclick="widgetVoltarParaLista()" aria-label="Voltar">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
-      <span class="chat-conv-avatar" id="widgetChatViewAvatar">👤</span>
+      <span class="chat-conv-avatar" id="widgetChatViewAvatar">ðŸ‘¤</span>
       <span class="chat-conv-name" id="widgetChatViewNome">Conversa</span>
     </div>
     <div class="chat-view-body" id="widgetChatBody">

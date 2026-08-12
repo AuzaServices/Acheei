@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acheei - PolÃ­tica de Privacidade</title>
-  <meta name="description" content="PolÃ­tica de Privacidade da Acheei. ConheÃ§a como tratamos seus dados pessoais em conformidade com a LGPD.">
+  <title>Acheei - Política de Privacidade</title>
+  <meta name="description" content="Política de Privacidade da Acheei. Conheça como tratamos seus dados pessoais em conformidade com a LGPD.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF0000' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E" type="image/svg+xml">
   <script>document.documentElement.classList.add('js');</script>
   <script src="js/reveal.js" defer></script>
   <style>
-    /* ===== PÃ¡gina Legal - PolÃ­tica de Privacidade ===== */
+    /* ===== Página Legal - Política de Privacidade ===== */
     .legal-body { background: var(--gray-bg); color: var(--black-primary); }
 
     .legal-header {
@@ -37,7 +37,7 @@
     .legal-hero h1 .hl { color: var(--red-primary); }
     .legal-hero p { font-size: 17px; color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto; line-height: 1.7; }
 
-    /* ConteÃºdo */
+    /* Conteúdo */
     .legal-main { max-width: 860px; margin: 0 auto; padding: 60px 20px; }
     .legal-card {
       background: #fff; border-radius: var(--radius-lg); padding: 48px 44px;
@@ -81,19 +81,19 @@
     <nav class="navbar">
       <a href="/" class="logo"><span>Acheei</span></a>
       <div class="nav-links">
-        <a href="/">InÃ­cio</a>
-        <a href="sobre">Sobre NÃ³s</a>
+        <a href="/">Início</a>
+        <a href="sobre">Sobre Nós</a>
         <a href="contato">Contato</a>
         <div class="user-area" id="userArea" style="display: none;">
           <div class="user-dropdown" id="userDropdown">
             <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
-              <span class="user-avatar" id="userAvatar">ðŸ‘¤</span>
+              <span class="user-avatar" id="userAvatar">👤</span>
               <span class="user-name" id="userName">Cliente</span>
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
             <div class="user-dropdown-menu" id="userDropdownMenu">
               <a href="cliente" class="user-dropdown-item" id="userAreaLink">
-                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Ãrea</span>
+                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
               </a>
               <button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
                 <span data-icon="log-out"></span> Sair
@@ -101,16 +101,16 @@
             </div>
           </div>
         </div>
-        <a href="cliente" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Ãrea do Cliente</a>
-        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Ãrea do Profissional</a>
+        <a href="cliente" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Área do Cliente</a>
+        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Área do Profissional</a>
       </div>
       <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
     </nav>
   </header>
 
   <script>
-    // Estado otimista do header: aplica imediatamente (de forma sÃ­ncrona) o estado
-    // logado/deslogado assim que o HTML Ã© montado, eliminando qualquer "flash".
+    // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
+    // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
     (function() {
       function aplicarUsuarioLogado(cache, ehProfissional) {
         var userArea = document.getElementById('userArea');
@@ -134,13 +134,13 @@
         if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
 
         if (userAreaLink) userAreaLink.href = mine;
-        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Ãrea';
+        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
         if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
-        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Ãrea';
+        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
 
         if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
         if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
-        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : 'ðŸ‘¤';
+        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
         if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
         if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
       }
@@ -184,22 +184,22 @@
     <div class="menu-items">
       <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
         <div class="user-info">
-          <span class="user-avatar" id="mobileUserAvatar">ðŸ‘¤</span>
+          <span class="user-avatar" id="mobileUserAvatar">👤</span>
           <span class="user-name" id="mobileUserName">Cliente</span>
         </div>
         <a href="cliente" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
-          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Ãrea</span>
+          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
         </a>
         <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
           Sair
         </button>
       </div>
-      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">InÃ­cio</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="sobre" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre NÃ³s</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">Início</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="sobre" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre Nós</span><span class="item-arrow" data-icon="arrow-right"></span></a>
       <a href="contato" class="menu-item"><span class="item-icon" data-icon="send"></span><span class="item-text">Contato</span><span class="item-arrow" data-icon="arrow-right"></span></a>
       <div class="menu-divider"></div>
-      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Ãrea do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Ãrea do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Área do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
+      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Área do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
     </div>
     <div class="menu-footer"><p>&copy; 2026 Acheei. Todos os direitos reservados.</p></div>
   </div>
@@ -208,90 +208,90 @@
   <section class="legal-hero">
     <div class="container">
       <span class="badge"><span data-icon="shield" style="width:16px;height:16px;display:inline-flex;"></span> LGPD</span>
-      <h1>PolÃ­tica de <span class="hl">Privacidade</span></h1>
-      <p>Saiba como a Acheei coleta, utiliza e protege os seus dados pessoais, em conformidade com a Lei Geral de ProteÃ§Ã£o de Dados.</p>
+      <h1>Política de <span class="hl">Privacidade</span></h1>
+      <p>Saiba como a Acheei coleta, utiliza e protege os seus dados pessoais, em conformidade com a Lei Geral de Proteção de Dados.</p>
     </div>
   </section>
 
-  <!-- ConteÃºdo -->
+  <!-- Conteúdo -->
   <section class="legal-main">
     <div class="legal-card">
-      <p class="updated">Ãšltima atualizaÃ§Ã£o: [data]. VersÃ£o 1.0</p>
+      <p class="updated">Última atualização: [data]. Versão 1.0</p>
 
       <h2>1. Quem somos</h2>
-      <p>O Acheei Ã© uma plataforma digital de intermediaÃ§Ã£o de serviÃ§os que conecta clientes e profissionais. Ao fornecer serviÃ§os, coletamos e tratamos dados pessoais como parte essencial da nossa operaÃ§Ã£o, sempre em conformidade com a <strong>Lei nÂº 13.709/2018 (Lei Geral de ProteÃ§Ã£o de Dados â€“ LGPD)</strong>.</p>
+      <p>O Acheei é uma plataforma digital de intermediação de serviços que conecta clientes e profissionais. Ao fornecer serviços, coletamos e tratamos dados pessoais como parte essencial da nossa operação, sempre em conformidade com a <strong>Lei nº 13.709/2018 (Lei Geral de Proteção de Dados – LGPD)</strong>.</p>
 
       <h2>2. Dados que coletamos</h2>
-      <p>Coletamos os dados estritamente necessÃ¡rios para a operaÃ§Ã£o da plataforma, a saber:</p>
+      <p>Coletamos os dados estritamente necessários para a operação da plataforma, a saber:</p>
       <ul>
-        <li><strong>Dados de identificaÃ§Ã£o:</strong> nome, CPF, data de nascimento (apenas profissionais), e-mail e telefone;</li>
-        <li><strong>Dados de endereÃ§o:</strong> rua, nÃºmero, bairro, cidade, estado e CEP;</li>
-        <li><strong>Dados profissionais:</strong> profissÃ£o, foto de perfil, fotos de serviÃ§os realizados, descriÃ§Ã£o do perfil e qualificaÃ§Ãµes;</li>
-        <li><strong>Dados de utilizaÃ§Ã£o:</strong> informaÃ§Ãµes de acesso, solicitaÃ§Ãµes, orÃ§amentos, mensagens e avaliaÃ§Ãµes;</li>
-        <li><strong>Dados de navegaÃ§Ã£o:</strong> endereÃ§o IP, tipo de navegador, pÃ¡ginas visitadas e dados de cookies (quando aplicÃ¡vel).</li>
+        <li><strong>Dados de identificação:</strong> nome, CPF, data de nascimento (apenas profissionais), e-mail e telefone;</li>
+        <li><strong>Dados de endereço:</strong> rua, número, bairro, cidade, estado e CEP;</li>
+        <li><strong>Dados profissionais:</strong> profissão, foto de perfil, fotos de serviços realizados, descrição do perfil e qualificações;</li>
+        <li><strong>Dados de utilização:</strong> informações de acesso, solicitações, orçamentos, mensagens e avaliações;</li>
+        <li><strong>Dados de navegação:</strong> endereço IP, tipo de navegador, páginas visitadas e dados de cookies (quando aplicável).</li>
       </ul>
 
       <h2>3. Finalidades do tratamento</h2>
       <p>Utilizamos os dados pessoais para:</p>
       <ul>
         <li>Criar e gerenciar contas de clientes e profissionais;</li>
-        <li>Permitir a intermediaÃ§Ã£o de serviÃ§os, incluindo cadastro de perfis, busca, solicitaÃ§Ãµes, orÃ§amentos e mensagens;</li>
-        <li>Garantir seguranÃ§a, prevenÃ§Ã£o de fraudes e boas prÃ¡ticas na plataforma;</li>
-        <li>Enviar notificaÃ§Ãµes e comunicaÃ§Ãµes relacionadas aos serviÃ§os demandados;</li>
-        <li>Cumprir obrigaÃ§Ãµes legais, regulatÃ³rias e de auditoria;</li>
-        <li>Melhorar a experiÃªncia, a funcionalidade e a seguranÃ§a da plataforma.</li>
+        <li>Permitir a intermediação de serviços, incluindo cadastro de perfis, busca, solicitações, orçamentos e mensagens;</li>
+        <li>Garantir segurança, prevenção de fraudes e boas práticas na plataforma;</li>
+        <li>Enviar notificações e comunicações relacionadas aos serviços demandados;</li>
+        <li>Cumprir obrigações legais, regulatórias e de auditoria;</li>
+        <li>Melhorar a experiência, a funcionalidade e a segurança da plataforma.</li>
       </ul>
 
       <h2>4. Tratamento de dados dos Profissionais (LGPD)</h2>
       <div class="destaque-lgpd">
-        <strong>AtenÃ§Ã£o aos profissionais:</strong> ao se cadastrarem na Acheei, os profissionais fornecem dados pessoais sensÃ­veis e profissionais (nome, CPF, endereÃ§o, telefone, e-mail, fotos, qualificaÃ§Ãµes e dados bancÃ¡rios, quando aplicÃ¡vel) para a finalidade de divulgar seus perfis e viabilizar a intermediaÃ§Ã£o de serviÃ§os. Tal tratamento tem por base o <strong>consentimento do titular</strong> e a <strong>execuÃ§Ã£o do contrato</strong> estabelecido com a plataforma, nos termos do art. 7Âº da LGPD. O profissional poderÃ¡, a qualquer momento, solicitar acesso, correÃ§Ã£o, anonimizaÃ§Ã£o ou eliminaÃ§Ã£o de seus dados, bem como revogar o consentimento, pelos canais de contato indicados nesta PolÃ­tica.
+        <strong>Atenção aos profissionais:</strong> ao se cadastrarem na Acheei, os profissionais fornecem dados pessoais sensíveis e profissionais (nome, CPF, endereço, telefone, e-mail, fotos, qualificações e dados bancários, quando aplicável) para a finalidade de divulgar seus perfis e viabilizar a intermediação de serviços. Tal tratamento tem por base o <strong>consentimento do titular</strong> e a <strong>execução do contrato</strong> estabelecido com a plataforma, nos termos do art. 7º da LGPD. O profissional poderá, a qualquer momento, solicitar acesso, correção, anonimização ou eliminação de seus dados, bem como revogar o consentimento, pelos canais de contato indicados nesta Política.
       </div>
 
       <h2>5. Base legal do tratamento</h2>
-      <p>O tratamento de dados realizado pela Acheei fundamenta-se nas seguintes bases legais previstas no art. 7Âº da LGPD:</p>
+      <p>O tratamento de dados realizado pela Acheei fundamenta-se nas seguintes bases legais previstas no art. 7º da LGPD:</p>
       <ul>
-        <li><strong>Consentimento</strong> do titular (art. 7Âº, I);</li>
-        <li><strong>ExecuÃ§Ã£o de contrato</strong> ou de procedimentos preliminares (art. 7Âº, V);</li>
-        <li><strong>Cumprimento de obrigaÃ§Ã£o legal</strong> ou regulatÃ³ria (art. 7Âº, II);</li>
-        <li><strong>LegÃ­timo interesse</strong> do controlador (art. 7Âº, IX), quando aplicÃ¡vel e desde que respeitados os direitos e liberdades dos titulares.</li>
+        <li><strong>Consentimento</strong> do titular (art. 7º, I);</li>
+        <li><strong>Execução de contrato</strong> ou de procedimentos preliminares (art. 7º, V);</li>
+        <li><strong>Cumprimento de obrigação legal</strong> ou regulatória (art. 7º, II);</li>
+        <li><strong>Legítimo interesse</strong> do controlador (art. 7º, IX), quando aplicável e desde que respeitados os direitos e liberdades dos titulares.</li>
       </ul>
 
       <h2>6. Compartilhamento de dados</h2>
-      <p>Os dados pessoais dos profissionais sÃ£o <strong>compartilhados com os clientes</strong> na plataforma com a finalidade exclusiva de viabilizar a intermediaÃ§Ã£o dos serviÃ§os (ex.: exibiÃ§Ã£o do perfil pÃºblico do profissional). AlÃ©m disso, poderemos compartilhar dados com:</p>
+      <p>Os dados pessoais dos profissionais são <strong>compartilhados com os clientes</strong> na plataforma com a finalidade exclusiva de viabilizar a intermediação dos serviços (ex.: exibição do perfil público do profissional). Além disso, poderemos compartilhar dados com:</p>
       <ul>
-        <li>Prestadores de serviÃ§os tecnolÃ³gicos e de hospedagem (como provedores de nuvem e armazenamento de imagens);</li>
-        <li>InstituiÃ§Ãµes de pagamento e operadoras financeiras, para processamento de transaÃ§Ãµes;</li>
-        <li>Autoridades pÃºblicas e Ã³rgÃ£os de fiscalizaÃ§Ã£o, quando exigido por lei ou por determinaÃ§Ã£o judicial.</li>
+        <li>Prestadores de serviços tecnológicos e de hospedagem (como provedores de nuvem e armazenamento de imagens);</li>
+        <li>Instituições de pagamento e operadoras financeiras, para processamento de transações;</li>
+        <li>Autoridades públicas e órgãos de fiscalização, quando exigido por lei ou por determinação judicial.</li>
       </ul>
-      <p>A Acheei nÃ£o vende dados pessoais a terceiros e nÃ£o compartilha dados alÃ©m do necessÃ¡rio para as finalidades descritas nesta PolÃ­tica.</p>
+      <p>A Acheei não vende dados pessoais a terceiros e não compartilha dados além do necessário para as finalidades descritas nesta Política.</p>
 
-      <h2>7. Armazenamento e seguranÃ§a</h2>
-      <p>Adotamos medidas tÃ©cnicas e organizacionais adequadas para proteger os dados pessoais, tais como criptografia, controle de acesso, auditorias e monitoramento contÃ­nuo. Os dados sÃ£o armazenados em servidores seguros, pelo tempo necessÃ¡rio ao cumprimento das finalidades ou das obrigaÃ§Ãµes legais, e posteriormente eliminados ou anonimizados, conforme o caso.</p>
+      <h2>7. Armazenamento e segurança</h2>
+      <p>Adotamos medidas técnicas e organizacionais adequadas para proteger os dados pessoais, tais como criptografia, controle de acesso, auditorias e monitoramento contínuo. Os dados são armazenados em servidores seguros, pelo tempo necessário ao cumprimento das finalidades ou das obrigações legais, e posteriormente eliminados ou anonimizados, conforme o caso.</p>
 
       <h2>8. Direitos dos titulares</h2>
-      <p>Nos termos da LGPD, vocÃª pode exercer, a qualquer momento, os seguintes direitos:</p>
+      <p>Nos termos da LGPD, você pode exercer, a qualquer momento, os seguintes direitos:</p>
       <ul>
-        <li>ConfirmaÃ§Ã£o da existÃªncia de tratamento;</li>
+        <li>Confirmação da existência de tratamento;</li>
         <li>Acesso aos seus dados pessoais;</li>
-        <li>CorreÃ§Ã£o de dados incompletos, inexatos ou desatualizados;</li>
-        <li>AnonimizaÃ§Ã£o, bloqueio ou eliminaÃ§Ã£o de dados desnecessÃ¡rios, excessivos ou tratados em desconformidade com a lei;</li>
-        <li>Portabilidade dos dados, na forma da regulamentaÃ§Ã£o;</li>
-        <li>RevogaÃ§Ã£o do consentimento;</li>
-        <li>InformaÃ§Ã£o sobre com quem seus dados foram compartilhados.</li>
+        <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
+        <li>Anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados em desconformidade com a lei;</li>
+        <li>Portabilidade dos dados, na forma da regulamentação;</li>
+        <li>Revogação do consentimento;</li>
+        <li>Informação sobre com quem seus dados foram compartilhados.</li>
       </ul>
-      <p>Para exercer seus direitos, entre em contato pelos canais indicados no item 11 desta PolÃ­tica.</p>
+      <p>Para exercer seus direitos, entre em contato pelos canais indicados no item 11 desta Política.</p>
 
       <h2>9. Cookies</h2>
-      <p>Podemos utilizar cookies e tecnologias semelhantes para melhorar a navegaÃ§Ã£o, lembrar preferÃªncias e analisar o uso da plataforma. VocÃª pode gerenciar ou desativar cookies nas configuraÃ§Ãµes do seu navegador, lembrando que alguns recursos podem deixar de funcionar corretamente.</p>
+      <p>Podemos utilizar cookies e tecnologias semelhantes para melhorar a navegação, lembrar preferências e analisar o uso da plataforma. Você pode gerenciar ou desativar cookies nas configurações do seu navegador, lembrando que alguns recursos podem deixar de funcionar corretamente.</p>
 
-      <h2>10. LegislaÃ§Ã£o aplicÃ¡vel</h2>
-      <p>Esta PolÃ­tica rege-se pelas leis da RepÃºblica Federativa do Brasil, em especial pela LGPD (Lei nÂº 13.709/2018) e pelo CÃ³digo de Defesa do Consumidor quando aplicÃ¡vel. O usuÃ¡rio poderÃ¡ contatar a <strong>Autoridade Nacional de ProteÃ§Ã£o de Dados (ANPD)</strong> para apresentar reclamaÃ§Ãµes.</p>
+      <h2>10. Legislação aplicável</h2>
+      <p>Esta Política rege-se pelas leis da República Federativa do Brasil, em especial pela LGPD (Lei nº 13.709/2018) e pelo Código de Defesa do Consumidor quando aplicável. O usuário poderá contatar a <strong>Autoridade Nacional de Proteção de Dados (ANPD)</strong> para apresentar reclamações.</p>
 
       <h2>11. Contato e Encarregado (DPO)</h2>
-      <p>Para dÃºvidas, solicitaÃ§Ãµes ou exercÃ­cio de direitos relacionados Ã  privacidade e proteÃ§Ã£o de dados, entre em contato com o nosso Encarregado de ProteÃ§Ã£o de Dados (DPO) pelo e-mail <a href="mailto:privacidade@acheei.com.br">privacidade@acheei.com.br</a> ou pela <a href="contato">pÃ¡gina de contato</a>.</p>
+      <p>Para dúvidas, solicitações ou exercício de direitos relacionados à privacidade e proteção de dados, entre em contato com o nosso Encarregado de Proteção de Dados (DPO) pelo e-mail <a href="mailto:privacidade@acheei.com.br">privacidade@acheei.com.br</a> ou pela <a href="contato">página de contato</a>.</p>
 
-      <h2>12. AlteraÃ§Ãµes desta PolÃ­tica</h2>
-      <p>Esta PolÃ­tica poderÃ¡ ser atualizada periodicamente. Recomendamos a consulta regular desta pÃ¡gina. Em caso de alteraÃ§Ãµes relevantes, notificaremos os usuÃ¡rios pelos meios disponÃ­veis.</p>
+      <h2>12. Alterações desta Política</h2>
+      <p>Esta Política poderá ser atualizada periodicamente. Recomendamos a consulta regular desta página. Em caso de alterações relevantes, notificaremos os usuários pelos meios disponíveis.</p>
     </div>
   </section>
 
@@ -303,7 +303,7 @@
 <a href="/" class="brand-logo">
           <span>Acheei</span>
         </a>
-        <p>Plataforma de intermediaÃ§Ã£o de serviÃ§os que conecta clientes aos melhores profissionais da sua regiÃ£o.</p>
+        <p>Plataforma de intermediação de serviços que conecta clientes aos melhores profissionais da sua região.</p>
         <div class="footer-social-title">Siga a Acheei</div>
         <div class="footer-social">
           <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><span data-icon="instagram"></span></a>
@@ -314,10 +314,10 @@
         </div>
       </div>
       <div class="footer-section">
-        <h4>NavegaÃ§Ã£o</h4>
+        <h4>Navegação</h4>
         <ul>
-          <li><a href="/">InÃ­cio</a></li>
-          <li><a href="sobre">Sobre NÃ³s</a></li>
+          <li><a href="/">Início</a></li>
+          <li><a href="sobre">Sobre Nós</a></li>
           <li><a href="contato">Contato</a></li>
         </ul>
       </div>
@@ -325,7 +325,7 @@
         <h4>Legal</h4>
         <ul>
           <li><a href="termos">Termos de Responsabilidade</a></li>
-          <li><a href="politica">PolÃ­tica de Privacidade</a></li>
+          <li><a href="politica">Política de Privacidade</a></li>
         </ul>
       </div>
     </div>
