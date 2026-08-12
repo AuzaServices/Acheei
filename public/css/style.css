@@ -136,8 +136,19 @@ img {
   color: var(--black-primary);
 }
 
+.navbar .logo img,
+.dashboard-nav .logo img,
+.login-card .logo img,
+.vis-brand .brand-image,
+.logo-menu .logo img {
+  height: 28px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
 .navbar .logo img {
-  height: 40px;
+  height: 28px;
 }
 
 .navbar .nav-links {
