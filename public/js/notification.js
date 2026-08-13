@@ -107,10 +107,44 @@ if (!window.__acheei_notification_loaded) {
     if (empty) empty.style.display = 'none';
   }
 
+  // Play a short bell-like notification sound using WebAudio (no external file needed)
+  function playNotificationSound() {
+    try {
+      var now = Date.now();
+      if (!window.__acheei_notif_last_sound) window.__acheei_notif_last_sound = 0;
+      if (now - window.__acheei_notif_last_sound < 300) return; // throttle
+      window.__acheei_notif_last_sound = now;
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) throw new Error('no audio context');
+      if (!window.__acheei_audio_ctx) window.__acheei_audio_ctx = new AudioCtx();
+      var ctx = window.__acheei_audio_ctx;
+      if (ctx.state === 'suspended' && typeof ctx.resume === 'function') ctx.resume().catch(function(){});
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(1000, ctx.currentTime);
+      g.gain.setValueAtTime(0, ctx.currentTime);
+      o.connect(g); g.connect(ctx.destination);
+      // envelope
+      g.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.001);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
+      o.start(ctx.currentTime);
+      o.stop(ctx.currentTime + 0.9);
+    } catch (e) {
+      // fallback to short data URI beep using HTMLAudio (very small base64 wav)
+      try {
+        if (!window.__acheei_fallback_audio) {
+          window.__acheei_fallback_audio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=');
+        }
+        window.__acheei_fallback_audio.currentTime = 0; window.__acheei_fallback_audio.play().catch(function(){});
+      } catch (e2) {}
+    }
+  }
+
   function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   // Expose to global
-  window.acheeiNotifications = { init: init, setBadge: setBadge, incrementBadge: incrementBadge, pushNotification: addNotificationItem };
+  window.acheeiNotifications = { init: init, setBadge: setBadge, incrementBadge: incrementBadge, pushNotification: function(d){ try{ addNotificationItem(d); playNotificationSound(); }catch(e){} } };
 
   // Auto init on DOMContentLoaded
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
@@ -193,7 +227,12 @@ if (!window.__acheei_notification_loaded) {
       }
 
       // Update UI
+      var prevUnread = window.__acheei_notif_last_unread || 0;
       if (unread && unread > 0) {
+        if (unread > prevUnread) {
+          try { playNotificationSound(); } catch(e){}
+        }
+        window.__acheei_notif_last_unread = unread;
         setBadge(unread);
         // ensure icon visible
         var icon = document.getElementById('notifIcon'); if (icon) icon.style.display = 'inline-flex';
@@ -209,6 +248,7 @@ if (!window.__acheei_notification_loaded) {
         list.insertBefore(item, list.firstChild);
       } else {
         // no unread: clear badge and remove summary
+        window.__acheei_notif_last_unread = 0;
         setBadge(0);
         var list = document.getElementById('notifList'); if (list) {
           var existing = list.querySelector('.notif-unread-summary'); if (existing) existing.remove();
