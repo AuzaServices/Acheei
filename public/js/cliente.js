@@ -357,7 +357,14 @@ function renderizarSolicitacoes() {
     if (sol.avaliacao_nota) {
       avaliacaoHtml = '<div class="avaliacao-enviada">⭐ Avaliada: ' + sol.avaliacao_nota + '/5</div>';
     } else if (sol.status_pagamento === 'pago') {
-      avaliacaoHtml = '<div class="avaliacao-disponivel"><p>Como foi o atendimento deste profissional?</p><button class="btn btn-outline btn-sm" onclick="abrirModalAvaliacao(' + sol.id + ', ' + sol.profissional_id + ')">Avaliar profissional</button></div>';
+      // Mostrar cinco estrelas arredondadas (SVG) ao invés de um único botão
+      var estrelas = '';
+      for (var s = 1; s <= 5; s++) {
+        estrelas += '<button class="estrela-btn" data-nota="' + s + '" data-solicitacao-id="' + sol.id + '" aria-label="' + s + ' estrela(s)" onclick="(function(n){ abrirModalAvaliacao(' + sol.id + ', ' + sol.profissional_id + '); setTimeout(function(){ setAvaliacaoEstrela(n); }, 30); })(' + s + ')">' +
+                    '<svg viewBox="0 0 24 24" class="estrela-svg" fill="currentColor" aria-hidden="true"><path d="M12 1.7L14.8 7.2L21.3 8.1L16.6 12.7L17.8 19.2L12 16.1L6.2 19.2L7.4 12.7L2.7 8.1L9.2 7.2L12 1.7Z"/></svg>' +
+                  '</button>';
+      }
+      avaliacaoHtml = '<div class="avaliacao-disponivel"><p>Como foi o atendimento deste profissional?</p><div class="estrelas-avaliacao">' + estrelas + '</div></div>';
     }
 
     card.innerHTML =
@@ -602,7 +609,15 @@ async function enviarAvaliacao(event) {
 function setAvaliacaoEstrela(nota) {
   var input = document.getElementById('avaliacaoNota');
   if (input) input.value = nota;
-  var btns = document.querySelectorAll('.estrela-btn');
+  // Prefer stars inside the modal; otherwise target stars for the current solicitação
+  var btns = document.querySelectorAll('#avaliacaoModal .estrela-btn');
+  if (!btns || btns.length === 0) {
+    if (typeof avalModalId !== 'undefined' && avalModalId) {
+      btns = document.querySelectorAll('.estrela-btn[data-solicitacao-id="' + avalModalId + '"]');
+    } else {
+      btns = document.querySelectorAll('.estrela-btn');
+    }
+  }
   for (var i = 0; i < btns.length; i++) {
     var n = parseInt(btns[i].getAttribute('data-nota'));
     btns[i].style.opacity = n <= nota ? '1' : '0.3';
