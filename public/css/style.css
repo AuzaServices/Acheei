@@ -219,6 +219,19 @@ img {
   flex-shrink: 0;
 }
 
+/* Notification icon next to avatar */
+.notif-icon { display: none; align-items: center; gap: 8px; margin-left: 10px; }
+.notif-icon .notif-button { background: transparent; border: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 6px; border-radius: 8px; color: var(--gray-dark); }
+.notif-icon .notif-button:hover { background: rgba(0,0,0,0.04); color: var(--red-primary); }
+.notif-icon .notif-badge { display: none; min-width: 20px; height: 20px; background: #ffc107; color: #000; font-weight: 700; border-radius: 10px; align-items: center; justify-content: center; font-size: 12px; padding: 0 6px; margin-left: 6px; display: inline-flex; }
+/* Mobile: place notification icon to the left of the hamburger */
+@media (max-width: 768px) {
+  .navbar { position: relative; }
+  .notif-icon { display: none; /* JS will show when logged */ position: absolute; right: 64px; top: 14px; z-index: 1002; }
+  .notif-icon .notif-button { padding: 8px; width: 40px; height: 40px; border-radius: 10px; }
+  .hamburger { position: absolute; right: 12px; top: 14px; z-index: 1003; display: flex; }
+}
+
 .settings-btn {
   min-width: 42px;
   width: 42px;

@@ -380,6 +380,12 @@
           <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><span data-icon="youtube"></span></a>
           <a href="https://x.com" target="_blank" rel="noopener" aria-label="X (Twitter)"><span data-icon="x-social"></span></a>
         </div>
+        <div class="notif-icon" id="notifIcon" style="display:none;">
+          <button id="notifButton" class="notif-button" aria-label="Notificações">
+            <img src="icons/notification.svg" alt="Notificações" style="width:20px;height:20px;display:block;">
+            <span class="notif-badge" id="notifBadge">0</span>
+          </button>
+        </div>
       </div>
       <div class="footer-section">
         <h4>Navegação</h4>
@@ -435,5 +441,7 @@
       setupUserDropdown();
     });
   </script>
+  <script src="js/push.js" defer></script>
+  <script src="js/notification.js" defer></script>
 </body>
 </html>

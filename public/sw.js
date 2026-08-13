@@ -54,6 +54,14 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
+  // Also notify open clients (pages) so they can update notification icon/badge in realtime
+  event.waitUntil(
+    clients.matchAll({ includeUncontrolled: true, type: 'window' }).then((clientList) => {
+      for (let i = 0; i < clientList.length; i++) {
+        try { clientList[i].postMessage({ type: 'push', data: data }); } catch (e) {}
+      }
+    })
+  );
 });
 
 // ============================================

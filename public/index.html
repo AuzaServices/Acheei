@@ -9,6 +9,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF0000' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3C/svg%3E" type="image/svg+xml">
   <script>document.documentElement.classList.add('js');</script>
   <script src="js/reveal.js" defer></script>
+  <script src="js/push.js" defer></script>
+  <script src="js/notification.js" defer></script>
 </head>
 <body class="page-enter">
   <header class="header">
@@ -21,7 +23,7 @@
         <a href="#categorias">Categorias</a>
         <a href="sobre">Sobre Nós</a>
         <a href="contato">Contato</a>
-<div class="user-area" id="userArea" style="display: none;">
+        <div class="user-area" id="userArea" style="display: none;">
           <div class="user-dropdown" id="userDropdown">
             <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
               <span class="user-avatar" id="userAvatar">👤</span>
@@ -36,6 +38,12 @@
                 <span data-icon="log-out"></span> Sair
               </button>
             </div>
+          </div>
+          <div class="notif-icon" id="notifIcon" style="display:none;">
+            <button id="notifButton" class="notif-button" aria-label="Notificações">
+              <img src="icons/notification.svg" alt="Notificações" style="width:20px;height:20px;display:block;">
+              <span class="notif-badge" id="notifBadge">0</span>
+            </button>
           </div>
         </div>
         <a href="cliente" class="btn btn-primary" id="btnAreaCliente">
@@ -550,5 +558,6 @@ function fecharMenuMobile() {
       digitar();
     })();
   </script>
+  <script src="js/notification.js" defer></script>
 </body>
 </html>
