@@ -188,6 +188,8 @@ async function login(event) {
     iniciarPollingWidget();
     showToast('Login realizado com sucesso!', 'success');
     setTimeout(function() { salvarAssinaturaPendente(); }, 500);
+    // Mostrar ícone de notificações imediatamente após login
+    try { var notif = document.getElementById('notifIcon'); if (notif) notif.style.display = 'inline-flex'; } catch(e) {}
   } else {
     document.getElementById('loginError').style.display = 'block';
   }
@@ -235,6 +237,8 @@ async function cadastro(event) {
       salvarAssinaturaPendente();
       showToast('Conta criada e login realizado!', 'success');
     }, 800);
+    // Mostrar ícone de notificações após cadastro/login
+    try { var notif = document.getElementById('notifIcon'); if (notif) notif.style.display = 'inline-flex'; } catch(e) {}
   } else {
     var msg = (response && response.message) ? response.message : 'Erro ao criar conta';
     document.getElementById('cadastroError').textContent = msg;

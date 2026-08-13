@@ -47,16 +47,21 @@
     dd.innerHTML = '<div class="notif-dropdown-list" id="notifList"></div><div class="notif-dropdown-empty" id="notifEmpty">Nenhuma notificação</div>';
     // attach to body (positioned via CSS near button)
     document.body.appendChild(dd);
-    // close on outside click
-    setTimeout(function(){
-      document.addEventListener('click', function(ev){
-        var dropdown = document.getElementById('notifDropdown');
-        var btn = document.getElementById('notifButton');
-        if (!dropdown || !btn) return;
-        if (dropdown.contains(ev.target) || btn.contains(ev.target)) return;
-        dropdown.classList.remove('open');
-      });
-    }, 10);
+    // close on outside click — register only once
+    if (!window.__acheei_notif_close_registered) {
+      window.__acheei_notif_close_registered = true;
+      setTimeout(function(){
+        document.addEventListener('click', function(ev){
+          var dropdown = document.getElementById('notifDropdown');
+          var btn = document.getElementById('notifButton');
+          if (!dropdown || !btn) return;
+          // respect temporary suppression to avoid immediate close after open
+          if (window.__acheei_notif_suppress_until && Date.now() < window.__acheei_notif_suppress_until) return;
+          if (dropdown.contains(ev.target) || btn.contains(ev.target)) return;
+          dropdown.classList.remove('open');
+        });
+      }, 10);
+    }
     return dd;
   }
 
@@ -66,6 +71,9 @@
     dd.classList.toggle('open');
     // position after opening so offsets are available
     setTimeout(positionDropdown, 10);
+    try {
+      window.__acheei_notif_suppress_until = Date.now() + 350;
+    } catch (e) {}
   }
 
   function positionDropdown() {
@@ -158,13 +166,5 @@
   });
 
   // Also listen for pointerdown as fallback on some mobile environments
-  document.addEventListener('pointerdown', function(e){
-    var target = e.target;
-    if (!target) return;
-    var btnEl = target.closest ? target.closest('#notifButton') : (target.id === 'notifButton' ? target : null);
-    if (btnEl) {
-      e.stopPropagation();
-      try { toggleDropdown(); } catch (err) { /* noop */ }
-    }
-  });
+  // (removed pointerdown fallback because it caused immediate close in some browsers)
 })();
