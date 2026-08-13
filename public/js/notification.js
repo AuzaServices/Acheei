@@ -19,16 +19,7 @@
         return;
       }
 
-      // Use delegated click handler so pages where the button is added later still work
-      document.addEventListener('click', function(e){
-        var target = e.target;
-        if (!target) return;
-        var btnEl = target.closest ? target.closest('#notifButton') : (target.id === 'notifButton' ? target : null);
-        if (btnEl) {
-          e.stopPropagation();
-          toggleDropdown();
-        }
-      });
+      // delegated click handler is registered at module scope (see below)
 
       // Note: message handler is registered below outside the login check so pushes are always received
     } catch (e) { console.error('init notification icon', e); }
@@ -139,4 +130,41 @@
       } catch (err) { console.error('sw global handler', err); }
     });
   }
+
+  // Fallback: listen to window 'message' events (some environments deliver postMessage here)
+  window.addEventListener('message', function(ev){
+    try {
+      var data = ev && ev.data ? ev.data : null;
+      if (!data) return;
+      if (data.type === 'push' || (data && data.action === 'push')) {
+        var d = data.data || data.payload || {};
+        if (window.acheeiNotifications && window.acheeiNotifications.pushNotification) window.acheeiNotifications.pushNotification(d);
+        if (window.acheeiNotifications && window.acheeiNotifications.incrementBadge) window.acheeiNotifications.incrementBadge();
+        if (window.showToast && d.body) showToast(d.body, 'info');
+      }
+    } catch(e){ /* ignore */ }
+  });
+
+  // Delegated click handler (module-scope) so the dropdown opens even if
+  // the button/node is inserted dynamically or init() returned early.
+  document.addEventListener('click', function(e){
+    var target = e.target;
+    if (!target) return;
+    var btnEl = target.closest ? target.closest('#notifButton') : (target.id === 'notifButton' ? target : null);
+    if (btnEl) {
+      e.stopPropagation();
+      try { toggleDropdown(); } catch (err) { console.error('toggleDropdown', err); }
+    }
+  });
+
+  // Also listen for pointerdown as fallback on some mobile environments
+  document.addEventListener('pointerdown', function(e){
+    var target = e.target;
+    if (!target) return;
+    var btnEl = target.closest ? target.closest('#notifButton') : (target.id === 'notifButton' ? target : null);
+    if (btnEl) {
+      e.stopPropagation();
+      try { toggleDropdown(); } catch (err) { /* noop */ }
+    }
+  });
 })();

@@ -208,3 +208,14 @@ async function salvarAssinaturaPendente() {
   }
 }
 
+// Proactively register the Service Worker on page load so it's available
+// to receive push events and postMessage to pages (does not request permission).
+(function ensureSW(){
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    registrarServiceWorker().then(function(r){
+      if (r) console.log('Service Worker ensured at', r.scope);
+    }).catch(function(){/* noop */});
+  } catch(e) { /* noop */ }
+})();
+
