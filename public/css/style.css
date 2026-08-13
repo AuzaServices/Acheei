@@ -151,6 +151,34 @@ img {
   height: 28px;
 }
 
+.auth-card .logo,
+.login-card .logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.auth-card .logo img,
+.login-card .logo img,
+.auth-mobile-logo img,
+.login-mobile-logo img {
+  display: block;
+  width: 120px;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.auth-card .logo p,
+.login-card .logo p,
+.auth-mobile-logo p,
+.login-mobile-logo p {
+  margin: 0;
+}
+
 .navbar .nav-links {
   display: flex;
   align-items: center;
