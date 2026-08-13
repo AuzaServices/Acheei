@@ -1,5 +1,7 @@
-// Notification icon helper
-(function(){
+// Notification icon helper (guard para evitar carregamento duplo)
+if (!window.__acheei_notification_loaded) {
+  window.__acheei_notification_loaded = true;
+  (function(){
   function init() {
     try {
       var icon = document.getElementById('notifIcon');
@@ -167,4 +169,5 @@
 
   // Also listen for pointerdown as fallback on some mobile environments
   // (removed pointerdown fallback because it caused immediate close in some browsers)
-})();
+  })();
+}

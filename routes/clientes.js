@@ -323,6 +323,31 @@ db.query(
   });
 
   // ============================================
+  // GET /api/clientes/push-subscription
+  // Retorna a assinatura push atual do cliente (diagnóstico)
+  // ============================================
+  router.get('/push-subscription', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query('SELECT push_subscription FROM clientes WHERE id = ?', [req.cliente.id], (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar assinatura push (diagnóstico):', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar assinatura push' });
+      }
+      if (results.length === 0 || !results[0].push_subscription) {
+        return res.json({ success: true, data: null });
+      }
+      try {
+        const sub = JSON.parse(results[0].push_subscription);
+        return res.json({ success: true, data: sub });
+      } catch (e) {
+        return res.json({ success: true, data: results[0].push_subscription });
+      }
+    });
+  });
+
+  // ============================================
   // GET /api/clientes/mensagens/:solicitacao_id
   // Mensagens do chat de uma solicitação
   // ============================================

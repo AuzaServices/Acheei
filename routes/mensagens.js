@@ -120,7 +120,11 @@ module.exports = function(db, dbConnected) {
 url: `/cliente?chat=${solicitacao_id}`,
                   solicitacao_id: solicitacao_id
                 };
-                notificarCliente(db, sol.cliente_id, payload).catch(() => {});
+                notificarCliente(db, sol.cliente_id, payload).then((r) => {
+                  console.log('notificarCliente result for cliente', sol.cliente_id, r);
+                }).catch((err) => {
+                  console.error('notificarCliente error for cliente', sol.cliente_id, err);
+                });
               }
             }
           );
