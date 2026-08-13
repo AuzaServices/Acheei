@@ -19,26 +19,18 @@
         return;
       }
 
-      // Click toggles notifications dropdown (does NOT navigate)
-      var btn = document.getElementById('notifButton');
-      if (btn) btn.addEventListener('click', function(e){
-        e.stopPropagation();
-        toggleDropdown();
+      // Use delegated click handler so pages where the button is added later still work
+      document.addEventListener('click', function(e){
+        var target = e.target;
+        if (!target) return;
+        var btnEl = target.closest ? target.closest('#notifButton') : (target.id === 'notifButton' ? target : null);
+        if (btnEl) {
+          e.stopPropagation();
+          toggleDropdown();
+        }
       });
 
-      // Handle messages from service worker
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.addEventListener('message', function(ev){
-          if (!ev || !ev.data) return;
-          if (ev.data.type === 'push') {
-            var d = ev.data.data || {};
-            // add to dropdown list
-            addNotificationItem(d);
-            incrementBadge();
-            if (window.showToast && d.body) showToast(d.body, 'info');
-          }
-        });
-      }
+      // Note: message handler is registered below outside the login check so pushes are always received
     } catch (e) { console.error('init notification icon', e); }
   }
 
@@ -121,4 +113,30 @@
 
   // Auto init on DOMContentLoaded
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  // Also register a global Service Worker message handler so pushes are received
+  // on any page (including initial pages) and shown in the dropdown immediately.
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.addEventListener('message', function(ev){
+      try {
+        if (!ev || !ev.data) return;
+        if (ev.data.type === 'push') {
+          var d = ev.data.data || {};
+          var clienteToken = localStorage.getItem('acheei_cliente_token');
+          var profToken = localStorage.getItem('acheei_prof_token');
+          var icon = document.getElementById('notifIcon');
+          if ((clienteToken || profToken) && icon && icon.style.display === 'none') {
+            try { icon.style.display = 'inline-flex'; } catch(e) {}
+          }
+          if (window.acheeiNotifications && window.acheeiNotifications.pushNotification) {
+            window.acheeiNotifications.pushNotification(d);
+          }
+          if (window.acheeiNotifications && window.acheeiNotifications.incrementBadge) {
+            window.acheeiNotifications.incrementBadge();
+          }
+          if (window.showToast && d.body) showToast(d.body, 'info');
+        }
+      } catch (err) { console.error('sw global handler', err); }
+    });
+  }
 })();
