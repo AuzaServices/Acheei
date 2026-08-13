@@ -230,9 +230,9 @@ img {
   /* Use flex alignment so items stay on one row and align vertically */
   .navbar .nav-links { flex: 1; min-width: 0; display: flex; gap: 12px; justify-content: flex-end; align-items: center; overflow: hidden; }
   .navbar .nav-links > * { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-  .notif-icon { display: none; /* JS will show when logged */ position: relative; margin-left: 8px; z-index: 1002; align-self: center; }
+  .notif-icon { display: none; /* JS will show when logged */ position: relative; margin-left: 2px; z-index: 1002; align-self: center; }
   .notif-icon .notif-button { padding: 6px; width: 40px; height: 40px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; }
-  .hamburger { position: relative; margin-left: 6px; z-index: 1003; display: inline-flex; align-items: center; }
+  .hamburger { position: relative; margin-left: 12px; z-index: 1003; display: inline-flex; align-items: center; }
   .notif-icon .notif-button img { width:22px; height:22px; display:block; }
 }
 
