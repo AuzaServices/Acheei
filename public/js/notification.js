@@ -9,6 +9,11 @@
       var profToken = localStorage.getItem('acheei_prof_token');
       if (clienteToken || profToken) {
         icon.style.display = 'inline-flex';
+        // Ensure badge hidden when zero
+        if (badge) {
+          badge.textContent = '';
+          badge.style.display = 'none';
+        }
       } else {
         icon.style.display = 'none';
         return;
@@ -30,7 +35,6 @@
           if (ev.data.type === 'push') {
             var d = ev.data.data || {};
             incrementBadge();
-            // optional: show small toast
             if (window.showToast && d.body) showToast(d.body, 'info');
           }
         });
@@ -40,8 +44,9 @@
 
   function setBadge(n) {
     var b = document.getElementById('notifBadge'); if (!b) return;
+    if (!n || n <= 0) { b.textContent = ''; b.style.display = 'none'; return; }
     b.textContent = n > 99 ? '99+' : String(n);
-    b.style.display = n > 0 ? 'inline-flex' : 'none';
+    b.style.display = 'inline-flex';
   }
 
   function incrementBadge() {
