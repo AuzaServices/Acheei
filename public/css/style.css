@@ -232,6 +232,7 @@ img {
   .hamburger { position: absolute; right: 12px; top: 14px; z-index: 1003; display: flex; }
   /* ensure nav links don't overlap with icons */
   .navbar .nav-links { padding-right: 110px; }
+  .notif-icon .notif-button img { width:22px; height:22px; display:block; }
 }
 
 .settings-btn {
