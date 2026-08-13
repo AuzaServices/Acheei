@@ -226,12 +226,13 @@ img {
 .notif-icon .notif-badge { display: none; min-width: 20px; height: 20px; background: #ffc107; color: #000; font-weight: 700; border-radius: 10px; align-items: center; justify-content: center; font-size: 12px; padding: 0 6px; margin-left: 6px; display: inline-flex; }
 /* Mobile: place notification icon to the left of the hamburger */
 @media (max-width: 768px) {
-  .navbar { position: relative; }
-  .notif-icon { display: none; /* JS will show when logged */ position: absolute; right: 64px; top: 14px; z-index: 1002; }
-  .notif-icon .notif-button { padding: 8px; width: 40px; height: 40px; border-radius: 10px; }
-  .hamburger { position: absolute; right: 12px; top: 14px; z-index: 1003; display: flex; }
-  /* ensure nav links don't overlap with icons */
-  .navbar .nav-links { padding-right: 110px; }
+  .navbar { position: relative; padding: 0 12px; height: 56px; }
+  /* Use flex alignment so items stay on one row and align vertically */
+  .navbar .nav-links { flex: 1; min-width: 0; display: flex; gap: 12px; justify-content: flex-end; align-items: center; overflow: hidden; }
+  .navbar .nav-links > * { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+  .notif-icon { display: none; /* JS will show when logged */ position: relative; margin-left: 8px; z-index: 1002; align-self: center; }
+  .notif-icon .notif-button { padding: 6px; width: 40px; height: 40px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; }
+  .hamburger { position: relative; margin-left: 6px; z-index: 1003; display: inline-flex; align-items: center; }
   .notif-icon .notif-button img { width:22px; height:22px; display:block; }
 }
 
