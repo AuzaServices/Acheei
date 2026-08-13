@@ -752,7 +752,6 @@
   <div class="modal pix-modal">
     <div class="modal-header pix-header">
       <h3>Pagamento via PIX</h3>
-      <button class="modal-close" onclick="fecharModalPix()">&times;</button>
     </div>
     <div class="modal-body pix-body">
       <input type="hidden" id="pixSolicitacaoId" value="">
@@ -776,8 +775,11 @@
         <span class="pix-copy-label">PIX Copia e Cola</span>
         <div class="pix-copy-row">
           <input type="text" id="pixCopiaCola" readonly placeholder="Clique em copiar">
-          <button type="button" class="btn btn-primary pix-copy-btn" onclick="copiarChavePix()">
-            <span data-icon="copy"></span> Copiar
+          <button type="button" class="btn btn-primary pix-copy-btn" onclick="copiarChavePix()" aria-label="Copiar chave PIX">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="10" height="12" rx="2"></rect>
+              <path d="M5 15V6a2 2 0 0 1 2-2h8"></path>
+            </svg>
           </button>
         </div>
       </div>
@@ -786,8 +788,6 @@
         O pagamento é verificado automaticamente.
         <br>Após a confirmação, o chat será liberado.
       </p>
-
-      <button type="button" class="btn btn-outline pix-close-btn" onclick="fecharModalPix()">Fechar</button>
     </div>
   </div>
 </div>
