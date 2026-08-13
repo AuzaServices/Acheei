@@ -141,6 +141,96 @@ if (!window.__acheei_notification_loaded) {
     });
   }
 
+  // Poll server for unread messages and show a persistent notification entry
+  var __acheei_notif_poll_interval = null;
+  function startUnreadPolling() {
+    stopUnreadPolling();
+    fetchAndUpdateUnread();
+    __acheei_notif_poll_interval = setInterval(fetchAndUpdateUnread, 20000);
+  }
+  function stopUnreadPolling() {
+    if (__acheei_notif_poll_interval) { clearInterval(__acheei_notif_poll_interval); __acheei_notif_poll_interval = null; }
+  }
+
+  async function fetchAndUpdateUnread() {
+    try {
+      var clienteToken = localStorage.getItem('acheei_cliente_token');
+      var profToken = localStorage.getItem('acheei_prof_token');
+      var unread = 0;
+      var destination = null;
+
+      if (clienteToken) {
+        // fetch client solicitacoes which includes qtd_nao_lidas per request
+        var res = await fetch('/api/clientes/solicitacoes', { headers: { 'Authorization': 'Bearer ' + clienteToken } });
+        if (res.ok) {
+          var j = await res.json();
+          if (j && j.success && Array.isArray(j.data)) {
+            j.data.forEach(function(s){ unread += Number(s.qtd_nao_lidas) || 0; });
+            destination = '/cliente';
+          }
+        }
+      } else if (profToken) {
+        // get profissional id then solicitacoes
+        var me = await fetch('/api/profissionais/me', { headers: { 'Authorization': 'Bearer ' + profToken } });
+        if (me.ok) {
+          var jm = await me.json();
+          if (jm && jm.success && jm.data && jm.data.id) {
+            var pid = jm.data.id;
+            var res2 = await fetch('/api/solicitacoes/profissional/' + pid);
+            if (res2.ok) {
+              var j2 = await res2.json();
+              if (j2 && j2.success && Array.isArray(j2.data)) {
+                j2.data.forEach(function(s){ unread += Number(s.qtd_nao_lidas) || 0; });
+                destination = '/profissional';
+              }
+            }
+          }
+        }
+      } else {
+        // not logged
+        stopUnreadPolling();
+        return;
+      }
+
+      // Update UI
+      if (unread && unread > 0) {
+        setBadge(unread);
+        // ensure icon visible
+        var icon = document.getElementById('notifIcon'); if (icon) icon.style.display = 'inline-flex';
+        // ensure dropdown has a persistent item at top
+        var dd = ensureDropdown();
+        var list = document.getElementById('notifList'); if (!list) return;
+        // remove existing unread-summary
+        var existing = list.querySelector('.notif-unread-summary'); if (existing) existing.remove();
+        var item = document.createElement('div');
+        item.className = 'notif-item notif-unread-summary';
+        item.innerHTML = '<div class="notif-item-body"><div class="notif-item-title">Você possui mensagens não lidas</div><div class="notif-item-text">Clique para abrir suas conversas</div></div>';
+        item.addEventListener('click', function(){ window.location.href = destination || '/'; });
+        list.insertBefore(item, list.firstChild);
+      } else {
+        // no unread: clear badge and remove summary
+        setBadge(0);
+        var list = document.getElementById('notifList'); if (list) {
+          var existing = list.querySelector('.notif-unread-summary'); if (existing) existing.remove();
+        }
+      }
+    } catch (e) {
+      // ignore polling errors
+      console.error('fetchAndUpdateUnread', e);
+    }
+  }
+
+  // Start polling if logged in
+  try {
+    if (localStorage.getItem('acheei_cliente_token') || localStorage.getItem('acheei_prof_token')) startUnreadPolling();
+    // also react to storage events (login/logout in other tabs)
+    window.addEventListener('storage', function(ev){
+      if (ev.key === 'acheei_cliente_token' || ev.key === 'acheei_prof_token') {
+        if (localStorage.getItem('acheei_cliente_token') || localStorage.getItem('acheei_prof_token')) startUnreadPolling(); else stopUnreadPolling();
+      }
+    });
+  } catch(e){}
+
   // Fallback: listen to window 'message' events (some environments deliver postMessage here)
   window.addEventListener('message', function(ev){
     try {
