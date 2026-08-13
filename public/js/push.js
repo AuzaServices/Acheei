@@ -1,12 +1,16 @@
 // ============================================
 // Acheei - Utilitário de Notificações Push
 // Registra service worker, pede permissão e assina
+// Proteção contra carregamento duplo
 // ============================================
 
-const VAPID_PUBLIC_KEY = 'BAIo2JpxKMvRWXkG2vxC1ROrSVkoTp5TGem_anQI0KlWwsN3va6GSSF8LRc13Xh8aG3yRAbdWHTGKVUZxYRJXvw';
+if (!window.__acheei_push_loaded) {
+  window.__acheei_push_loaded = true;
 
-let pushReady = false;
-let pushSubscription = null;
+  const VAPID_PUBLIC_KEY = 'BAIo2JpxKMvRWXkG2vxC1ROrSVkoTp5TGem_anQI0KlWwsN3va6GSSF8LRc13Xh8aG3yRAbdWHTGKVUZxYRJXvw';
+
+  let pushReady = false;
+  let pushSubscription = null;
 
 // ============================================
 // Converter chave VAPID (base64) para Uint8Array
