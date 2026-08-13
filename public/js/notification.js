@@ -19,13 +19,11 @@
         return;
       }
 
-      // Click opens messages area
+      // Click toggles notifications dropdown (does NOT navigate)
       var btn = document.getElementById('notifButton');
-      if (btn) btn.addEventListener('click', function(){
-        var clienteToken = localStorage.getItem('acheei_cliente_token');
-        var profToken = localStorage.getItem('acheei_prof_token');
-        if (profToken) { window.location.href = '/profissional'; }
-        else { window.location.href = '/cliente'; }
+      if (btn) btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        toggleDropdown();
       });
 
       // Handle messages from service worker
@@ -34,6 +32,8 @@
           if (!ev || !ev.data) return;
           if (ev.data.type === 'push') {
             var d = ev.data.data || {};
+            // add to dropdown list
+            addNotificationItem(d);
             incrementBadge();
             if (window.showToast && d.body) showToast(d.body, 'info');
           }
@@ -54,8 +54,70 @@
     var cur = parseInt(b.textContent) || 0; cur++; setBadge(cur);
   }
 
+  // Dropdown management
+  function ensureDropdown() {
+    var dd = document.getElementById('notifDropdown');
+    if (dd) return dd;
+    dd = document.createElement('div');
+    dd.id = 'notifDropdown';
+    dd.className = 'notif-dropdown';
+    dd.innerHTML = '<div class="notif-dropdown-list" id="notifList"></div><div class="notif-dropdown-empty" id="notifEmpty">Nenhuma notificação</div>';
+    // attach to body (positioned via CSS near button)
+    document.body.appendChild(dd);
+    // close on outside click
+    setTimeout(function(){
+      document.addEventListener('click', function(ev){
+        var dropdown = document.getElementById('notifDropdown');
+        var btn = document.getElementById('notifButton');
+        if (!dropdown || !btn) return;
+        if (dropdown.contains(ev.target) || btn.contains(ev.target)) return;
+        dropdown.classList.remove('open');
+      });
+    }, 10);
+    return dd;
+  }
+
+  function toggleDropdown() {
+    var dd = ensureDropdown();
+    if (!dd) return;
+    dd.classList.toggle('open');
+    // position after opening so offsets are available
+    setTimeout(positionDropdown, 10);
+  }
+
+  function positionDropdown() {
+    var btn = document.getElementById('notifButton');
+    var dd = document.getElementById('notifDropdown');
+    if (!btn || !dd) return;
+    var rect = btn.getBoundingClientRect();
+    // place below the button, aligned to right edge
+    dd.style.top = (window.scrollY + rect.bottom + 8) + 'px';
+    dd.style.left = (window.scrollX + rect.right - dd.offsetWidth) + 'px';
+  }
+
+  function addNotificationItem(data) {
+    var dd = ensureDropdown();
+    var list = document.getElementById('notifList');
+    var empty = document.getElementById('notifEmpty');
+    if (!list) return;
+    var item = document.createElement('div');
+    item.className = 'notif-item';
+    var title = data.title || 'Nova mensagem';
+    var body = data.body || '';
+    var time = new Date().toLocaleTimeString();
+    item.innerHTML = '<div class="notif-item-body"><div class="notif-item-title">'+escapeHtml(title)+'</div><div class="notif-item-text">'+escapeHtml(body)+'</div></div><div class="notif-item-time">'+escapeHtml(time)+'</div>';
+    // click behavior: if data.url provided, navigate; otherwise open dropdown only
+    if (data.url) {
+      item.addEventListener('click', function(){ window.location.href = data.url; });
+    }
+    list.insertBefore(item, list.firstChild);
+    if (empty) empty.style.display = 'none';
+  }
+
+  function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
   // Expose to global
-  window.acheeiNotifications = { init: init, setBadge: setBadge, incrementBadge: incrementBadge };
+  window.acheeiNotifications = { init: init, setBadge: setBadge, incrementBadge: incrementBadge, pushNotification: addNotificationItem };
 
   // Auto init on DOMContentLoaded
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

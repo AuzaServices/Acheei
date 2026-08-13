@@ -265,6 +265,8 @@ function logout() {
   pararPollingWidget();
   mostrarLogin();
   showToast('Sessão encerrada', 'info');
+  try { var notif = document.getElementById('notifIcon'); if (notif) notif.style.display = 'none'; } catch(e) {}
+  try { var dd = document.getElementById('notifDropdown'); if (dd) dd.remove(); } catch(e) {}
 }
 
 function sairUsuario() {

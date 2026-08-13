@@ -241,6 +241,8 @@ function logout() {
   if (widgetBox) widgetBox.classList.remove('active');
   mostrarLogin();
   showToast('Sessao encerrada', 'info');
+  try { var notif = document.getElementById('notifIcon'); if (notif) notif.style.display = 'none'; } catch(e) {}
+  try { var dd = document.getElementById('notifDropdown'); if (dd) dd.remove(); } catch(e) {}
 }
 
 function mostrarLogin() {

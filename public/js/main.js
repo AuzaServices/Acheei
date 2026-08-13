@@ -363,6 +363,17 @@ if (userAreaLink) userAreaLink.href = 'profissional';
     if (btnAreaProfissional) btnAreaProfissional.style.display = '';
     if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
   }
+  // Mostrar/ocultar ícone de notificações imediatamente conforme estado de login
+  try {
+    var notif = document.getElementById('notifIcon');
+    if (notif) {
+      if (clienteLogado || profissionalLogado) {
+        notif.style.display = 'flex';
+      } else {
+        notif.style.display = 'none';
+      }
+    }
+  } catch (e) {}
 }
 
 async function verificarLoginCliente() {
