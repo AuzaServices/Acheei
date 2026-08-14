@@ -92,6 +92,39 @@ module.exports = {
   VAPID_PRIVATE_KEY,
   VAPID_SUBJECT,
   enviarNotificacao,
-  notificarCliente
+  notificarCliente,
+  notificarProfissional: async function(db, profissionalId, payload) {
+    return new Promise((resolve) => {
+      if (!profissionalId) return resolve({ success: false, error: 'Profissional sem ID' });
+
+      db.query(
+        'SELECT push_subscription FROM profissionais WHERE id = ?',
+        [profissionalId],
+        (err, results) => {
+          if (err) {
+            console.error('Erro ao buscar assinatura push do profissional:', err);
+            return resolve({ success: false, error: 'Erro ao buscar assinatura' });
+          }
+          if (results.length === 0 || !results[0].push_subscription) {
+            console.log(`Profissional ${profissionalId} não possui assinatura push cadastrada`);
+            return resolve({ success: false, error: 'Sem assinatura' });
+          }
+
+          enviarNotificacao(results[0].push_subscription, payload).then((result) => {
+            if (result.expired) {
+              db.query(
+                'UPDATE profissionais SET push_subscription = NULL WHERE id = ?',
+                [profissionalId],
+                (clearErr) => {
+                  if (clearErr) console.error('Erro ao limpar assinatura expirada (profissional):', clearErr);
+                }
+              );
+            }
+            resolve(result);
+          });
+        }
+      );
+    });
+  }
 };
 

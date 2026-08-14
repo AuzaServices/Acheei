@@ -57,6 +57,8 @@ const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, 
                 console.error('Erro ao criar solicitação:', err);
                 return res.status(500).json({ success: false, message: 'Erro ao enviar solicitação' });
               }
+
+              // Responder ao cliente rapidamente
               res.status(201).json({
                 success: true,
                 message: `Solicitação enviada com sucesso para ${profResults[0].nome_perfil}!`,
@@ -66,6 +68,26 @@ const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, 
                   profissional_id: profissional_id
                 }
               });
+
+              // Tentar notificar o profissional via push (assíncrono)
+              try {
+                const push = require('../config/push');
+                const payload = {
+                  title: 'Nova solicitação',
+                  body: `${(nomeFinal || '').trim()} solicitou seu serviço.`,
+                  url: `/profissional?solicitacao_id=${result.insertId}`,
+                  solicitacao_id: result.insertId
+                };
+                push.notificarProfissional(db, profissional_id, payload).then(r => {
+                  if (r && r.success) {
+                    console.log('[solicitacoes] Notificação enviada ao profissional', profissional_id);
+                  } else {
+                    console.log('[solicitacoes] Não foi possível enviar notificação ao profissional', profissional_id, r && r.error);
+                  }
+                }).catch(e => console.error('[solicitacoes] Erro ao notificar profissional:', e));
+              } catch (e) {
+                console.error('[solicitacoes] Erro ao carregar módulo de push:', e);
+              }
             }
           );
         }

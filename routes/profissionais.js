@@ -172,6 +172,57 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
     });
   });
 
+  // ============================================
+  // POST /api/profissionais/push-subscription
+  // Salvar assinatura push do profissional logado
+  // ============================================
+  router.post('/push-subscription', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const profissionalId = decoded.id;
+      const { subscription } = req.body;
+      if (!subscription || !subscription.endpoint) {
+        return res.status(400).json({ success: false, message: 'Assinatura push inválida' });
+      }
+      const subStr = JSON.stringify(subscription);
+      db.query('UPDATE profissionais SET push_subscription = ? WHERE id = ?', [subStr, profissionalId], (err) => {
+        if (err) {
+          console.error('Erro ao salvar assinatura push (profissional):', err);
+          return res.status(500).json({ success: false, message: 'Erro ao salvar assinatura push' });
+        }
+        res.json({ success: true, message: 'Notificações ativadas para profissional' });
+      });
+    } catch (e) {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+  });
+
+  // ============================================
+  // GET /api/profissionais/push-subscription
+  // Retorna assinatura do profissional (diagnóstico)
+  // ============================================
+  router.get('/push-subscription', (req, res) => {
+    if (!dbConnected()) return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const profissionalId = decoded.id;
+      db.query('SELECT push_subscription FROM profissionais WHERE id = ?', [profissionalId], (err, results) => {
+        if (err) { console.error('Erro ao buscar assinatura push (profissional):', err); return res.status(500).json({ success: false, message: 'Erro ao buscar assinatura' }); }
+        if (results.length === 0 || !results[0].push_subscription) return res.json({ success: true, data: null });
+        try { const sub = JSON.parse(results[0].push_subscription); return res.json({ success: true, data: sub }); } catch (e) { return res.json({ success: true, data: results[0].push_subscription }); }
+      });
+    } catch (e) { return res.status(401).json({ success: false, message: 'Token inválido ou expirado' }); }
+  });
+
 // ============================================
   // GET /api/profissionais/me
   // Dados do profissional logado (via token)

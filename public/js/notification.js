@@ -293,7 +293,20 @@ if (!window.__acheei_notification_loaded) {
     var btnEl = target.closest ? target.closest('#notifButton') : (target.id === 'notifButton' ? target : null);
     if (btnEl) {
       e.stopPropagation();
-      try { toggleDropdown(); } catch (err) { console.error('toggleDropdown', err); }
+      try {
+        // If permissions not yet granted, trigger the activation flow which will
+        // register the service worker, subscribe and save the subscription.
+        if (typeof ativarNotificacoes === 'function' && Notification && Notification.permission !== 'granted') {
+          (async function(){
+            try {
+              await ativarNotificacoes();
+            } catch(e){}
+            try { toggleDropdown(); } catch (err) { console.error('toggleDropdown', err); }
+          })();
+        } else {
+          toggleDropdown();
+        }
+      } catch (err) { console.error('toggleDropdown', err); }
     }
   });
 

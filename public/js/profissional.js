@@ -173,6 +173,9 @@ try {
       profissional = result.data.profissional;
       localStorage.setItem('acheei_prof_token', token);
       salvarProfCache(profissional);
+      if (typeof salvarAssinaturaPendente === 'function') {
+        try { salvarAssinaturaPendente(); } catch (e) { /* noop */ }
+      }
       // Limpa estado de conversas do profissional anterior
       pararPollingWidgetProf();
       if (widgetIntervaloMsgProf) { clearInterval(widgetIntervaloMsgProf); widgetIntervaloMsgProf = null; }

@@ -128,18 +128,22 @@ async function salvarAssinaturaPush() {
   if (!pushSubscription) return false;
 
   try {
-    const token = localStorage.getItem('acheei_cliente_token');
-    if (!token) {
+    const clienteToken = localStorage.getItem('acheei_cliente_token');
+    const profToken = localStorage.getItem('acheei_prof_token');
+    if (!clienteToken && !profToken) {
       // Não está logado, guarda a assinatura para salvar depois
       localStorage.setItem('acheei_pending_subscription', JSON.stringify(pushSubscription));
       return false;
     }
 
-    const response = await fetch('/api/clientes/push-subscription', {
+    // Decide para qual endpoint salvar (cliente ou profissional) baseado no token presente
+    const endpoint = clienteToken ? '/api/clientes/push-subscription' : '/api/profissionais/push-subscription';
+    const auth = clienteToken ? clienteToken : profToken;
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': 'Bearer ' + auth
       },
       body: JSON.stringify({
         subscription: JSON.parse(JSON.stringify(pushSubscription))
