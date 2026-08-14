@@ -180,3 +180,71 @@ app.listen(PORT, '0.0.0.0', function() {
   console.log('  http://localhost:' + PORT);
   console.log('========================================');
 });
+
+// ============================================
+// Rotina de limpeza de solicitações expiradas
+// - solicitações pagas: removidas após 5 dias
+// - solicitações pendentes (não pagas): removidas após 15 dias
+// Remoções automáticas são tratadas como rejeição do profissional
+// e incrementam o contador `rejeicoes` para afetar a pontuação.
+// Executa ao iniciar e a cada 6 horas.
+// ============================================
+function cleanupSolicitacoes() {
+  if (!dbConnected) return;
+  console.log('[cleanup] Verificando solicitações expiradas...');
+
+  // Helper para processar um conjunto de solicitações selecionadas
+  function processAndRemove(rows, label) {
+    if (!rows || rows.length === 0) return;
+    // Conta por profissional quantas solicitações serão removidas
+    const counts = {};
+    const ids = rows.map(r => r.id);
+    rows.forEach(r => {
+      const pid = r.profissional_id;
+      counts[pid] = (counts[pid] || 0) + 1;
+    });
+
+    // Deleta as solicitações
+    db.query('DELETE FROM solicitacoes WHERE id IN (?)', [ids], (err, del) => {
+      if (err) {
+        console.error('[cleanup] Erro ao deletar solicitações (' + label + '):', err);
+        return;
+      }
+      console.log('[cleanup] Deletadas', ids.length, 'solicitações (', label, ')');
+
+      // Para cada profissional, incrementa rejeicoes pelo número de exclusões
+      Object.keys(counts).forEach(pid => {
+        const inc = counts[pid];
+        db.query('UPDATE profissionais SET rejeicoes = rejeicoes + ? WHERE id = ?', [inc, pid], (err2) => {
+          if (err2) {
+            console.error('[cleanup] Erro ao atualizar rejeições para profissional', pid, err2);
+          } else {
+            console.log('[cleanup] Incrementadas', inc, 'rejeições para profissional', pid);
+          }
+        });
+      });
+    });
+  }
+
+  // 1) Solicitações pagas com mais de 5 dias
+  db.query("SELECT id, profissional_id FROM solicitacoes WHERE status_pagamento = 'pago' AND data_solicitacao <= NOW() - INTERVAL 5 DAY", (err, paidRows) => {
+    if (err) {
+      console.error('[cleanup] Erro ao buscar solicitações pagas expiradas:', err);
+    } else {
+      processAndRemove(paidRows, 'pago>5d');
+    }
+  });
+
+  // 2) Solicitações pendentes com mais de 15 dias
+  db.query("SELECT id, profissional_id FROM solicitacoes WHERE status_pagamento = 'pendente' AND data_solicitacao <= NOW() - INTERVAL 15 DAY", (err, pendRows) => {
+    if (err) {
+      console.error('[cleanup] Erro ao buscar solicitações pendentes expiradas:', err);
+    } else {
+      processAndRemove(pendRows, 'pendente>15d');
+    }
+  });
+}
+
+// Executa imediatamente ao iniciar e agenda execução periódica
+setTimeout(cleanupSolicitacoes, 5 * 1000); // 5s após iniciar
+setInterval(cleanupSolicitacoes, 1000 * 60 * 60 * 6); // a cada 6 horas
