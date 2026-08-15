@@ -104,6 +104,7 @@ img {
   justify-content: space-between;
   flex-wrap: nowrap;
   height: 70px;
+  overflow: visible;
 }
 
 .dashboard-nav {
@@ -186,6 +187,7 @@ img {
   flex: 1;
   min-width: 0;
   justify-content: flex-end;
+  overflow: visible;
 }
 
 .navbar .nav-links > * {
@@ -228,7 +230,7 @@ img {
 @media (max-width: 768px) {
   .navbar { position: relative; padding: 0 12px; height: 56px; flex-wrap: nowrap; }
   /* Use flex alignment so items stay on one row and align vertically */
-  .navbar .nav-links { flex: 1; min-width: 0; display: flex; gap: 12px; justify-content: flex-end; align-items: center; overflow: hidden; order: 1; padding-right: 70px; }
+  .navbar .nav-links { flex: 1; min-width: 0; display: flex; gap: 12px; justify-content: flex-end; align-items: center; overflow: visible; order: 1; padding-right: 70px; }
   .navbar .nav-links > * { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
   /* Right-side actions: notification icon + hamburger grouped to guarantee proximity */
   .nav-actions { display: flex; align-items: center; gap: 2px; order: 2; z-index: 1003; margin-left: auto; }
@@ -2020,11 +2022,14 @@ img {
 .user-area {
   display: flex;
   align-items: center;
+  position: relative;
+  z-index: 1100;
 }
 
 /* Dropdown do usuário (avatar + nome) */
 .user-dropdown {
   position: relative;
+  z-index: 1100;
 }
 
 .user-dropdown .user-info {
@@ -2100,8 +2105,10 @@ img {
   padding: 6px;
   display: none;
   flex-direction: column;
-  z-index: 1100;
-  overflow: hidden;
+  z-index: 9999;
+  overflow: visible;
+  overflow-y: auto;
+  max-height: 400px;
 }
 
 .user-dropdown.active .user-dropdown-menu {
