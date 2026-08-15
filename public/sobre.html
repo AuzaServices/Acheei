@@ -21,7 +21,7 @@
       <a href="/" class="logo" aria-label="Acheei início">
         <img src="icons/logo2.png" alt="Acheei logo">
       </a>
-<div class="nav-links">
+      <div class="nav-links">
         <a href="/">Início</a>
         <a href="/#categorias">Categorias</a>
         <a href="sobre" style="color:var(--red-primary);font-weight:700;">Sobre Nós</a>
@@ -33,21 +33,20 @@
               <span class="user-name" id="userName">Cliente</span>
               <span class="user-caret" data-icon="chevron-down"></span>
             </button>
-<div class="user-dropdown-menu" id="userDropdownMenu">
+            <div class="user-dropdown-menu" id="userDropdownMenu">
               <a href="cliente" class="user-dropdown-item" id="userAreaLink">
                 <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
               </a>
-<button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
+              <button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
                 <span data-icon="log-out"></span> Sair
               </button>
             </div>
           </div>
-        
         </div>
         <a href="cliente" class="btn btn-primary" id="btnAreaCliente">
           <span data-icon="user"></span> Área do Cliente
         </a>
-<a href="profissional" class="btn btn-outline" id="btnAreaProfissional">
+        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional">
           <span data-icon="hard-hat"></span> Área do Profissional
         </a>
       </div>
@@ -67,7 +66,7 @@
     </nav>
   </header>
 
-<script>
+  <script>
     // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
     // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
     (function() {
@@ -138,13 +137,11 @@
     })();
   </script>
 
-  <!-- Mobile Menu Overlay -->
+  <!-- Mobile overlay + menu -->
   <div class="mobile-menu-overlay" id="menuOverlay"></div>
-
-<!-- Mobile Menu Panel -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="menu-items">
-<div class="mobile-user-area" id="mobileUserArea" style="display: none;">
+      <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
         <div class="user-info">
           <span class="user-avatar" id="mobileUserAvatar">👤</span>
           <span class="user-name" id="mobileUserName">Cliente</span>
@@ -156,7 +153,7 @@
           Sair
         </button>
       </div>
-<a href="/" class="menu-item">
+      <a href="/" class="menu-item">
         <span class="item-icon" data-icon="home"></span>
         <span class="item-text">Início</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
@@ -171,7 +168,7 @@
         <span class="item-text">Sobre Nós</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
-<a href="contato" class="menu-item">
+      <a href="contato" class="menu-item">
         <span class="item-icon" data-icon="send"></span>
         <span class="item-text">Contato</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
@@ -182,7 +179,7 @@
         <span class="item-text">Área do Cliente</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
       </a>
-<a href="profissional" class="menu-item" id="mobileBtnAreaProfissional">
+      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional">
         <span class="item-icon" data-icon="hard-hat"></span>
         <span class="item-text">Área do Profissional</span>
         <span class="item-arrow" data-icon="arrow-right"></span>
@@ -259,7 +256,7 @@
     .step-card { background: #fff; border-radius: var(--radius-lg); padding: 30px 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-lighter); position: relative; transition: var(--transition); }
     .step-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
     .step-card .step-num { position: absolute; top: -18px; left: 24px; width: 38px; height: 38px; border-radius: 50%; background: var(--red-primary); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 17px; box-shadow: var(--shadow-md); }
-.step-card .icon { font-size: 36px; margin: 10px 0 16px; display: flex; align-items: center; justify-content: center; }
+    .step-card .icon { font-size: 36px; margin: 10px 0 16px; display: flex; align-items: center; justify-content: center; }
     .step-card .icon .icon-svg { width: 36px; height: 36px; }
     .mvv-card .icon .icon-svg { width: 30px; height: 30px; }
     .value-item .v-icon .icon-svg { width: 22px; height: 22px; }
@@ -300,89 +297,11 @@
       .sobre-hero h1 { font-size: 28px; }
     }
   </style>
-</head>
-<body class="page-enter">
-
-  <style>
-    /* ===== Página Sobre - Estilos ===== */
-    .sobre-hero {
-      background: linear-gradient(135deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
-      color: #fff; padding: 90px 20px 100px; text-align: center; position: relative; overflow: hidden;
-    }
-        if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
-        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
-
-        if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
-        if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
-        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
-        if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
-        if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
-      }
-
-      function aplicarDeslogado() {
-        var userArea = document.getElementById('userArea');
-        var btnAreaCliente = document.getElementById('btnAreaCliente');
-        var mobileUserArea = document.getElementById('mobileUserArea');
-        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
-        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
-        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
-
-        if (userArea) userArea.style.display = 'none';
-        if (btnAreaCliente) btnAreaCliente.style.display = '';
-        if (mobileUserArea) mobileUserArea.style.display = 'none';
-        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
-        if (btnAreaProfissional) btnAreaProfissional.style.display = '';
-        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
-      }
-
-      try {
-        var clienteCache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
-        var clienteToken = localStorage.getItem('acheei_cliente_token');
-        var profCache = JSON.parse(localStorage.getItem('acheei_prof_cache') || 'null');
-        var profToken = localStorage.getItem('acheei_prof_token');
-
-        if (clienteCache && clienteToken) {
-          aplicarUsuarioLogado(clienteCache, false);
-        } else if (profCache && profToken) {
-          aplicarUsuarioLogado(profCache, true);
-        } else {
-          aplicarDeslogado();
-        }
-      } catch (e) {}
-    })();
-  </script>
-
-  <!-- Mobile overlay + menu -->
-  <div class="mobile-menu-overlay" id="menuOverlay"></div>
-  <div class="mobile-menu" id="mobileMenu">
-    <div class="menu-items">
-      <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
-        <div class="user-info">
-          <span class="user-avatar" id="mobileUserAvatar">👤</span>
-          <span class="user-name" id="mobileUserName">Cliente</span>
-        </div>
-        <a href="cliente" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
-          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
-        </a>
-        <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
-          Sair
-        </button>
-      </div>
-      <a href="/" class="menu-item"><span class="item-icon" data-icon="home"></span><span class="item-text">Início</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="/#categorias" class="menu-item" onclick="fecharMenuMobile()"><span class="item-icon" data-icon="grid"></span><span class="item-text">Categorias</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="sobre" class="menu-item"><span class="item-icon" data-icon="user"></span><span class="item-text">Sobre Nós</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="contato" class="menu-item"><span class="item-icon" data-icon="send"></span><span class="item-text">Contato</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <div class="menu-divider"></div>
-      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente"><span class="item-icon" data-icon="user"></span><span class="item-text">Área do Cliente</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional"><span class="item-icon" data-icon="hard-hat"></span><span class="item-text">Área do Profissional</span><span class="item-arrow" data-icon="arrow-right"></span></a>
-    </div>
-    <div class="menu-footer"><p>&copy; 2026 Acheei. Todos os direitos reservados.</p></div>
-  </div>
 
   <!-- Hero -->
   <section class="sobre-hero">
     <div class="container">
-<span class="badge"><span data-icon="rocket" style="width:16px;height:16px;display:inline-flex;"></span> Nossa História</span>
+      <span class="badge"><span data-icon="rocket" style="width:16px;height:16px;display:inline-flex;"></span> Nossa História</span>
       <h1>Conectando você aos <span class="hl">melhores profissionais</span> do Brasil</h1>
       <p>A Acheei nasceu com uma missão simples: acabar com a dificuldade de encontrar profissionais de confiança perto de você. De forma rápida, fácil e sem burocracia.</p>
       <div class="cta-row">
@@ -469,7 +388,7 @@
       <div class="eyebrow">Nossas Verdades</div>
       <h2>O que valorizamos todos os dias</h2>
     </div>
-<div class="values-grid">
+    <div class="values-grid">
       <div class="value-item"><div class="v-icon"><span data-icon="users"></span></div><div><h5>Confiança</h5><p>Cada profissional passa por um processo de verificação para garantir que você está contratando alguém de verdade.</p></div></div>
       <div class="value-item"><div class="v-icon"><span data-icon="shield"></span></div><div><h5>Segurança</h5><p>Pagamentos protegidos e comunicação centralizada na plataforma para a sua tranquilidade.</p></div></div>
       <div class="value-item"><div class="v-icon"><span data-icon="zap"></span></div><div><h5>Agilidade</h5><p>Receba orçamentos e respostas em minutos para não perder tempo.</p></div></div>
@@ -488,7 +407,7 @@
     </div>
   </section>
 
-<!-- Footer -->
+  <!-- Footer -->
   <footer class="footer">
     <div class="footer-accent"></div>
     <div class="footer-content">
@@ -500,16 +419,10 @@
         <div class="footer-social-title">Siga a Acheei</div>
         <div class="footer-social">
           <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><span data-icon="instagram"></span></a>
-<a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><span data-icon="facebook"></span></a>
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><span data-icon="facebook"></span></a>
           <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><span data-icon="linkedin"></span></a>
           <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><span data-icon="youtube"></span></a>
           <a href="https://x.com" target="_blank" rel="noopener" aria-label="X (Twitter)"><span data-icon="x-social"></span></a>
-        </div>
-        <div class="notif-icon" id="notifIcon" style="display:none;">
-          <button id="notifButton" class="notif-button" aria-label="Notificações">
-            <img src="icons/notification-bell.svg" alt="Notificações" style="width:22px;height:22px;display:block;">
-            <span class="notif-badge" id="notifBadge">0</span>
-          </button>
         </div>
       </div>
       <div class="footer-section">
