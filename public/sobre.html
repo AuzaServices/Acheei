@@ -13,18 +13,193 @@
   <script src="js/push.js" defer></script>
   <script src="js/main.js" defer></script>
   <script src="js/notification.js" defer></script>
+  
+</head>
+<body class="page-enter">
+  <header class="header">
+    <nav class="navbar">
+      <a href="/" class="logo" aria-label="Acheei início">
+        <img src="icons/logo2.png" alt="Acheei logo">
+      </a>
+<div class="nav-links">
+        <a href="/">Início</a>
+        <a href="/#categorias">Categorias</a>
+        <a href="sobre" style="color:var(--red-primary);font-weight:700;">Sobre Nós</a>
+        <a href="contato">Contato</a>
+        <div class="user-area" id="userArea" style="display: none;">
+          <div class="user-dropdown" id="userDropdown">
+            <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
+              <span class="user-avatar" id="userAvatar">👤</span>
+              <span class="user-name" id="userName">Cliente</span>
+              <span class="user-caret" data-icon="chevron-down"></span>
+            </button>
+<div class="user-dropdown-menu" id="userDropdownMenu">
+              <a href="cliente" class="user-dropdown-item" id="userAreaLink">
+                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
+              </a>
+<button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
+                <span data-icon="log-out"></span> Sair
+              </button>
+            </div>
+          </div>
+        
+        </div>
+        <a href="cliente" class="btn btn-primary" id="btnAreaCliente">
+          <span data-icon="user"></span> Área do Cliente
+        </a>
+<a href="profissional" class="btn btn-outline" id="btnAreaProfissional">
+          <span data-icon="hard-hat"></span> Área do Profissional
+        </a>
+      </div>
+      <div class="nav-actions">
+        <div class="notif-icon" id="notifIcon" style="display:none;">
+          <button id="notifButton" class="notif-button" aria-label="Notificações">
+            <img src="icons/notification-bell.svg" alt="Notificações" style="width:22px;height:22px;display:block;">
+            <span class="notif-badge" id="notifBadge">0</span>
+          </button>
+        </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+<script>
+    // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
+    // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
+    (function() {
+      function aplicarUsuarioLogado(cache, ehProfissional) {
+        var userArea = document.getElementById('userArea');
+        var btnAreaCliente = document.getElementById('btnAreaCliente');
+        var mobileUserArea = document.getElementById('mobileUserArea');
+        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+        var userAreaLink = document.getElementById('userAreaLink');
+        var userAreaLinkText = document.getElementById('userAreaLinkText');
+        var mobileUserAreaLink = document.getElementById('mobileUserAreaLink');
+        var mobileUserAreaLinkText = document.getElementById('mobileUserAreaLinkText');
+
+        var mine = ehProfissional ? '' : '';
+        var label = ehProfissional ? 'Minha Área' : 'Minha Área';
+
+        if (userArea) userArea.style.display = 'flex';
+        if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+        if (mobileUserArea) mobileUserArea.style.display = 'flex';
+        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+        if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
+
+        if (userAreaLink) userAreaLink.href = mine;
+        if (userAreaLinkText) userAreaLinkText.textContent = label;
+        if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
+        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = label;
+
+        if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
+        if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
+        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
+        if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
+        if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+      }
+
+      function aplicarDeslogado() {
+        var userArea = document.getElementById('userArea');
+        var btnAreaCliente = document.getElementById('btnAreaCliente');
+        var mobileUserArea = document.getElementById('mobileUserArea');
+        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+
+        if (userArea) userArea.style.display = 'none';
+        if (btnAreaCliente) btnAreaCliente.style.display = '';
+        if (mobileUserArea) mobileUserArea.style.display = 'none';
+        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+        if (btnAreaProfissional) btnAreaProfissional.style.display = '';
+        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
+      }
+
+      try {
+        var clienteCache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
+        var clienteToken = localStorage.getItem('acheei_cliente_token');
+        var profCache = JSON.parse(localStorage.getItem('acheei_prof_cache') || 'null');
+        var profToken = localStorage.getItem('acheei_prof_token');
+
+        if (clienteCache && clienteToken) {
+          aplicarUsuarioLogado(clienteCache, false);
+        } else if (profCache && profToken) {
+          aplicarUsuarioLogado(profCache, true);
+        } else {
+          aplicarDeslogado();
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="menuOverlay"></div>
+
+<!-- Mobile Menu Panel -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="menu-items">
+<div class="mobile-user-area" id="mobileUserArea" style="display: none;">
+        <div class="user-info">
+          <span class="user-avatar" id="mobileUserAvatar">👤</span>
+          <span class="user-name" id="mobileUserName">Cliente</span>
+        </div>
+        <a href="cliente" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
+          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
+        </a>
+        <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
+          Sair
+        </button>
+      </div>
+<a href="/" class="menu-item">
+        <span class="item-icon" data-icon="home"></span>
+        <span class="item-text">Início</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="/#categorias" class="menu-item" onclick="fecharMenuMobile()">
+        <span class="item-icon" data-icon="grid"></span>
+        <span class="item-text">Categorias</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="sobre" class="menu-item">
+        <span class="item-icon" data-icon="user"></span>
+        <span class="item-text">Sobre Nós</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+<a href="contato" class="menu-item">
+        <span class="item-icon" data-icon="send"></span>
+        <span class="item-text">Contato</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <div class="menu-divider"></div>
+      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente">
+        <span class="item-icon" data-icon="user"></span>
+        <span class="item-text">Área do Cliente</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+<a href="profissional" class="menu-item" id="mobileBtnAreaProfissional">
+        <span class="item-icon" data-icon="hard-hat"></span>
+        <span class="item-text">Área do Profissional</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="cadastro" class="menu-item">
+        <span class="item-icon" data-icon="edit"></span>
+        <span class="item-text">Cadastre-se como Profissional</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+    </div>
+    <div class="menu-footer">
+      <p>&copy; 2026 Acheei. Todos os direitos reservados.</p>
+    </div>
+  </div>
+
   <style>
     /* ===== Página Sobre - Estilos ===== */
-    .sobre-body { background: var(--gray-bg); color: var(--black-primary); }
-
-    /* Header */
-    .sobre-header {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: var(--shadow-sm);
-      position: sticky; top: 0; z-index: 1000; padding: 0 20px; overflow: visible;
-    }
 
     /* Hero com gradiente dramático */
     .sobre-hero {
@@ -126,78 +301,14 @@
     }
   </style>
 </head>
-<body class="sobre-body page-enter">
+<body class="page-enter">
 
-  <!-- Header -->
-  <header class="sobre-header">
-    <nav class="navbar">
-      <a href="/" class="logo" aria-label="Acheei início">
-        <img src="icons/logo2.png" alt="Acheei logo">
-      </a>
-<div class="nav-links">
-  <a href="/">Início</a>
-  <a href="/#categorias">Categorias</a>
-  <a href="sobre" style="color:var(--red-primary);font-weight:700;">Sobre Nós</a>
-  <a href="contato">Contato</a>
-        <div class="user-area" id="userArea" style="display: none;">
-          <div class="user-dropdown" id="userDropdown">
-            <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
-              <span class="user-avatar" id="userAvatar">👤</span>
-              <span class="user-name" id="userName">Cliente</span>
-              <span class="user-caret" data-icon="chevron-down"></span>
-            </button>
-            <div class="user-dropdown-menu" id="userDropdownMenu">
-              <a href="cliente" class="user-dropdown-item" id="userAreaLink">
-                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
-              </a>
-              <button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
-                <span data-icon="log-out"></span> Sair
-              </button>
-            </div>
-          </div>
-        </div>
-        <a href="cliente" class="btn btn-primary" id="btnAreaCliente"><span data-icon="user"></span> Área do Cliente</a>
-        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional"><span data-icon="hard-hat"></span> Área do Profissional</a>
-      </div>
-      <div class="nav-actions">
-        <div class="notif-icon" id="notifIcon" style="display:none;">
-          <button id="notifButton" class="notif-button" aria-label="Notificações">
-            <img src="icons/notification-bell.svg" alt="Notificações" style="width:22px;height:22px;display:block;">
-            <span class="notif-badge" id="notifBadge">0</span>
-          </button>
-        </div>
-        <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
-      </div>
-    </nav>
-  </header>
-
-  <script>
-    // Estado otimista do header: aplica imediatamente (de forma síncrona) o estado
-    // logado/deslogado assim que o HTML é montado, eliminando qualquer "flash".
-    (function() {
-      function aplicarUsuarioLogado(cache, ehProfissional) {
-        var userArea = document.getElementById('userArea');
-        var btnAreaCliente = document.getElementById('btnAreaCliente');
-        var mobileUserArea = document.getElementById('mobileUserArea');
-        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
-        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
-        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
-        var userAreaLink = document.getElementById('userAreaLink');
-        var userAreaLinkText = document.getElementById('userAreaLinkText');
-        var mobileUserAreaLink = document.getElementById('mobileUserAreaLink');
-        var mobileUserAreaLinkText = document.getElementById('mobileUserAreaLinkText');
-
-        var mine = ehProfissional ? '' : '';
-
-        if (userArea) userArea.style.display = 'flex';
-        if (btnAreaCliente) btnAreaCliente.style.display = 'none';
-        if (mobileUserArea) mobileUserArea.style.display = 'flex';
-        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
-        if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
-        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
-
-        if (userAreaLink) userAreaLink.href = mine;
-        if (userAreaLinkText) userAreaLinkText.textContent = 'Minha Área';
+  <style>
+    /* ===== Página Sobre - Estilos ===== */
+    .sobre-hero {
+      background: linear-gradient(135deg, #000 0%, #1a1a1a 45%, #CC0000 100%);
+      color: #fff; padding: 90px 20px 100px; text-align: center; position: relative; overflow: hidden;
+    }
         if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
         if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = 'Minha Área';
 
