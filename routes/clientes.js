@@ -220,6 +220,28 @@ db.query(
   });
 
   // ============================================
+  // PUT /api/clientes/solicitacoes/marcar-vistas-pagamento
+  // Marca as liberações de chat/pagamento como vistas
+  // (zera o badge de "chat liberado" no sino de notificações)
+  // ============================================
+  router.put('/solicitacoes/marcar-vistas-pagamento', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query(
+      'UPDATE solicitacoes SET vista_pagamento_cliente = TRUE WHERE cliente_id = ? AND vista_pagamento_cliente = FALSE',
+      [req.cliente.id],
+      (err) => {
+        if (err) {
+          console.error('Erro ao marcar pagamentos como vistos:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao marcar pagamentos como vistos' });
+        }
+        res.json({ success: true });
+      }
+    );
+  });
+
+  // ============================================
   // POST /api/clientes/avaliacoes
   // Uma unica avaliacao, apenas para solicitacao do cliente com chat liberado
   // ============================================

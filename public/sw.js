@@ -74,14 +74,17 @@ self.addEventListener('notificationclick', (event) => {
     ? event.notification.data.url
     : '/cliente';
 
-  const solicitacaoId = event.notification.data && event.notification.data.solicitacaoId;
+  const areaPath = url.indexOf('/profissional') === 0 ? '/profissional' : '/cliente';
 
-  // Abre ou foca a página do cliente
+  // Abre ou foca a página correta (cliente ou profissional) já navegando para a url da notificação
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
-        if (client.url.includes('/cliente') && 'focus' in client) {
+        if (client.url.includes(areaPath) && 'focus' in client) {
+          if ('navigate' in client) {
+            return client.navigate(url).then((c) => c.focus());
+          }
           return client.focus();
         }
       }

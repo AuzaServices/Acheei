@@ -144,7 +144,7 @@ if (!window.__acheei_notification_loaded) {
   function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   // Expose to global
-  window.acheeiNotifications = { init: init, setBadge: setBadge, incrementBadge: incrementBadge, pushNotification: function(d){ try{ addNotificationItem(d); playNotificationSound(); }catch(e){} } };
+  window.acheeiNotifications = { init: init, setBadge: setBadge, incrementBadge: incrementBadge, pushNotification: function(d){ try{ addNotificationItem(d); playNotificationSound(); }catch(e){} }, refreshUnread: function(){ try{ fetchAndUpdateUnread(); }catch(e){} } };
 
   // Auto init on DOMContentLoaded
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
@@ -199,7 +199,11 @@ if (!window.__acheei_notification_loaded) {
         if (res.ok) {
           var j = await res.json();
           if (j && j.success && Array.isArray(j.data)) {
-            j.data.forEach(function(s){ unread += Number(s.qtd_nao_lidas) || 0; });
+            j.data.forEach(function(s){
+              unread += Number(s.qtd_nao_lidas) || 0;
+              // chat liberado (pagamento confirmado) ainda não visto pelo cliente
+              if (s.status_pagamento === 'pago' && !s.vista_pagamento_cliente) unread += 1;
+            });
             destination = '/cliente';
           }
         }
@@ -214,7 +218,11 @@ if (!window.__acheei_notification_loaded) {
             if (res2.ok) {
               var j2 = await res2.json();
               if (j2 && j2.success && Array.isArray(j2.data)) {
-                j2.data.forEach(function(s){ unread += Number(s.qtd_nao_lidas) || 0; });
+                j2.data.forEach(function(s){
+                  unread += Number(s.qtd_nao_lidas) || 0;
+                  // nova solicitação ainda não vista pelo profissional
+                  if (!s.vista_profissional) unread += 1;
+                });
                 destination = '/profissional';
               }
             }

@@ -321,7 +321,17 @@ async function carregarSolicitacoes() {
     solicitacoesData = result.data;
     renderizarSolicitacoes();
     document.getElementById('countSolicitacoes').textContent = result.total;
+    marcarPagamentosVistos();
   }
+}
+
+// Marca as liberações de chat/pagamento como vistas (zera o badge no sino)
+async function marcarPagamentosVistos() {
+  if (!token) return;
+  try {
+    await apiRequest(API_BASE + '/clientes/solicitacoes/marcar-vistas-pagamento', { method: 'PUT' });
+    if (window.acheeiNotifications && window.acheeiNotifications.refreshUnread) window.acheeiNotifications.refreshUnread();
+  } catch (e) {}
 }
 
 function renderizarSolicitacoes() {

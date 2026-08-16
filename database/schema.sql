@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS solicitacoes (
   data_hora DATETIME,
   urgencia VARCHAR(50),
   orcamento_estimado VARCHAR(100),
+  vista_profissional BOOLEAN DEFAULT FALSE,
+  vista_pagamento_cliente BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

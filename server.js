@@ -94,6 +94,8 @@ function criarTabelas() {
   db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
   db.query("ALTER TABLE clientes ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription:', err.message); } });
   db.query("ALTER TABLE profissionais ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription em profissionais:', err.message); } });
+  db.query("ALTER TABLE solicitacoes ADD COLUMN vista_profissional BOOLEAN DEFAULT FALSE", function(err) { if (err) { /* coluna já existe */ } });
+  db.query("ALTER TABLE solicitacoes ADD COLUMN vista_pagamento_cliente BOOLEAN DEFAULT FALSE", function(err) { if (err) { /* coluna já existe */ } });
   // Garantir admin padrão
   setupBanco();
 }

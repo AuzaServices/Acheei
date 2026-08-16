@@ -74,7 +74,7 @@ const { cliente_nome, cliente_telefone, descricao, profissional_id, cliente_id, 
                 const push = require('../config/push');
                 const payload = {
                   title: 'Nova solicitação',
-                  body: `${(nomeFinal || '').trim()} solicitou seu serviço.`,
+                  body: `${profResults[0].nome_perfil} Você tem uma nova solicitação de serviço, clique aqui para ver.`,
                   url: `/profissional?solicitacao_id=${result.insertId}`,
                   solicitacao_id: result.insertId
                 };
@@ -155,6 +155,28 @@ db.query(
           return res.status(500).json({ success: false, message: 'Erro ao buscar solicitações' });
         }
         res.json({ success: true, data: results, total: results.length });
+      }
+    );
+  });
+
+  // ============================================
+  // PUT /api/solicitacoes/profissional/:id/marcar-vistas
+  // Marca todas as solicitações do profissional como vistas
+  // (zera o badge de "nova solicitação" no sino de notificações)
+  // ============================================
+  router.put('/profissional/:id/marcar-vistas', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query(
+      'UPDATE solicitacoes SET vista_profissional = TRUE WHERE profissional_id = ? AND vista_profissional = FALSE',
+      [req.params.id],
+      (err) => {
+        if (err) {
+          console.error('Erro ao marcar solicitações como vistas:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao marcar solicitações como vistas' });
+        }
+        res.json({ success: true });
       }
     );
   });
@@ -249,6 +271,28 @@ db.query(
           return res.status(500).json({ success: false, message: 'Erro ao buscar solicitações' });
         }
         res.json({ success: true, data: results, total: results.length });
+      }
+    );
+  });
+
+  // ============================================
+  // PUT /api/solicitacoes/profissional/:id/marcar-vistas
+  // Marca todas as solicitações do profissional como vistas
+  // (zera o badge de "nova solicitação" no sino de notificações)
+  // ============================================
+  router.put('/profissional/:id/marcar-vistas', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query(
+      'UPDATE solicitacoes SET vista_profissional = TRUE WHERE profissional_id = ? AND vista_profissional = FALSE',
+      [req.params.id],
+      (err) => {
+        if (err) {
+          console.error('Erro ao marcar solicitações como vistas:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao marcar solicitações como vistas' });
+        }
+        res.json({ success: true });
       }
     );
   });

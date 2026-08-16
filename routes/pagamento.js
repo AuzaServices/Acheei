@@ -9,6 +9,38 @@ const mp = require('../config/mercadopago');
 module.exports = function(db, dbConnected) {
 
   // ============================================
+  // Notifica o cliente que o chat foi liberado (pagamento confirmado)
+  // ============================================
+  function notificarClientePagamentoLiberado(solicitacaoId) {
+    db.query(
+      `SELECT s.cliente_id, p.nome_perfil
+       FROM solicitacoes s
+       JOIN profissionais p ON p.id = s.profissional_id
+       WHERE s.id = ?`,
+      [solicitacaoId],
+      (err, results) => {
+        if (err || results.length === 0 || !results[0].cliente_id) return;
+        const clienteId = results[0].cliente_id;
+        const nomeProfissional = results[0].nome_perfil;
+        try {
+          const push = require('../config/push');
+          const payload = {
+            title: 'Chat liberado',
+            body: `Olá, ${nomeProfissional} está esperando para ajustar os detalhes do serviço que você solicitou, clique aqui`,
+            url: `/cliente?solicitacao_id=${solicitacaoId}`,
+            solicitacao_id: solicitacaoId
+          };
+          push.notificarCliente(db, clienteId, payload).catch((e) => {
+            console.error('[pagamento] Erro ao notificar cliente sobre chat liberado:', e);
+          });
+        } catch (e) {
+          console.error('[pagamento] Erro ao carregar módulo de push:', e);
+        }
+      }
+    );
+  }
+
+  // ============================================
   // POST /api/pagamento/pix
   // Tenta criar pagamento PIX transparente. Se a conta não tiver chave PIX,
   // faz fallback automático para Checkout Pro (que suporta PIX na página do MP)
@@ -367,6 +399,7 @@ module.exports = function(db, dbConnected) {
                     [solicitacaoId],
                     (updateErr) => {
                       if (updateErr) console.error('Erro ao liberar chat:', updateErr);
+                      else notificarClientePagamentoLiberado(solicitacaoId);
                     }
                   );
                   console.log(`✅ Pagamento verificado e chat liberado para solicitacao #${solicitacaoId}`);
@@ -403,6 +436,7 @@ if (idPart.startsWith('preference:') && refPart && mp.payment) {
                   [solicitacaoId],
                   (updateErr) => {
                     if (updateErr) console.error('Erro ao liberar chat:', updateErr);
+                    else notificarClientePagamentoLiberado(solicitacaoId);
                   }
                 );
                 console.log(`✅ Pagamento verificado e chat liberado para solicitacao #${solicitacaoId}`);
@@ -445,6 +479,7 @@ if (idPart.startsWith('preference:') && refPart && mp.payment) {
               [solicitacaoId],
               (updateErr) => {
                 if (updateErr) console.error('Erro ao liberar chat:', updateErr);
+                else notificarClientePagamentoLiberado(solicitacaoId);
               }
             );
             console.log(`✅ Pagamento verificado e chat liberado para solicitação #${solicitacaoId}`);
@@ -525,6 +560,7 @@ if (idPart.startsWith('preference:') && refPart && mp.payment) {
               }
               if (result.affectedRows > 0) {
                 console.log(`✅ Chat liberado para solicitação #${solicitacaoId}`);
+                notificarClientePagamentoLiberado(solicitacaoId);
               } else {
                 console.log(`Solicitação #${solicitacaoId} já estava paga ou não existe`);
               }

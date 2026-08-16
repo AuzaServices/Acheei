@@ -335,7 +335,17 @@ async function carregarSolicitacoes() {
     renderizarSolicitacoes();
     document.getElementById('countSolicitacoes').textContent = result.total;
     document.getElementById('solCount').textContent = result.total + ' solicitação' + (result.total !== 1 ? 'ões' : '');
+    marcarSolicitacoesVistas();
   }
+}
+
+// Marca as solicitações como vistas (zera o badge de "nova solicitação" no sino)
+async function marcarSolicitacoesVistas() {
+  if (!profissional) return;
+  try {
+    await apiRequest(API_BASE + '/solicitacoes/profissional/' + profissional.id + '/marcar-vistas', { method: 'PUT' });
+    if (window.acheeiNotifications && window.acheeiNotifications.refreshUnread) window.acheeiNotifications.refreshUnread();
+  } catch (e) {}
 }
 
 // ============================================
