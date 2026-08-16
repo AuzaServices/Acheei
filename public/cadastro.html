@@ -126,6 +126,16 @@
             <input type="password" id="senha_confirmar" name="senha_confirmar" placeholder="Repita a senha" required minlength="6">
             <div class="error-message" id="senhaConfirmError">As senhas não conferem</div>
           </div>
+
+          <div id="emailVerificacaoBox" style="display:none;margin-top:8px;padding:16px;background:#fff3cd;border-radius:8px;border:1px solid #ffeeba;color:#856404;text-align:left;font-size:14px;">
+            <strong>Confirme seu e-mail para continuar</strong>
+            <p style="margin:8px 0 0;">Enviamos um link de confirmação para <strong id="emailVerifDestino"></strong>. Clique no link recebido e depois volte aqui e clique em "Já confirmei".</p>
+            <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-primary btn-sm" id="jaConfirmeiBtn">Já confirmei, verificar</button>
+              <button type="button" class="btn btn-outline btn-sm" id="reenviarInicialBtn">Reenviar e-mail</button>
+            </div>
+            <p class="error-message" id="verifInicialMsg" style="margin-top:10px;"></p>
+          </div>
         </div>
 
         <div class="form-step" id="step2">

@@ -5,6 +5,9 @@
 const API_BASE = '/api';
 let currentStep = 1;
 const totalSteps = 3;
+let emailConfirmadoStep1 = false;
+let ultimoEmailVerificado = '';
+let pollingStatusEmail = null;
 
 // Dados acumulados do formulário
 let formData = {
@@ -139,13 +142,159 @@ function showStep(step) {
 }
 
 function nextStep() {
+  if (currentStep === 1) {
+    handleNextFromStep1();
+    return;
+  }
   if (validateStep(currentStep)) {
     showStep(currentStep + 1);
   }
 }
 
+// ============================================
+// Verificação de e-mail obrigatória no passo 1
+// ============================================
+function pararPollingStatusEmail() {
+  if (pollingStatusEmail) {
+    clearInterval(pollingStatusEmail);
+    pollingStatusEmail = null;
+  }
+}
+
+async function handleNextFromStep1() {
+  if (!validateStep(1)) return;
+
+  const email = document.getElementById('email').value.trim();
+
+  // Se este e-mail já foi confirmado nesta sessão, avança direto
+  if (emailConfirmadoStep1 && email === ultimoEmailVerificado) {
+    showStep(2);
+    return;
+  }
+
+  const nextBtn = document.getElementById('nextBtn');
+  const box = document.getElementById('emailVerificacaoBox');
+  const destino = document.getElementById('emailVerifDestino');
+  const msgEl = document.getElementById('verifInicialMsg');
+
+  nextBtn.disabled = true;
+  nextBtn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  try {
+    const response = await fetch(`${API_BASE}/profissionais/verificar-email-inicial`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const result = await response.json();
+
+    if (!result.success) {
+      showToast(result.message || 'Erro ao enviar e-mail de confirmação', 'error');
+      return;
+    }
+
+    ultimoEmailVerificado = email;
+    if (destino) destino.textContent = email;
+    if (box) box.style.display = 'block';
+    if (msgEl) { msgEl.classList.remove('show'); msgEl.textContent = ''; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Verifica automaticamente a cada 5s se o link já foi confirmado
+    pararPollingStatusEmail();
+    pollingStatusEmail = setInterval(() => verificarStatusEmailInicial(true), 5000);
+  } catch (error) {
+    console.error('Erro ao enviar verificação de e-mail:', error);
+    showToast('Erro ao conectar com o servidor', 'error');
+  } finally {
+    nextBtn.disabled = false;
+    nextBtn.innerHTML = 'Proximo';
+  }
+}
+
+async function verificarStatusEmailInicial(silencioso) {
+  const email = document.getElementById('email').value.trim();
+  const msgEl = document.getElementById('verifInicialMsg');
+  const btn = document.getElementById('jaConfirmeiBtn');
+
+  if (!silencioso && btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Verificando...';
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/profissionais/status-verificacao-email?email=${encodeURIComponent(email)}`);
+    const result = await response.json();
+
+    if (result.success && result.verificado) {
+      pararPollingStatusEmail();
+      emailConfirmadoStep1 = true;
+      ultimoEmailVerificado = email;
+      const box = document.getElementById('emailVerificacaoBox');
+      if (box) box.style.display = 'none';
+      showToast('E-mail confirmado com sucesso!', 'success');
+      showStep(2);
+    } else if (!silencioso) {
+      if (msgEl) {
+        msgEl.classList.add('show');
+        msgEl.style.color = '#856404';
+        msgEl.textContent = 'Ainda não identificamos a confirmação. Verifique se clicou no link recebido por e-mail.';
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao verificar status do e-mail:', error);
+    if (!silencioso && msgEl) {
+      msgEl.classList.add('show');
+      msgEl.style.color = '#dc3545';
+      msgEl.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
+    }
+  } finally {
+    if (!silencioso && btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Já confirmei, verificar';
+    }
+  }
+}
+
+async function reenviarEmailInicial() {
+  const email = document.getElementById('email').value.trim();
+  const msgEl = document.getElementById('verifInicialMsg');
+  const btn = document.getElementById('reenviarInicialBtn');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Enviando...';
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/profissionais/verificar-email-inicial`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const result = await response.json();
+    if (msgEl) {
+      msgEl.classList.add('show');
+      msgEl.style.color = result.success ? '#155724' : '#dc3545';
+      msgEl.textContent = result.message || 'Erro ao reenviar e-mail';
+    }
+  } catch (error) {
+    console.error('Erro ao reenviar e-mail:', error);
+    if (msgEl) {
+      msgEl.classList.add('show');
+      msgEl.style.color = '#dc3545';
+      msgEl.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Reenviar e-mail';
+    }
+  }
+}
+
 function prevStep() {
   if (currentStep > 1) {
+    pararPollingStatusEmail();
     showStep(currentStep - 1);
   }
 }
@@ -509,6 +658,16 @@ document.getElementById('data_nascimento').addEventListener('change', function()
   document.getElementById('dataError').classList.remove('show');
 });
 
+// Se o e-mail for alterado depois de confirmado, exige nova confirmação
+document.getElementById('email').addEventListener('input', function() {
+  if (emailConfirmadoStep1 && this.value.trim() !== ultimoEmailVerificado) {
+    emailConfirmadoStep1 = false;
+    pararPollingStatusEmail();
+    const box = document.getElementById('emailVerificacaoBox');
+    if (box) box.style.display = 'none';
+  }
+});
+
 // Clear errors on focus
 document.querySelectorAll('.form-step input, .form-step select').forEach(el => {
   el.addEventListener('focus', function() {
@@ -527,6 +686,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('nextBtn').addEventListener('click', nextStep);
   document.getElementById('prevBtn').addEventListener('click', prevStep);
   document.getElementById('cadastroForm').addEventListener('submit', submitForm);
+
+  const jaConfirmeiBtn = document.getElementById('jaConfirmeiBtn');
+  if (jaConfirmeiBtn) jaConfirmeiBtn.addEventListener('click', () => verificarStatusEmailInicial(false));
+
+  const reenviarInicialBtn = document.getElementById('reenviarInicialBtn');
+  if (reenviarInicialBtn) reenviarInicialBtn.addEventListener('click', reenviarEmailInicial);
 
   // Auto-advance on Enter key
   document.addEventListener('keydown', function(e) {
