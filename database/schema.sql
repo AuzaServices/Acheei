@@ -127,10 +127,13 @@ CREATE TABLE IF NOT EXISTS clientes (
 -- ============================================
 -- Tabela: avaliacoes
 -- Uma avaliacao por solicitacao, feita pelo cliente apos a liberacao do chat
+-- A avaliacao e independente da solicitacao: se a solicitacao for excluida,
+-- solicitacao_id fica NULL mas a avaliacao permanece (so e removida se o
+-- profissional for excluido da plataforma).
 -- ============================================
 CREATE TABLE IF NOT EXISTS avaliacoes (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  solicitacao_id INT NOT NULL UNIQUE,
+  solicitacao_id INT NULL UNIQUE,
   profissional_id INT NOT NULL,
   cliente_id INT NOT NULL,
   nota TINYINT NOT NULL,
@@ -138,7 +141,8 @@ CREATE TABLE IF NOT EXISTS avaliacoes (
   comprometimento ENUM('sim', 'parcialmente', 'nao') NOT NULL,
   qualidade ENUM('sim', 'parcialmente', 'nao') NOT NULL,
   data_avaliacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE CASCADE,
+  FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id) ON DELETE SET NULL,
   FOREIGN KEY (profissional_id) REFERENCES profissionais(id) ON DELETE CASCADE,
   FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

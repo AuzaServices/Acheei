@@ -5,8 +5,16 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'acheei_secret_key_2024_admin';
+
+cloudinary.config({
+  cloud_name: 'dzwkr47ib',
+  api_key: '553561859359519',
+  api_secret: 'IYJBytc-xlGnFW87Taguno77LDw',
+  secure: true
+});
 
 module.exports = function(db, dbConnected) {
 
@@ -447,6 +455,97 @@ if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !c
             }
           );
         });
+        });
+      });
+    });
+  });
+
+  // ============================================
+  // DELETE /api/profissionais/me
+  // Autoexclusão de conta pelo próprio profissional
+  // Remove fotos do Cloudinary, solicitações e o profissional.
+  // As avaliações permanecem vinculadas ao histórico até aqui,
+  // mas são removidas em cascata pois pertencem a este profissional
+  // (profissional_id ON DELETE CASCADE).
+  // ============================================
+  router.delete('/me', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+
+    db.query('SELECT * FROM profissionais WHERE id = ?', [decoded.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar profissional' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Profissional não encontrado' });
+      }
+
+      const prof = results[0];
+      const erros = [];
+
+      // Extrair public_ids das fotos no Cloudinary
+      const publicIds = [];
+
+      // Foto de perfil
+      if (prof.foto_perfil && prof.foto_perfil.includes('cloudinary')) {
+        const parts = prof.foto_perfil.split('/');
+        const filename = parts[parts.length - 1].split('.')[0];
+        const folder = prof.foto_perfil.includes('/perfis/') ? 'acheei/perfis/' : 'acheei/';
+        publicIds.push(folder + filename);
+      }
+
+      // Fotos de serviços
+      let fotosServicos = [];
+      if (prof.fotos_servicos) {
+        try { fotosServicos = JSON.parse(prof.fotos_servicos); } catch(e) { fotosServicos = []; }
+      }
+      fotosServicos.forEach(fotoUrl => {
+        if (fotoUrl && fotoUrl.includes('cloudinary')) {
+          const parts = fotoUrl.split('/');
+          const filename = parts[parts.length - 1].split('.')[0];
+          const folder = fotoUrl.includes('/servicos/') ? 'acheei/servicos/' : 'acheei/';
+          publicIds.push(folder + filename);
+        }
+      });
+
+      // Deletar imagens do Cloudinary (em paralelo)
+      const deletePromises = publicIds.map(publicId =>
+        cloudinary.uploader.destroy(publicId).catch(e => {
+          erros.push('Cloudinary: ' + e.message);
+        })
+      );
+      await Promise.all(deletePromises);
+
+      // Deletar solicitações relacionadas
+      db.query('DELETE FROM solicitacoes WHERE profissional_id = ?', [prof.id], (err) => {
+        if (err) console.error('Erro ao deletar solicitacoes:', err);
+      });
+
+      // Deletar profissional do banco (cascateia avaliacoes, orçamentos, etc via profissional_id)
+      db.query('DELETE FROM profissionais WHERE id = ?', [prof.id], (err) => {
+        if (err) {
+          console.error('Erro ao deletar profissional:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao excluir conta' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Conta excluída permanentemente.',
+          erros: erros.length > 0 ? erros : undefined
         });
       });
     });

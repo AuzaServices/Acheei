@@ -404,6 +404,7 @@
           <p id="compartilharLocalizacao" style="color:var(--gray-medium);font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;">
             <span data-icon="map-pin"></span> <span id="compartilharCidadeEstado"></span>
           </p>
+          <div id="compartilharAvaliacao" class="avaliacao-publica" style="display:flex;justify-content:center;margin-top:8px;"></div>
         </div>
         <button class="btn btn-primary" id="compartilharSolicitarBtn" style="width:100%;justify-content:center;margin-bottom:16px;">
           <span data-icon="send"></span> Solicitar Serviço
@@ -425,17 +426,6 @@
         </div>
       </div>
       <input type="hidden" id="compartilharProfissionalId">
-    </div>
-  </div>
-
-  <div id="compartilharModal" class="modal-overlay">
-    <div class="modal compartilhar-modal">
-      <div class="modal-header"><h3>Compartilhar profissional</h3><button type="button" class="modal-close" onclick="fecharCompartilhar()">&times;</button></div>
-      <div class="modal-body">
-        <input type="hidden" id="compartilharProfissionalId">
-        <div class="compartilhar-perfil"><div id="compartilharFoto" class="compartilhar-foto"></div><div><h4 id="compartilharNome"></h4><p id="compartilharProfissao"></p><p id="compartilharCidadeEstado" class="compartilhar-localizacao"></p><div id="compartilharAvaliacao" class="avaliacao-publica"></div></div></div>
-        <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="compartilharWhatsApp()">WhatsApp</button><button type="button" class="btn btn-primary" onclick="compartilharProfissional()">Compartilhar</button></div>
-      </div>
     </div>
   </div>
 

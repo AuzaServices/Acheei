@@ -1327,6 +1327,12 @@ function renderizarConfiguracoes() {
   html += '  <button class="btn btn-primary" onclick="salvarConfiguracoes()">Salvar Alterações</button>';
   html += '</div>';
 
+  html += '<div class="config-section" style="margin-top:32px;border-top:2px solid #ffe0e0;padding-top:24px;">';
+  html += '  <h4 style="color:var(--red-primary);"><span data-icon="alert"></span> Zona de Risco</h4>';
+  html += '  <p style="font-size:14px;color:var(--gray-medium);margin-bottom:16px;">Ao excluir sua conta, todos os seus dados, fotos, solicitações e avaliações serão apagados permanentemente da plataforma Acheei. Essa ação não pode ser desfeita.</p>';
+  html += '  <button type="button" class="btn btn-outline" style="border-color:var(--red-primary);color:var(--red-primary);" onclick="confirmarExclusaoConta()"><span data-icon="trash"></span> Excluir conta</button>';
+  html += '</div>';
+
   document.getElementById('configBody').innerHTML = html;
 
   // Event listeners de upload
@@ -1372,6 +1378,22 @@ function escHtml(str) {
     .replace(/>/g, a + 'gt;')
     .replace(/\x22/g, a + 'quot;')
     .replace(/'/g, a + '#39;');
+}
+
+async function confirmarExclusaoConta() {
+  var passo1 = confirm('Tem certeza que deseja excluir sua conta? Todos os seus dados, fotos, solicitações e avaliações serão apagados permanentemente da plataforma Acheei.');
+  if (!passo1) return;
+  var passo2 = confirm('Esta ação é IRREVERSÍVEL e não pode ser desfeita. Confirma definitivamente a exclusão da sua conta?');
+  if (!passo2) return;
+
+  var result = await apiRequest(API_BASE + '/profissionais/me', { method: 'DELETE' });
+  if (result && result.success) {
+    localStorage.removeItem('acheei_prof_token');
+    localStorage.removeItem('acheei_prof_cache');
+    window.location.href = '/';
+  } else if (result) {
+    showToast(result.message || 'Erro ao excluir conta', 'error');
+  }
 }
 
 async function salvarConfiguracoes() {

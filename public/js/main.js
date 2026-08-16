@@ -6,6 +6,20 @@
 const API_BASE = '/api';
 
 // ============================================
+// Estrelas SVG (arredondadas, minimalistas)
+// ============================================
+function renderEstrelasSVG(media) {
+  function svgStar(filled) {
+    var color = filled ? '#FF0000' : '#e0e0e0';
+    return '<svg width="16" height="16" viewBox="0 0 24 24" fill="' + color + '" style="display:inline-block;"><path d="M12 2.5c.3 0 .58.17.72.44l2.32 4.7 5.2.76c.61.09 1.02.66.86 1.25-.06.24-.2.45-.38.61l-3.76 3.66.89 5.17c.1.6-.3 1.17-.9 1.27-.24.04-.49 0-.71-.12L12 17.77l-4.64 2.47c-.54.29-1.2.08-1.49-.45-.12-.22-.16-.47-.12-.71l.89-5.17-3.76-3.66c-.44-.42-.45-1.12-.02-1.55.17-.18.38-.3.61-.36l5.2-.76 2.32-4.7c.14-.27.42-.44.72-.44z"/></svg>';
+  }
+  var arredondado = Math.round(Number(media) || 0);
+  var html = '';
+  for (var i = 1; i <= 5; i++) html += svgStar(i <= arredondado);
+  return '<span class="estrelas-svg" role="img" aria-label="' + (Number(media) || 0).toFixed(1) + ' de 5 estrelas">' + html + '</span>';
+}
+
+// ============================================
 // Utility Functions
 // ============================================
 function showToast(message, type = 'success') {
@@ -98,10 +112,9 @@ const fotoPerfil = prof.foto_perfil
 
     var mediaAvaliacoes = Number(prof.media_avaliacoes) || 0;
     var totalAvaliacoes = Number(prof.total_avaliacoes) || 0;
-    var estrelasPublicas = '★★★★★'.slice(0, Math.round(mediaAvaliacoes)) + '☆☆☆☆☆'.slice(Math.round(mediaAvaliacoes));
     var avaliacaoCard = totalAvaliacoes
-      ? '<p class="avaliacao-card" aria-label="Avaliação média ' + mediaAvaliacoes.toFixed(1) + ' de 5"><span class="estrelas-publicas" aria-hidden="true">' + estrelasPublicas + '</span> ' + mediaAvaliacoes.toFixed(1).replace('.', ',') + ' <span>(' + totalAvaliacoes + ')</span></p>'
-      : '<p class="avaliacao-card sem-avaliacoes">☆ Sem avaliações</p>';
+      ? '<p class="avaliacao-card">' + renderEstrelasSVG(mediaAvaliacoes) + '</p>'
+      : '<p class="avaliacao-card sem-avaliacoes">' + renderEstrelasSVG(0) + '</p>';
 
     let fotosHtml = '';
     if (prof.fotos_servicos && prof.fotos_servicos.length > 0) {
@@ -908,8 +921,7 @@ function abrirCompartilhar(id, nome, profissao, cidade, estado, foto, mediaAvali
   var avaliacaoEl = document.getElementById('compartilharAvaliacao');
   var media = Number(mediaAvaliacoes) || 0;
   var total = Number(totalAvaliacoes) || 0;
-  var estrelas = '★★★★★'.slice(0, Math.round(media)) + '☆☆☆☆☆'.slice(Math.round(media));
-  avaliacaoEl.textContent = total ? estrelas + ' ' + media.toFixed(1).replace('.', ',') + ' (' + total + ' avaliação' + (total !== 1 ? 'ões' : '') + ')' : '☆☆☆☆☆ Ainda sem avaliações';
+  avaliacaoEl.innerHTML = renderEstrelasSVG(media);
 
   // Foto do profissional
   var fotoContainer = document.getElementById('compartilharFoto');
