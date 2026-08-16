@@ -97,7 +97,8 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
       'Personal Trainer', 'Fotógrafo', 'Cozinheiro', 'Motorista',
       'Babá', 'Cuidador de Idosos', 'Segurança', 'Advogado',
       'Contador', 'Arquiteto', 'Designer de Interiores', 'Professor Particular',
-      'Cabeleireiro', 'Manicure', 'Massagista', 'Técnico em Ar Condicionado'
+      'Cabeleireiro', 'Manicure', 'Massagista', 'Técnico em Ar Condicionado',
+      'Montador de Móveis', 'Frete e Mudanças', 'Gesseiro', 'Ajudante de Pedreiro'
     ];
     if (!dbConnected()) {
       return res.json({ success: true, data: categoriasFixas });

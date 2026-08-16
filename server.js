@@ -152,7 +152,8 @@ const PAGINAS = {
   '/cadastro': 'cadastro.html',
   '/termos': 'termos.html',
   '/politica': 'politica.html',
-  '/painel': 'painel.html'
+  '/painel': 'painel.html',
+  '/categorias': 'categorias.html'
 };
 
 // Rota de fallback

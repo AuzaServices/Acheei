@@ -187,9 +187,12 @@ function setupAutocomplete() {
 
     if (value.length < 1) return;
 
+    // "Servente" é sinônimo de "Ajudante de Pedreiro"
+    const termoBusca = 'servente'.startsWith(value) ? 'ajudante' : value;
+
     // Filtrar por iniciais (ex: digitar "Dia" mostra "Diarista")
     const matches = categoriasCache.filter(cat => 
-      cat.toLowerCase().startsWith(value)
+      cat.toLowerCase().startsWith(termoBusca) || cat.toLowerCase().startsWith(value)
     ).slice(0, 8);
 
     if (matches.length === 0) return;
@@ -1032,6 +1035,14 @@ document.addEventListener('DOMContentLoaded', function() {
   carregarCategorias();
   setupAutocomplete();
 
+  // Se veio de categorias.html com profissão pré-selecionada (?profissao=...)
+  var profissaoUrl = new URLSearchParams(window.location.search).get('profissao');
+  if (profissaoUrl) {
+    document.getElementById('profissao').value = profissaoUrl;
+    document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+    document.getElementById('busca').scrollIntoView({ behavior: 'smooth' });
+  }
+
   // Botão "Solicitar Serviço" do modal de compartilhamento
   var compartilharSolicitarBtn = document.getElementById('compartilharSolicitarBtn');
   if (compartilharSolicitarBtn) {
@@ -1059,9 +1070,14 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
     
     const params = {};
-    const profissao = document.getElementById('profissao').value.trim();
+    let profissao = document.getElementById('profissao').value.trim();
     const cidade = document.getElementById('cidade').value.trim();
     const estado = document.getElementById('estado').value;
+
+    // "Servente" é sinônimo de "Ajudante de Pedreiro"
+    if (profissao.toLowerCase() === 'servente') {
+      profissao = 'Ajudante de Pedreiro';
+    }
 
     if (profissao) params.profissao = profissao;
     if (cidade) params.cidade = cidade;
