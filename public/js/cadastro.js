@@ -197,6 +197,8 @@ async function handleNextFromStep1() {
     if (destino) destino.textContent = email;
     if (box) box.style.display = 'block';
     if (msgEl) { msgEl.classList.remove('show'); msgEl.textContent = ''; }
+    const codigoInput = document.getElementById('codigoVerificacaoInput');
+    if (codigoInput) { codigoInput.value = ''; codigoInput.focus(); }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     // Verifica automaticamente a cada 5s se o link já foi confirmado
@@ -208,6 +210,63 @@ async function handleNextFromStep1() {
   } finally {
     nextBtn.disabled = false;
     nextBtn.innerHTML = 'Proximo';
+  }
+}
+
+async function confirmarCodigoVerificacao() {
+  const email = document.getElementById('email').value.trim();
+  const codigoInput = document.getElementById('codigoVerificacaoInput');
+  const codigo = codigoInput ? codigoInput.value.trim() : '';
+  const msgEl = document.getElementById('verifInicialMsg');
+  const btn = document.getElementById('confirmarCodigoBtn');
+
+  if (!codigo || codigo.length !== 6) {
+    if (msgEl) {
+      msgEl.classList.add('show');
+      msgEl.style.color = '#dc3545';
+      msgEl.textContent = 'Digite o código de 6 dígitos recebido por e-mail.';
+    }
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Verificando...';
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/profissionais/confirmar-codigo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, codigo })
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      pararPollingStatusEmail();
+      emailConfirmadoStep1 = true;
+      ultimoEmailVerificado = email;
+      const box = document.getElementById('emailVerificacaoBox');
+      if (box) box.style.display = 'none';
+      showToast('E-mail confirmado com sucesso!', 'success');
+      showStep(2);
+    } else if (msgEl) {
+      msgEl.classList.add('show');
+      msgEl.style.color = '#dc3545';
+      msgEl.textContent = result.message || 'Código incorreto';
+    }
+  } catch (error) {
+    console.error('Erro ao confirmar código:', error);
+    if (msgEl) {
+      msgEl.classList.add('show');
+      msgEl.style.color = '#dc3545';
+      msgEl.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Confirmar código';
+    }
   }
 }
 
@@ -692,6 +751,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const reenviarInicialBtn = document.getElementById('reenviarInicialBtn');
   if (reenviarInicialBtn) reenviarInicialBtn.addEventListener('click', reenviarEmailInicial);
+
+  const confirmarCodigoBtn = document.getElementById('confirmarCodigoBtn');
+  if (confirmarCodigoBtn) confirmarCodigoBtn.addEventListener('click', confirmarCodigoVerificacao);
+
+  const codigoInput = document.getElementById('codigoVerificacaoInput');
+  if (codigoInput) {
+    codigoInput.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+    codigoInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirmarCodigoVerificacao();
+      }
+    });
+  }
 
   // Auto-advance on Enter key
   document.addEventListener('keydown', function(e) {

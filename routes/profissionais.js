@@ -372,12 +372,13 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
       }
 
       const token = crypto.randomBytes(32).toString('hex');
+      const codigo = String(Math.floor(100000 + Math.random() * 900000));
       const nomeContato = nome || 'Profissional';
 
       db.query(
-        `INSERT INTO pre_verificacoes_email (email, token, verificado) VALUES (?, ?, 0)
-         ON DUPLICATE KEY UPDATE token = ?, verificado = 0, data_criacao = CURRENT_TIMESTAMP`,
-        [email, token, token],
+        `INSERT INTO pre_verificacoes_email (email, token, codigo, verificado) VALUES (?, ?, ?, 0)
+         ON DUPLICATE KEY UPDATE token = ?, codigo = ?, verificado = 0, data_criacao = CURRENT_TIMESTAMP`,
+        [email, token, codigo, token, codigo],
         (err2) => {
           if (err2) {
             console.error('Erro ao registrar pré-verificação:', err2);
@@ -388,28 +389,69 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
               <h2 style="color:#e60000;">Confirme seu e-mail - Acheei</h2>
               <p>Olá!</p>
-              <p>Para continuar seu cadastro na Acheei, confirme seu endereço de e-mail clicando no botão abaixo:</p>
-              <p style="text-align:center;margin:30px 0;">
+              <p>Para continuar seu cadastro na Acheei, use o código abaixo na página de cadastro:</p>
+              <p style="text-align:center;margin:24px 0;">
+                <span style="display:inline-block;background:#f5f5f5;border:2px dashed #e60000;color:#e60000;font-size:28px;font-weight:bold;letter-spacing:6px;padding:14px 24px;border-radius:8px;">${codigo}</span>
+              </p>
+              <p>Ou, se preferir, clique no botão para confirmar automaticamente:</p>
+              <p style="text-align:center;margin:20px 0;">
                 <a href="${link}" style="background:#e60000;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Confirmar E-mail</a>
               </p>
-              <p>Se o botão não funcionar, copie e cole este link no navegador:</p>
-              <p style="word-break:break-all;color:#555;font-size:13px;">${link}</p>
-              <p style="color:#999;font-size:12px;">Este link expira em 24 horas.</p>
+              <p style="color:#999;font-size:12px;">O código e o link expiram em 24 horas.</p>
             </div>`;
           sendEmail({
             toEmail: email,
             toName: nomeContato,
             subject: 'Confirme seu e-mail - Acheei',
             htmlContent: html,
-            textContent: 'Confirme seu e-mail na Acheei acessando: ' + link
+            textContent: 'Seu codigo de confirmacao Acheei: ' + codigo + '. Ou acesse: ' + link
           }).then(() => {
-            res.json({ success: true, message: 'Link de confirmação enviado para seu e-mail.' });
+            res.json({ success: true, message: 'Código e link de confirmação enviados para seu e-mail.' });
           }).catch(e => {
             console.error('Erro ao enviar e-mail de pré-verificação:', e.message);
             res.status(500).json({ success: false, message: 'Erro ao enviar o e-mail. Tente novamente mais tarde.' });
           });
         }
       );
+    });
+  });
+
+  // ============================================
+  // POST /api/profissionais/confirmar-codigo
+  // Confirma o e-mail do passo 1 usando o código de 6 dígitos
+  // (alternativa ao link, que pode ser afetado pelo rastreamento
+  // de cliques de provedores de e-mail)
+  // ============================================
+  router.post('/confirmar-codigo', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const { email, codigo } = req.body;
+    if (!email || !codigo) {
+      return res.status(400).json({ success: false, message: 'Informe o e-mail e o código' });
+    }
+    db.query('SELECT id, codigo, verificado FROM pre_verificacoes_email WHERE email = ?', [email], (err, results) => {
+      if (err) {
+        console.error('Erro ao confirmar código:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao confirmar código' });
+      }
+      if (results.length === 0) {
+        return res.status(400).json({ success: false, message: 'Nenhuma verificação pendente para este e-mail' });
+      }
+      const registro = results[0];
+      if (registro.verificado) {
+        return res.json({ success: true, message: 'E-mail já confirmado.' });
+      }
+      if (String(registro.codigo) !== String(codigo).trim()) {
+        return res.status(400).json({ success: false, message: 'Código incorreto. Verifique e tente novamente.' });
+      }
+      db.query('UPDATE pre_verificacoes_email SET verificado = 1 WHERE id = ?', [registro.id], (err2) => {
+        if (err2) {
+          console.error('Erro ao atualizar verificação por código:', err2);
+          return res.status(500).json({ success: false, message: 'Erro ao confirmar código' });
+        }
+        res.json({ success: true, message: 'E-mail confirmado com sucesso!' });
+      });
     });
   });
 
