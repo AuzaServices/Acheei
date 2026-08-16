@@ -265,6 +265,7 @@ var sc = prof.status_aprovacao;
     fotosHtml += '<div class="detalhes-foto-item" style="position:relative;">';
     if (fotoUrl) {
       fotosHtml += '<img src="' + fotoUrl + '" alt="Servico ' + (i + 1) + '">';
+      fotosHtml += '<button type="button" class="detalhes-remover-foto" onclick="removerFotoServico(' + prof.id + ', ' + i + ')" title="Excluir foto" aria-label="Excluir foto">&times;</button>';
     } else {
       fotosHtml += '<div style="width:100%;height:150px;border:2px dashed var(--gray-lighter);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--gray-medium);background:var(--gray-bg);">Sem foto</div>';
     }
