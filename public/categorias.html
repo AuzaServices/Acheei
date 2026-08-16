@@ -261,10 +261,12 @@
       max-width: 480px; margin: 0 auto 36px; position: relative;
     }
     .allcats-search input {
-      width: 100%; padding: 14px 18px 14px 46px; border-radius: var(--radius-full);
+      width: 100%; padding: 14px 18px 14px 46px; border-radius: 999px;
       border: 2px solid var(--gray-lighter); font-size: 15px; transition: var(--transition);
+      outline: none; box-shadow: none; -webkit-appearance: none; appearance: none;
     }
-    .allcats-search input:focus { outline: none; border-color: var(--red-primary); }
+    .allcats-search input:focus,
+    .allcats-search input:focus-visible { outline: none; box-shadow: none; border-color: var(--red-primary); }
     .allcats-search .search-ic {
       position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--gray-medium);
       width: 18px; height: 18px; display: flex;
