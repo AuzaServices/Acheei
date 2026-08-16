@@ -9,6 +9,62 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'acheei_secret_key_2024_admin';
 
+// ============================================
+// Autocorreção de domínio de e-mail
+// Evita que o usuário burle/erro o domínio
+// (ex: @gmil -> @gmail.com, @hotmial -> @hotmail.com)
+// ============================================
+const DOMINIOS_EMAIL_CONHECIDOS = [
+  'gmail.com', 'hotmail.com', 'outlook.com', 'outlook.com.br', 'yahoo.com',
+  'icloud.com', 'live.com', 'uol.com.br', 'bol.com.br', 'terra.com.br',
+  'globo.com', 'aol.com', 'proton.me', 'msn.com'
+];
+
+function distanciaLevenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const custo = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + custo);
+    }
+  }
+  return dp[m][n];
+}
+
+function corrigirDominioEmail(email) {
+  if (!email || !email.includes('@')) return email;
+  const partes = email.split('@');
+  if (partes.length !== 2) return email;
+  const usuario = partes[0];
+  const dominio = partes[1].trim().toLowerCase();
+  if (!dominio) return email;
+
+  if (DOMINIOS_EMAIL_CONHECIDOS.includes(dominio)) return email.trim();
+
+  let melhorDominio = null;
+  let melhorDistancia = 3;
+
+  for (const conhecido of DOMINIOS_EMAIL_CONHECIDOS) {
+    const baseConhecido = conhecido.split('.')[0];
+    const dist = Math.min(
+      distanciaLevenshtein(dominio, baseConhecido),
+      distanciaLevenshtein(dominio, conhecido)
+    );
+    if (dist < melhorDistancia) {
+      melhorDistancia = dist;
+      melhorDominio = conhecido;
+    }
+  }
+
+  if (melhorDominio && melhorDistancia <= 2) {
+    return usuario + '@' + melhorDominio;
+  }
+  return email.trim();
+}
+
 module.exports = function(db, dbConnected) {
 
   // ============================================
@@ -19,7 +75,10 @@ module.exports = function(db, dbConnected) {
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-const { nome, email, senha, telefone } = req.body;
+let { nome, email, senha, telefone } = req.body;
+
+    // Autocorrige o domínio do e-mail antes de salvar (ex: @gmil -> @gmail.com)
+    email = corrigirDominioEmail(email || '');
 
     if (!nome || !email || !senha || !telefone) {
       return res.status(400).json({ success: false, message: 'Nome, email, senha e telefone são obrigatórios' });

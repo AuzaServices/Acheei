@@ -71,6 +71,66 @@ function validarCPF(cpf) {
   return true;
 }
 
+// ============================================
+// Autocorreção de domínio de e-mail
+// Evita que o usuário burle/erro o domínio
+// (ex: @gmil -> @gmail.com, @hotmial -> @hotmail.com)
+// ============================================
+const DOMINIOS_EMAIL_CONHECIDOS = [
+  'gmail.com', 'hotmail.com', 'outlook.com', 'outlook.com.br', 'yahoo.com',
+  'icloud.com', 'live.com', 'uol.com.br', 'bol.com.br', 'terra.com.br',
+  'globo.com', 'aol.com', 'proton.me', 'msn.com'
+];
+
+// Calcula a distância de Levenshtein entre duas strings
+function distanciaLevenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const custo = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + custo);
+    }
+  }
+  return dp[m][n];
+}
+
+// Corrige erros de digitação no domínio do e-mail
+function corrigirDominioEmail(email) {
+  if (!email || !email.includes('@')) return email;
+  const partes = email.split('@');
+  if (partes.length !== 2) return email;
+  const usuario = partes[0];
+  const dominio = partes[1].trim().toLowerCase();
+  if (!dominio) return email;
+
+  // Já está em um domínio conhecido? Retorna como está.
+  if (DOMINIOS_EMAIL_CONHECIDOS.includes(dominio)) return email.trim();
+
+  // Procura o domínio conhecido mais próximo (aceita só correções pequenas)
+  let melhorDominio = null;
+  let melhorDistancia = 3;
+
+  for (const conhecido of DOMINIOS_EMAIL_CONHECIDOS) {
+    const baseConhecido = conhecido.split('.')[0];
+    const dist = Math.min(
+      distanciaLevenshtein(dominio, baseConhecido),
+      distanciaLevenshtein(dominio, conhecido)
+    );
+    if (dist < melhorDistancia) {
+      melhorDistancia = dist;
+      melhorDominio = conhecido;
+    }
+  }
+
+  if (melhorDominio && melhorDistancia <= 2) {
+    return usuario + '@' + melhorDominio;
+  }
+  return email.trim();
+}
+
 function resizeImage(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -406,11 +466,23 @@ function validateStep(step) {
       }
     }
 
-    // Validar email
-    if (!email.value.trim() || !email.value.includes('@') || !email.value.includes('.')) {
+    // Validar email (com autocorreção do domínio)
+    const emailBruto = email.value.trim();
+    if (!emailBruto || !emailBruto.includes('@')) {
       email.classList.add('error');
       document.getElementById('emailError').classList.add('show');
       valid = false;
+    } else {
+      const emailCorrigido = corrigirDominioEmail(emailBruto);
+      if (emailCorrigido !== emailBruto) {
+        email.value = emailCorrigido;
+        showToast('Corrigimos o domínio do seu e-mail para: ' + emailCorrigido, 'info');
+      }
+      if (!emailCorrigido.includes('@') || !emailCorrigido.includes('.')) {
+        email.classList.add('error');
+        document.getElementById('emailError').classList.add('show');
+        valid = false;
+      }
     }
 
     // Validar senha
@@ -625,7 +697,7 @@ const data = {
       foto_perfil: fotoPerfilUrl,
       profissao: document.getElementById('profissao').value.trim(),
       fotos_servicos: fotosServicosUrls,
-      email: document.getElementById('email').value.trim(),
+      email: corrigirDominioEmail(document.getElementById('email').value.trim()),
       senha: document.getElementById('senha').value
     };
 

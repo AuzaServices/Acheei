@@ -66,6 +66,62 @@ function formatTelefone(value) {
 }
 
 // ============================================
+// Autocorreção de domínio de e-mail
+// Evita que o usuário burle/erro o domínio
+// (ex: @gmil -> @gmail.com, @hotmial -> @hotmail.com)
+// ============================================
+var DOMINIOS_EMAIL_CONHECIDOS = [
+  'gmail.com', 'hotmail.com', 'outlook.com', 'outlook.com.br', 'yahoo.com',
+  'icloud.com', 'live.com', 'uol.com.br', 'bol.com.br', 'terra.com.br',
+  'globo.com', 'aol.com', 'proton.me', 'msn.com'
+];
+
+function distanciaLevenshtein(a, b) {
+  var m = a.length, n = b.length;
+  var dp = [];
+  for (var i = 0; i <= m; i++) { dp[i] = []; dp[i][0] = i; }
+  for (var j = 0; j <= n; j++) dp[0][j] = j;
+  for (var i = 1; i <= m; i++) {
+    for (var j = 1; j <= n; j++) {
+      var custo = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + custo);
+    }
+  }
+  return dp[m][n];
+}
+
+function corrigirDominioEmail(email) {
+  if (!email || email.indexOf('@') === -1) return email;
+  var partes = email.split('@');
+  if (partes.length !== 2) return email;
+  var usuario = partes[0];
+  var dominio = partes[1].trim().toLowerCase();
+  if (!dominio) return email;
+
+  if (DOMINIOS_EMAIL_CONHECIDOS.indexOf(dominio) !== -1) return email.trim();
+
+  var melhorDominio = null;
+  var melhorDistancia = 3;
+
+  for (var i = 0; i < DOMINIOS_EMAIL_CONHECIDOS.length; i++) {
+    var conhecido = DOMINIOS_EMAIL_CONHECIDOS[i];
+    var baseConhecido = conhecido.split('.')[0];
+    var distBase = distanciaLevenshtein(dominio, baseConhecido);
+    var distCompleto = distanciaLevenshtein(dominio, conhecido);
+    var dist = distBase < distCompleto ? distBase : distCompleto;
+    if (dist < melhorDistancia) {
+      melhorDistancia = dist;
+      melhorDominio = conhecido;
+    }
+  }
+
+  if (melhorDominio && melhorDistancia <= 2) {
+    return usuario + '@' + melhorDominio;
+  }
+  return email.trim();
+}
+
+// ============================================
 // Som "chiclete" (estalo de goma de mascar) ao receber nova mensagem
 // ============================================
 function tocarSomNotificacao() {
@@ -199,9 +255,15 @@ async function cadastro(event) {
   event.preventDefault();
   var btn = document.getElementById('btnCriarConta');
   var nome = document.getElementById('cadastroNome').value.trim();
-  var email = document.getElementById('cadastroEmail').value.trim();
+  var email = corrigirDominioEmail(document.getElementById('cadastroEmail').value.trim());
   var senha = document.getElementById('cadastroSenha').value;
   var telefone = document.getElementById('cadastroTelefone').value.trim();
+
+  // Reflete a correção do domínio no campo para o usuário ver
+  if (document.getElementById('cadastroEmail').value.trim() !== email) {
+    document.getElementById('cadastroEmail').value = email;
+    showToast('Corrigimos o domínio do seu e-mail para: ' + email, 'info');
+  }
 
   if (!nome || !email || !senha || !telefone) {
     document.getElementById('cadastroError').textContent = 'Preencha todos os campos';
