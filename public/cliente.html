@@ -355,7 +355,24 @@
         <label for="cadastroTelefone">WhatsApp (obrigatório)</label>
         <input type="tel" id="cadastroTelefone" placeholder="(11) 99999-9999" required>
       </div>
-<button type="submit" class="btn btn-primary btn-lg" id="btnCriarConta">Criar Conta</button>
+
+      <!-- Confirmacao de WhatsApp -->
+      <div class="whatsapp-confirm" id="whatsappConfirmBox">
+        <button type="button" class="btn btn-primary btn-sm" id="btnConfirmarWhatsApp" onclick="gerarConfirmacaoWhatsApp()">Confirmar WhatsApp</button>
+        <div id="whatsappConfirmStep" style="display:none;margin-top:10px;">
+          <p style="margin:0 0 8px;font-size:13px;color:var(--gray-medium);">
+            Clique em <strong>Abrir WhatsApp</strong>, envie a mensagem com o codigo para nosso WhatsApp
+            e depois digite o codigo abaixo para confirmar.
+          </p>
+          <button type="button" class="btn btn-primary btn-sm" id="btnAbrirWhatsApp" onclick="abrirWhatsAppLink()" style="width:100%;justify-content:center;margin-bottom:8px;">Abrir WhatsApp</button>
+          <input type="text" id="whatsappCodigoInput" placeholder="Codigo de 6 digitos" maxlength="6" inputmode="numeric" style="width:100%;margin-bottom:8px;">
+          <button type="button" class="btn btn-primary btn-sm" id="btnConfirmarCodigoWhatsApp" onclick="confirmarCodigoWhatsApp()" style="width:100%;justify-content:center;">Confirmar codigo</button>
+        </div>
+        <div class="auth-error" id="whatsappError"></div>
+        <div class="auth-success" id="whatsappSuccess" style="display:none;">WhatsApp confirmado!</div>
+      </div>
+
+<button type="submit" class="btn btn-primary btn-lg" id="btnCriarConta" disabled>Criar Conta</button>
 <div class="auth-error" id="cadastroError"></div>
       <div class="auth-success" id="cadastroSuccess">Conta criada! Entrando...</div>
     </form>

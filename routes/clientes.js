@@ -9,6 +9,10 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'acheei_secret_key_2024_admin';
 
+// Número do WhatsApp comercial da Acheei (formato internacional, só dígitos)
+// Para onde o cliente envia a mensagem com o código de confirmação (link wa.me)
+const WHATSAPP_EMPRESA = process.env.WHATSAPP_EMPRESA || '5585991340658';
+
 // ============================================
 // Autocorreção de domínio de e-mail
 // Evita que o usuário burle/erro o domínio
@@ -118,6 +122,21 @@ let { nome, email, senha, telefone } = req.body;
           });
         }
 
+      // Verificar se o WhatsApp do cliente já foi confirmado (passo de confirmação)
+      let telefoneVerif = telefoneLimpo;
+      if (!(telefoneVerif.startsWith('55') && (telefoneVerif.length === 12 || telefoneVerif.length === 13))) {
+        telefoneVerif = '55' + telefoneLimpo;
+      }
+      db.query('SELECT verificado FROM pre_verificacoes_whatsapp WHERE telefone = ?', [telefoneVerif], (err, waResults) => {
+        if (err) {
+          console.error('Erro ao verificar confirmação de WhatsApp:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao verificar confirmação de WhatsApp' });
+        }
+        const waConfirmado = waResults.length > 0 && !!waResults[0].verificado;
+        if (!waConfirmado) {
+          return res.status(400).json({ success: false, message: 'Confirme seu WhatsApp antes de concluir o cadastro.' });
+        }
+
       bcrypt.hash(senha, 10, (err, senhaHash) => {
         if (err) {
           return res.status(500).json({ success: false, message: 'Erro ao processar senha' });
@@ -153,6 +172,7 @@ res.status(201).json({
             });
           }
         );
+      });
       });
       });
     });
@@ -231,6 +251,85 @@ res.status(201).json({
       return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
     }
   }
+
+  // ============================================
+  // POST /api/clientes/verificar-whatsapp-inicial
+  // Gera o código de confirmação do WhatsApp do cliente
+  // (fluxo gratuito via link wa.me - o cliente envia o código
+  // para o WhatsApp comercial da Acheei)
+  // ============================================
+  router.post('/verificar-whatsapp-inicial', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const telefoneBruto = (req.body.telefone || '').replace(/\D/g, '');
+    if (telefoneBruto.length < 10) {
+      return res.status(400).json({ success: false, message: 'Informe um telefone válido com DDD para WhatsApp' });
+    }
+    // Normaliza para o formato internacional (prefixo 55 - Brasil)
+    // Números de 10-11 dígitos ainda não têm DDI; 12-13 já têm.
+    const telefoneLimpo = telefoneBruto;
+    let telefone = telefoneLimpo;
+    if (!(telefone.startsWith('55') && (telefone.length === 12 || telefone.length === 13))) {
+      telefone = '55' + telefoneLimpo;
+    }
+
+    const codigo = String(Math.floor(100000 + Math.random() * 900000));
+    const mensagem = 'Ola Acheei! Meu codigo de confirmacao de WhatsApp e: ' + codigo;
+    const link = 'https://wa.me/' + WHATSAPP_EMPRESA + '?text=' + encodeURIComponent(mensagem);
+
+    db.query(
+      `INSERT INTO pre_verificacoes_whatsapp (telefone, codigo, verificado) VALUES (?, ?, 0)
+       ON DUPLICATE KEY UPDATE codigo = ?, verificado = 0, data_criacao = CURRENT_TIMESTAMP`,
+      [telefone, codigo, codigo],
+      (err) => {
+        if (err) {
+          console.error('Erro ao registrar pré-verificação de WhatsApp:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao processar a confirmação de WhatsApp' });
+        }
+        res.json({ success: true, message: 'Codigo gerado. Envie-o para nosso WhatsApp para confirmar.', codigo, link, telefone });
+      }
+    );
+  });
+
+  // ============================================
+  // POST /api/clientes/confirmar-whatsapp
+  // Valida o código digitado pelo cliente e marca o
+  // WhatsApp como confirmado
+  // ============================================
+  router.post('/confirmar-whatsapp', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const telefone = (req.body.telefone || '').replace(/\D/g, '');
+    const codigo = String(req.body.codigo || '').trim();
+    if (!telefone || !codigo) {
+      return res.status(400).json({ success: false, message: 'Informe o telefone e o código' });
+    }
+    db.query('SELECT id, codigo, verificado FROM pre_verificacoes_whatsapp WHERE telefone = ?', [telefone], (err, results) => {
+      if (err) {
+        console.error('Erro ao confirmar WhatsApp:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao confirmar WhatsApp' });
+      }
+      if (results.length === 0) {
+        return res.status(400).json({ success: false, message: 'Nenhuma verificação pendente para este número' });
+      }
+      const registro = results[0];
+      if (registro.verificado) {
+        return res.json({ success: true, message: 'WhatsApp já confirmado.' });
+      }
+      if (String(registro.codigo) !== codigo) {
+        return res.status(400).json({ success: false, message: 'Código incorreto. Verifique a mensagem enviada e tente novamente.' });
+      }
+      db.query('UPDATE pre_verificacoes_whatsapp SET verificado = 1 WHERE id = ?', [registro.id], (err2) => {
+        if (err2) {
+          console.error('Erro ao atualizar verificação de WhatsApp:', err2);
+          return res.status(500).json({ success: false, message: 'Erro ao confirmar WhatsApp' });
+        }
+        res.json({ success: true, message: 'WhatsApp confirmado com sucesso!' });
+      });
+    });
+  });
 
   // ============================================
   // GET /api/clientes/me

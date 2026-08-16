@@ -125,6 +125,19 @@ CREATE TABLE IF NOT EXISTS clientes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================
+-- Tabela: pre_verificacoes_whatsapp
+-- Confirmação do WhatsApp no cadastro do cliente
+-- (código gerado no passo de confirmação via link wa.me)
+-- ============================================
+CREATE TABLE IF NOT EXISTS pre_verificacoes_whatsapp (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  telefone VARCHAR(20) NOT NULL UNIQUE,
+  codigo VARCHAR(6) NOT NULL,
+  verificado BOOLEAN DEFAULT 0,
+  data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================
 -- Tabela: avaliacoes
 -- Uma avaliacao por solicitacao, feita pelo cliente apos a liberacao do chat
 -- A avaliacao e independente da solicitacao: se a solicitacao for excluida,
