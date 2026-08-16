@@ -5,6 +5,11 @@
 
 const API_BASE = '/api';
 
+// Estado da confirmação de WhatsApp no modal de solicitação
+var modalWhatsAppConfirmado = false;
+var modalWhatsAppTelefone = '';
+var modalWhatsAppLink = '';
+
 // ============================================
 // Estrelas SVG (arredondadas, minimalistas)
 // ============================================
@@ -490,6 +495,95 @@ function fecharDropdownUsuario() {
 // ============================================
 var pushNoticeAceito = localStorage.getItem('acheei_notificacoes') === 'true';
 
+// ============================================
+// Confirmação de WhatsApp no modal de solicitação
+// (fluxo gratuito via link wa.me)
+// ============================================
+function modalMostrarWhatsAppErro(msg) {
+  var err = document.getElementById('modalWhatsappError');
+  var ok = document.getElementById('modalWhatsappSuccess');
+  if (err) { err.textContent = msg || ''; err.style.display = msg ? 'block' : 'none'; }
+  if (ok) ok.style.display = 'none';
+}
+
+function modalMostrarWhatsAppSucesso(msg) {
+  var err = document.getElementById('modalWhatsappError');
+  var ok = document.getElementById('modalWhatsappSuccess');
+  if (err) { err.style.display = 'none'; err.textContent = ''; }
+  if (ok) { ok.style.display = 'block'; ok.textContent = msg || 'WhatsApp confirmado!'; }
+}
+
+async function modalGerarConfirmacaoWhatsApp() {
+  var tel = document.getElementById('clienteTelefone').value.trim();
+  if (!tel || tel.replace(/\D/g, '').length < 10) {
+    modalMostrarWhatsAppErro('Informe um telefone válido com DDD para gerar a confirmação.');
+    return;
+  }
+  modalMostrarWhatsAppErro('');
+  var btn = document.getElementById('modalBtnConfirmarWhatsApp');
+  if (btn) { btn.disabled = true; btn.textContent = 'Gerando...'; }
+  var result = await fetch(API_BASE + '/clientes/verificar-whatsapp-inicial', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefone: tel })
+  }).then(function(r) { return r.json(); }).catch(function() { return null; });
+  if (btn) { btn.disabled = false; btn.textContent = 'Confirmar WhatsApp'; }
+  if (!result || !result.success) {
+    modalMostrarWhatsAppErro((result && result.message) || 'Erro ao gerar a confirmação.');
+    return;
+  }
+  modalWhatsAppTelefone = result.telefone;
+  modalWhatsAppLink = result.link;
+  var step = document.getElementById('modalWhatsappConfirmStep');
+  if (step) step.style.display = 'block';
+  showToast('Confirme seu WhatsApp enviando o código para nosso número.', 'info');
+}
+
+function modalAbrirWhatsAppLink() {
+  if (modalWhatsAppLink) {
+    window.open(modalWhatsAppLink, '_blank');
+  } else {
+    modalMostrarWhatsAppErro('Clique em "Confirmar WhatsApp" primeiro.');
+  }
+}
+
+async function modalConfirmarCodigoWhatsApp() {
+  var codigo = document.getElementById('modalWhatsappCodigoInput').value.trim();
+  if (!codigo || codigo.length !== 6) {
+    modalMostrarWhatsAppErro('Digite o código de 6 dígitos enviado.');
+    return;
+  }
+  if (!modalWhatsAppTelefone) {
+    modalMostrarWhatsAppErro('Gere a confirmação antes de confirmar o código.');
+    return;
+  }
+  modalMostrarWhatsAppErro('');
+  var btn = document.getElementById('modalBtnConfirmarCodigoWhatsApp');
+  if (btn) { btn.disabled = true; btn.textContent = 'Confirmando...'; }
+  var result = await fetch(API_BASE + '/clientes/confirmar-whatsapp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telefone: modalWhatsAppTelefone, codigo: codigo })
+  }).then(function(r) { return r.json(); }).catch(function() { return null; });
+  if (btn) { btn.disabled = false; btn.textContent = 'Confirmar codigo'; }
+  if (result && result.success) {
+    modalWhatsAppConfirmado = true;
+    modalMostrarWhatsAppSucesso('WhatsApp confirmado!');
+    var step = document.getElementById('modalWhatsappConfirmStep');
+    if (step) step.style.display = 'none';
+    var btnGerar = document.getElementById('modalBtnConfirmarWhatsApp');
+    if (btnGerar) { btnGerar.disabled = true; btnGerar.textContent = 'WhatsApp confirmado'; }
+    // Libera o envio da solicitação
+    var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('btn-disabled');
+    }
+  } else {
+    modalMostrarWhatsAppErro((result && result.message) || 'Código incorreto. Tente novamente.');
+  }
+}
+
 // Profissionais não podem solicitar serviços a outros profissionais
 function mostrarErroProfSolicitacao(event) {
   if (event) {
@@ -518,6 +612,21 @@ async function abrirModalSolicitacao(id, nome, profissao) {
 
   if (cadastroSection) cadastroSection.classList.remove('hidden');
 
+  // Reseta o estado da confirmação de WhatsApp ao abrir o modal
+  modalWhatsAppConfirmado = false;
+  modalWhatsAppTelefone = '';
+  modalWhatsAppLink = '';
+  var modalWaStep = document.getElementById('modalWhatsappConfirmStep');
+  if (modalWaStep) modalWaStep.style.display = 'none';
+  var modalWaGerar = document.getElementById('modalBtnConfirmarWhatsApp');
+  if (modalWaGerar) { modalWaGerar.disabled = false; modalWaGerar.textContent = 'Confirmar WhatsApp'; }
+  var modalWaSucesso = document.getElementById('modalWhatsappSuccess');
+  if (modalWaSucesso) modalWaSucesso.style.display = 'none';
+  var modalWaErro = document.getElementById('modalWhatsappError');
+  if (modalWaErro) { modalWaErro.style.display = 'none'; modalWaErro.textContent = ''; }
+  var modalWaCodigo = document.getElementById('modalWhatsappCodigoInput');
+  if (modalWaCodigo) modalWaCodigo.value = '';
+
   // Garante que o estado de login foi verificado antes de decidir como renderizar o modal
   try {
     await verificarLoginCliente();
@@ -536,7 +645,7 @@ async function abrirModalSolicitacao(id, nome, profissao) {
     // Não logado: manter modal completo (cadastro embutido)
     if (cadastroSection) cadastroSection.classList.remove('hidden');
 
-    // Bloquear envio até o usuário aceitar as notificações push
+    // Bloquear envio até o usuário confirmar o WhatsApp
     var notificaoSuportada = typeof Notification !== 'undefined';
     var notificacoesOk = pushNoticeAceito || (notificaoSuportada && Notification.permission === 'granted');
 
@@ -548,9 +657,10 @@ async function abrirModalSolicitacao(id, nome, profissao) {
       }
     }
     if (submitBtn) {
-      submitBtn.disabled = notificaoSuportada ? !notificacoesOk : false;
-      submitBtn.classList.toggle('btn-disabled', notificaoSuportada && !notificacoesOk);
-      if (submitBtn.disabled) submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+      // Só libera o envio após confirmar o WhatsApp
+      submitBtn.disabled = true;
+      submitBtn.classList.add('btn-disabled');
+      submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
     }
   }
 
@@ -576,12 +686,7 @@ async function ativarNotificacaoSolicitacao() {
       pushNotice.innerHTML = '✅ <strong>Notificações ativadas!</strong>';
       pushNotice.style.borderColor = '#28a745';
     }
-    // Liberar o botão de envio após aceitar notificações
-    var submitBtn = document.querySelector('#solicitacaoForm button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.classList.remove('btn-disabled');
-    }
+    // O envio da solicitação só é liberado após confirmar o WhatsApp
   }
 }
 
@@ -660,6 +765,14 @@ setTimeout(function() {
     }
     if (senha.length < 6) {
       showToast('A senha deve ter no mínimo 6 caracteres', 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
+      return;
+    }
+
+    // Exige a confirmação do WhatsApp antes de criar a conta
+    if (!modalWhatsAppConfirmado) {
+      showToast('Confirme seu WhatsApp antes de enviar a solicitação', 'error');
       submitBtn.disabled = false;
       submitBtn.innerHTML = '<span data-icon="send"></span> Enviar Solicitação';
       return;
@@ -1104,10 +1217,40 @@ document.addEventListener('DOMContentLoaded', function() {
   // Formulário de solicitação
   document.getElementById('solicitacaoForm').addEventListener('submit', enviarSolicitacao);
 
-  // Máscara de telefone
+  // Máscara de telefone (modal)
   document.getElementById('clienteTelefone').addEventListener('input', function(e) {
     e.target.value = formatTelefone(e.target.value);
+    // Se o número mudar após confirmar, exige nova confirmação
+    if (modalWhatsAppConfirmado) {
+      modalWhatsAppConfirmado = false;
+      modalWhatsAppTelefone = '';
+      modalWhatsAppLink = '';
+      var mws = document.getElementById('modalWhatsappSuccess');
+      if (mws) mws.style.display = 'none';
+      var mwe = document.getElementById('modalWhatsappError');
+      if (mwe) { mwe.style.display = 'none'; mwe.textContent = ''; }
+      var mwStep = document.getElementById('modalWhatsappConfirmStep');
+      if (mwStep) mwStep.style.display = 'none';
+      var mwGerar = document.getElementById('modalBtnConfirmarWhatsApp');
+      if (mwGerar) { mwGerar.disabled = false; mwGerar.textContent = 'Confirmar WhatsApp'; }
+      var mwSubmit = document.querySelector('#solicitacaoForm button[type="submit"]');
+      if (mwSubmit) { mwSubmit.disabled = true; mwSubmit.classList.add('btn-disabled'); }
+    }
   });
+
+  // Campo do código de confirmação (modal): só dígitos (6)
+  var mwCodigo = document.getElementById('modalWhatsappCodigoInput');
+  if (mwCodigo) {
+    mwCodigo.addEventListener('input', function(e) {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    });
+    mwCodigo.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        modalConfirmarCodigoWhatsApp();
+      }
+    });
+  }
 
   // Fechar modal com ESC
   document.addEventListener('keydown', function(e) {

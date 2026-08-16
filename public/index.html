@@ -467,6 +467,23 @@
             <label for="clienteTelefone">Seu Telefone</label>
             <input type="tel" id="clienteTelefone" name="cliente_telefone" placeholder="(11) 99999-9999">
           </div>
+
+          <!-- Confirmacao de WhatsApp -->
+          <div class="whatsapp-confirm" id="modalWhatsappConfirmBox">
+            <p class="wa-title">WhatsApp</p>
+            <button type="button" class="btn btn-primary wa-btn" id="modalBtnConfirmarWhatsApp" onclick="modalGerarConfirmacaoWhatsApp()">Confirmar WhatsApp</button>
+            <div id="modalWhatsappConfirmStep" class="wa-actions" style="display:none;">
+              <p class="wa-hint">
+                Clique em <strong>Abrir WhatsApp</strong>, envie a mensagem com o codigo para nosso WhatsApp
+                e depois digite o codigo abaixo para confirmar.
+              </p>
+              <button type="button" class="btn wa-btn-whatsapp" id="modalBtnAbrirWhatsApp" onclick="modalAbrirWhatsAppLink()">Abrir WhatsApp</button>
+              <input type="text" class="wa-code" id="modalWhatsappCodigoInput" placeholder="Codigo de 6 digitos" maxlength="6" inputmode="numeric">
+              <button type="button" class="btn btn-primary wa-btn" id="modalBtnConfirmarCodigoWhatsApp" onclick="modalConfirmarCodigoWhatsApp()">Confirmar codigo</button>
+            </div>
+            <div class="auth-error" id="modalWhatsappError"></div>
+            <div class="wa-status-success" id="modalWhatsappSuccess" style="display:none;">WhatsApp confirmado!</div>
+          </div>
         </div>
 <div class="form-group">
           <label for="dataHora">Data e Hora <span style="color:var(--gray-light);font-weight:400;">(opcional)</span></label>

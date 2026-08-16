@@ -2446,6 +2446,81 @@ button[type="button"] {
   min-height: 48px;
 }
 
+/* ==================== Confirmação de WhatsApp ==================== */
+.whatsapp-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--gray-light);
+  border-radius: var(--radius-sm);
+  background: var(--gray-bg);
+}
+
+.whatsapp-confirm .wa-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-dark, #333);
+  margin: 0;
+}
+
+.whatsapp-confirm .wa-hint {
+  font-size: 13px;
+  color: var(--gray-medium);
+  line-height: 1.4;
+  margin: 0 0 4px;
+}
+
+.whatsapp-confirm .wa-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.whatsapp-confirm .wa-actions .btn,
+.whatsapp-confirm .wa-btn {
+  width: 100%;
+  justify-content: center;
+  white-space: normal;
+  min-height: 44px;
+}
+
+/* Botão de abrir o WhatsApp em tom verde (distinto do vermelho padrão) */
+.whatsapp-confirm .wa-btn-whatsapp {
+  background: #25d366;
+  color: var(--white);
+  box-shadow: 0 6px 14px rgba(37, 211, 102, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.whatsapp-confirm .wa-btn-whatsapp:hover {
+  background: #1ebe5b;
+  transform: translateY(-1px);
+}
+
+.whatsapp-confirm .wa-code {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-align: center;
+  border: 1px solid var(--gray-light);
+  border-radius: var(--radius-sm);
+}
+
+.whatsapp-confirm .wa-status-success {
+  font-size: 13px;
+  font-weight: 600;
+  color: #155724;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  text-align: center;
+}
+
 /* ==================== Responsivo - Modal footer & Cadastro ==================== */
 @media (max-width: 600px) {
   .modal-footer,
@@ -2455,7 +2530,6 @@ button[type="button"] {
     gap: 10px;
     padding: 16px 20px;
   }
-
   .modal-footer .btn,
   .form-navigation .btn {
     width: 100%;

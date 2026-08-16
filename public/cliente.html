@@ -358,18 +358,19 @@
 
       <!-- Confirmacao de WhatsApp -->
       <div class="whatsapp-confirm" id="whatsappConfirmBox">
-        <button type="button" class="btn btn-primary btn-sm" id="btnConfirmarWhatsApp" onclick="gerarConfirmacaoWhatsApp()">Confirmar WhatsApp</button>
-        <div id="whatsappConfirmStep" style="display:none;margin-top:10px;">
-          <p style="margin:0 0 8px;font-size:13px;color:var(--gray-medium);">
+        <p class="wa-title">WhatsApp</p>
+        <button type="button" class="btn btn-primary wa-btn" id="btnConfirmarWhatsApp" onclick="gerarConfirmacaoWhatsApp()">Confirmar WhatsApp</button>
+        <div id="whatsappConfirmStep" class="wa-actions" style="display:none;">
+          <p class="wa-hint">
             Clique em <strong>Abrir WhatsApp</strong>, envie a mensagem com o codigo para nosso WhatsApp
             e depois digite o codigo abaixo para confirmar.
           </p>
-          <button type="button" class="btn btn-primary btn-sm" id="btnAbrirWhatsApp" onclick="abrirWhatsAppLink()" style="width:100%;justify-content:center;margin-bottom:8px;">Abrir WhatsApp</button>
-          <input type="text" id="whatsappCodigoInput" placeholder="Codigo de 6 digitos" maxlength="6" inputmode="numeric" style="width:100%;margin-bottom:8px;">
-          <button type="button" class="btn btn-primary btn-sm" id="btnConfirmarCodigoWhatsApp" onclick="confirmarCodigoWhatsApp()" style="width:100%;justify-content:center;">Confirmar codigo</button>
+          <button type="button" class="btn wa-btn-whatsapp" id="btnAbrirWhatsApp" onclick="abrirWhatsAppLink()">Abrir WhatsApp</button>
+          <input type="text" class="wa-code" id="whatsappCodigoInput" placeholder="Codigo de 6 digitos" maxlength="6" inputmode="numeric">
+          <button type="button" class="btn btn-primary wa-btn" id="btnConfirmarCodigoWhatsApp" onclick="confirmarCodigoWhatsApp()">Confirmar codigo</button>
         </div>
         <div class="auth-error" id="whatsappError"></div>
-        <div class="auth-success" id="whatsappSuccess" style="display:none;">WhatsApp confirmado!</div>
+        <div class="wa-status-success" id="whatsappSuccess" style="display:none;">WhatsApp confirmado!</div>
       </div>
 
 <button type="submit" class="btn btn-primary btn-lg" id="btnCriarConta" disabled>Criar Conta</button>

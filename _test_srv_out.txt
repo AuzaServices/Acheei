@@ -1,0 +1,7 @@
+========================================
+  Acheei - Servidor rodando
+  http://localhost:3001
+========================================
+Conectado ao MySQL com sucesso!
+Admin padrao garantido: usuario=admin / senha=admin123
+[cleanup] Verificando solicitações expiradas...
