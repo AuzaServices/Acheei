@@ -2450,7 +2450,7 @@ button[type="button"] {
 .whatsapp-confirm {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   margin: 16px 0;
   padding: 14px 16px;
   border: 1px dashed var(--gray-light);
@@ -2475,7 +2475,7 @@ button[type="button"] {
 .whatsapp-confirm .wa-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .whatsapp-confirm .wa-actions .btn,

@@ -129,6 +129,9 @@
       <button class="dashboard-tab" onclick="switchTab('solicitacoes', this)">
         Solicitacoes <span class="count" id="countSolicitacoes">0</span>
       </button>
+      <button class="dashboard-tab" onclick="switchTab('clientes', this)">
+        Clientes <span class="count" id="countClientes">0</span>
+      </button>
     </div>
 
     <div class="tab-content active" id="tabPendentes">
@@ -190,6 +193,24 @@
 
     <div class="tab-content" id="tabSolicitacoes">
       <div id="solicitacoesList"></div>
+    </div>
+
+    <div class="tab-content" id="tabClientes">
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Foto</th>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>WhatsApp</th>
+              <th>Data Cadastro</th>
+              <th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody id="clientesBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

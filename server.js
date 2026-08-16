@@ -93,6 +93,7 @@ function criarTabelas() {
   db.query("ALTER TABLE solicitacoes ADD COLUMN cliente_id INT AFTER profissional_id", function(err) { if (err) { /* coluna já existe */ } });
   db.query("ALTER TABLE solicitacoes ADD COLUMN preference_id VARCHAR(100) AFTER status_pagamento", function(err) { if (err) { /* coluna já existe */ } });
   db.query("ALTER TABLE clientes ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription:', err.message); } });
+  db.query("ALTER TABLE clientes ADD COLUMN foto_perfil VARCHAR(255)", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar foto_perfil:', err.message); } });
   db.query("ALTER TABLE profissionais ADD COLUMN push_subscription LONGTEXT", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar push_subscription em profissionais:', err.message); } });
   db.query("ALTER TABLE profissionais ADD COLUMN email_verificado BOOLEAN DEFAULT 0 AFTER senha", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar email_verificado:', err.message); } });
   db.query("ALTER TABLE profissionais ADD COLUMN token_verificacao VARCHAR(255) AFTER email_verificado", function(err) { if (err && !String(err.message).toLowerCase().includes('duplicate')) { console.error('Erro ao adicionar token_verificacao:', err.message); } });

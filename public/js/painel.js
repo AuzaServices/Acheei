@@ -106,13 +106,14 @@ function switchTab(tab, btn) {
   btn.classList.add('active');
   var contents = document.querySelectorAll('.tab-content');
   for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
-  var map = { pendentes: 'tabPendentes', aprovados: 'tabAprovados', reprovados: 'tabReprovados', solicitacoes: 'tabSolicitacoes' };
+  var map = { pendentes: 'tabPendentes', aprovados: 'tabAprovados', reprovados: 'tabReprovados', solicitacoes: 'tabSolicitacoes', clientes: 'tabClientes' };
   document.getElementById(map[tab]).classList.add('active');
 }
 
 async function carregarDados() {
   await carregarProfissionais();
   await carregarSolicitacoes();
+  await carregarClientes();
 }
 
 async function carregarProfissionais() {
@@ -206,6 +207,40 @@ async function deletarProfissional(id) {
     if (result.erros && result.erros.length > 0) msg += ' (Alguns erros: ' + result.erros.join(', ') + ')';
     showToast(msg, 'success');
     await carregarProfissionais();
+  }
+}
+
+async function carregarClientes() {
+  var result = await apiRequest(API_BASE + '/admin/clientes');
+  if (result && result.success) {
+    renderizarClientes(result.data);
+    document.getElementById('countClientes').textContent = result.total;
+  }
+}
+
+function renderizarClientes(clientes) {
+  var tbody = document.getElementById('clientesBody');
+  tbody.innerHTML = '';
+  if (clientes.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">Nenhum cliente cadastrado</td></tr>';
+    return;
+  }
+  for (var i = 0; i < clientes.length; i++) {
+    var c = clientes[i];
+    var foto = c.foto_perfil ? '<img src="' + c.foto_perfil + '" alt="' + c.nome + '" class="foto-mini">' : '<div class="foto-mini-placeholder">' + icon('user') + '</div>';
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + foto + '</td><td><strong>' + c.nome + '</strong></td><td>' + c.email + '</td><td>' + (c.telefone || '—') + '</td><td>' + (c.data_cadastro ? new Date(c.data_cadastro).toLocaleDateString('pt-BR') : '—') + '</td><td><div class="action-btns"><button class="btn btn-danger btn-sm" onclick="deletarCliente(' + c.id + ')">' + icon('trash') + ' Deletar</button></div></td>';
+    tbody.appendChild(tr);
+  }
+}
+
+async function deletarCliente(id) {
+  if (!confirm('ATENCAO! Esta acao ira DELETAR PERMANENTEMENTE este cliente e todas as suas solicitacoes relacionadas. Esta acao nao pode ser desfeita!')) return;
+  if (!confirm('Confirmacao final: deseja realmente excluir permanentemente este cliente?')) return;
+  var result = await apiRequest(API_BASE + '/admin/clientes/' + id, { method: 'DELETE' });
+  if (result && result.success) {
+    showToast('Cliente deletado permanentemente!', 'success');
+    await carregarClientes();
   }
 }
 

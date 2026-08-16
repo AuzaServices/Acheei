@@ -464,6 +464,72 @@ module.exports = function(db, dbConnected) {
     }
   });
 
+  // ============================================
+  // GET /api/admin/clientes
+  // Lista todos os clientes cadastrados
+  // ============================================
+  router.get('/clientes', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    db.query('SELECT id, nome, email, telefone, foto_perfil, data_cadastro FROM clientes ORDER BY data_cadastro DESC', (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar clientes:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar clientes' });
+      }
+      res.json({ success: true, data: results, total: results.length });
+    });
+  });
+
+  // ============================================
+  // DELETE /api/admin/clientes/:id
+  // Exclui um cliente (e sua foto do Cloudinary)
+  // ============================================
+  router.delete('/clientes/:id', authMiddleware, (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    db.query('SELECT * FROM clientes WHERE id = ?', [req.params.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar cliente:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar cliente' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Cliente não encontrado' });
+      }
+
+      const cliente = results[0];
+      const erros = [];
+
+      // Remover foto de perfil do Cloudinary se existir
+      const publicId = getCloudinaryPublicId(cliente.foto_perfil);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (e) {
+          erros.push('Cloudinary: ' + e.message);
+        }
+      }
+
+      // Deletar solicitações relacionadas
+      db.query('DELETE FROM solicitacoes WHERE cliente_id = ?', [cliente.id], (err) => {
+        if (err) console.error('Erro ao deletar solicitacoes do cliente:', err);
+      });
+
+      db.query('DELETE FROM clientes WHERE id = ?', [cliente.id], (err, result) => {
+        if (err) {
+          console.error('Erro ao deletar cliente:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao deletar cliente' });
+        }
+        res.json({
+          success: true,
+          message: 'Cliente e seus dados foram deletados permanentemente!',
+          erros: erros.length > 0 ? erros : undefined
+        });
+      });
+    });
+  });
+
   return router;
 };
 

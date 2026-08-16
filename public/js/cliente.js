@@ -1255,6 +1255,193 @@ async function verificarToken() {
 }
 
 // ============================================
+// Configurações do Cliente
+// ============================================
+var configFotoPerfil = null;
+var configNovaFotoPerfil = null;
+
+function resizeImage(file, maxWidth, maxHeight, quality) {
+  if (!maxWidth) maxWidth = 800;
+  if (!maxHeight) maxHeight = 800;
+  if (!quality) quality = 0.7;
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function(e) {
+      var img = new Image();
+      img.src = e.target.result;
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var width = img.width;
+        var height = img.height;
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+    };
+  });
+}
+
+async function uploadImageToCloudinary(base64Image, folder) {
+  var response = await fetch(API_BASE + '/upload', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: base64Image, folder: folder })
+  });
+  var result = await response.json();
+  if (!result.success) throw new Error(result.message || 'Erro no upload');
+  return result.data.url;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  var a = String.fromCharCode(38);
+  return String(str)
+    .replace(/&/g, a + 'amp;')
+    .replace(/</g, a + 'lt;')
+    .replace(/>/g, a + 'gt;')
+    .replace(/\x22/g, a + 'quot;')
+    .replace(/'/g, a + '#39;');
+}
+
+function abrirConfiguracoes() {
+  if (!clienteData) {
+    showToast('Faça login primeiro', 'error');
+    return;
+  }
+  fecharDropdown();
+  renderizarConfiguracoes();
+  document.getElementById('configModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharConfiguracoes() {
+  document.getElementById('configModal').classList.remove('active');
+  document.body.style.overflow = '';
+  configNovaFotoPerfil = null;
+}
+
+function renderizarConfiguracoes() {
+  var cli = clienteData || {};
+  configFotoPerfil = cli.foto_perfil || cli.foto || null;
+
+  var html = '';
+  html += '<div class="config-section">';
+  html += '  <h4><span data-icon="user"></span> Informações Pessoais</h4>';
+  html += '  <div class="config-grid">';
+  html += '    <div class="config-group"><label>Nome Completo</label><input type="text" id="cfgNome" value="' + escHtml(cli.nome || '') + '"></div>';
+  html += '    <div class="config-group"><label>E-mail</label><input type="email" id="cfgEmail" value="' + escHtml(cli.email || '') + '"></div>';
+  html += '    <div class="config-group"><label>WhatsApp (não editável)</label><input type="text" value="' + escHtml(cli.telefone || '') + '" disabled></div>';
+  html += '  </div>';
+  html += '</div>';
+
+  html += '<div class="config-section">';
+  html += '  <h4><span data-icon="camera"></span> Foto de Perfil</h4>';
+  html += '  <div class="config-foto-perfil">';
+  html += '    <div class="config-foto-perfil-preview" id="cfgFotoPerfilPreview" style="cursor:pointer;" onclick="document.getElementById(\'cfgFotoPerfilInput\').click()">';
+  html += configFotoPerfil ? '<img src="' + configFotoPerfil + '" alt="Foto de Perfil">' : '<div class="foto-placeholder">👤</div>';
+  html += '    </div>';
+  html += '    <input type="file" id="cfgFotoPerfilInput" accept="image/*" style="display:none;">';
+  html += '    <p style="font-size:13px;color:var(--gray-medium);">Clique na foto para alterar</p>';
+  html += '  </div>';
+  html += '</div>';
+
+  html += '<div class="config-save-bar active" style="display:flex;justify-content:flex-end;gap:10px;">';
+  html += '  <button class="btn btn-outline" onclick="fecharConfiguracoes()">Cancelar</button>';
+  html += '  <button class="btn btn-primary" onclick="salvarConfiguracoes()">Salvar Alterações</button>';
+  html += '</div>';
+
+  html += '<div class="config-section" style="margin-top:32px;border-top:2px solid #ffe0e0;padding-top:24px;">';
+  html += '  <h4 style="color:var(--red-primary);"><span data-icon="alert"></span> Zona de Risco</h4>';
+  html += '  <p style="font-size:14px;color:var(--gray-medium);margin-bottom:16px;">Ao excluir sua conta, todos os seus dados, foto e solicitações serão apagados permanentemente da plataforma Acheei. Essa ação não pode ser desfeita.</p>';
+  html += '  <button type="button" class="btn btn-outline" style="border-color:var(--red-primary);color:var(--red-primary);" onclick="confirmarExclusaoConta()"><span data-icon="trash"></span> Excluir conta</button>';
+  html += '</div>';
+
+  document.getElementById('configBody').innerHTML = html;
+
+  document.getElementById('cfgFotoPerfilInput').addEventListener('change', async function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    try {
+      var resized = await resizeImage(file);
+      configNovaFotoPerfil = resized;
+      var preview = document.getElementById('cfgFotoPerfilPreview');
+      preview.innerHTML = '<img src="' + resized + '" alt="Foto de Perfil">';
+    } catch (err) {
+      showToast('Erro ao processar imagem', 'error');
+    }
+  });
+}
+
+async function salvarConfiguracoes() {
+  var btn = event && event.target ? event.target : document.querySelector('[onclick="salvarConfiguracoes()"]');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvando...'; }
+  try {
+    var dados = {
+      nome: document.getElementById('cfgNome').value.trim(),
+      email: document.getElementById('cfgEmail').value.trim()
+    };
+    if (configNovaFotoPerfil) {
+      btn.innerHTML = '<span class="spinner"></span> Enviando foto de perfil...';
+      dados.foto_perfil = await uploadImageToCloudinary(configNovaFotoPerfil, 'perfis');
+    }
+    btn.innerHTML = '<span class="spinner"></span> Salvando...';
+    var result = await apiRequest(API_BASE + '/clientes/me', { method: 'PUT', body: JSON.stringify(dados) });
+    if (result && result.success) {
+      showToast('Configurações salvas com sucesso!', 'success');
+      fecharConfiguracoes();
+      var me = await apiRequest(API_BASE + '/clientes/me');
+      if (me && me.success) {
+        clienteData = me.data;
+        salvarClienteCache(me.data);
+        if (document.getElementById('userName')) document.getElementById('userName').textContent = me.data.nome;
+        var avatar = document.getElementById('userAvatar');
+        if (avatar) {
+          if (me.data.foto_perfil) avatar.innerHTML = '<img src="' + me.data.foto_perfil + '" alt="Foto">';
+          else avatar.innerHTML = '<span data-icon="user"></span>';
+        }
+      }
+    } else {
+      showToast((result && result.message) || 'Erro ao salvar configurações', 'error');
+    }
+  } catch (error) {
+    console.error('Erro ao salvar configurações:', error);
+    showToast(error.message || 'Erro ao salvar configurações', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Salvar Alterações'; }
+  }
+}
+
+async function confirmarExclusaoConta() {
+  var passo1 = confirm('Tem certeza que deseja excluir sua conta? Todos os seus dados, foto e solicitações serão apagados permanentemente da plataforma Acheei.');
+  if (!passo1) return;
+  var passo2 = confirm('Esta ação é IRREVERSÍVEL e não pode ser desfeita. Confirma definitivamente a exclusão da sua conta?');
+  if (!passo2) return;
+
+  var result = await apiRequest(API_BASE + '/clientes/me', { method: 'DELETE' });
+  if (result && result.success) {
+    localStorage.removeItem('acheei_cliente_token');
+    localStorage.removeItem('acheei_cliente_cache');
+    window.location.href = '/';
+  } else if (result) {
+    showToast(result.message || 'Erro ao excluir conta', 'error');
+  }
+}
+
+// ============================================
 // Initialize
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {

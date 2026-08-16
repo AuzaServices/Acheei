@@ -262,6 +262,28 @@
         -webkit-backdrop-filter: blur(5px);
       }
     }
+  <style>
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .config-group { display: flex; flex-direction: column; }
+    .config-group label { font-size: 13px; font-weight: 600; color: var(--gray-dark); margin-bottom: 6px; }
+    .config-group input, .config-group textarea, .config-group select {
+      width: 100%; padding: 10px 12px; border: 2px solid var(--gray-lighter);
+      border-radius: var(--radius-sm); font-size: 14px; transition: var(--transition);
+      background: var(--white); color: var(--black-primary);
+    }
+    .config-group input:focus, .config-group textarea:focus, .config-group select:focus { outline: none; border-color: var(--red-primary); }
+    .config-group input:disabled { background: var(--gray-lighter); color: var(--gray-medium); cursor: not-allowed; }
+    .config-section { margin-bottom: 24px; }
+    .config-section h4 { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--black-primary); display: flex; align-items: center; gap: 8px; }
+    .config-section h4 .icon-svg { width: 18px; height: 18px; color: var(--red-primary); }
+    .config-foto-perfil { display: flex; align-items: center; gap: 20px; }
+    .config-foto-perfil img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid var(--red-primary); }
+    .config-foto-perfil .foto-placeholder { width: 96px; height: 96px; border-radius: 50%; background: var(--gray-lighter); display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--gray-medium); }
+    .config-save-bar { display: none; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--gray-lighter); }
+    .config-save-bar.active { display: flex; justify-content: flex-end; gap: 10px; }
+    .config-modal { max-height: 90vh; display: flex; flex-direction: column; }
+    .config-modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    @media (max-width: 768px) { .config-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body class="cliente-body">
@@ -405,6 +427,9 @@
               <a href="contato" class="user-dropdown-item">
                 <span data-icon="send"></span> Contato
               </a>
+              <button type="button" class="user-dropdown-item" onclick="abrirConfiguracoes()">
+                <span data-icon="settings"></span> Configurações
+              </button>
               <div class="user-dropdown-divider"></div>
               <button type="button" class="user-dropdown-item" onclick="logout()">
                 <span data-icon="log-out"></span> Sair
@@ -516,6 +541,19 @@
       <button class="chat-send-btn" onclick="widgetEnviarMensagem()" aria-label="Enviar mensagem">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIGURACOES -->
+<div class="modal-overlay" id="configModal">
+  <div class="modal config-modal" style="max-width:640px;">
+    <div class="modal-header">
+      <h3><span data-icon="settings"></span> Configurações</h3>
+      <button class="modal-close" onclick="fecharConfiguracoes()">&times;</button>
+    </div>
+    <div class="modal-body config-modal-body">
+      <div id="configBody"></div>
     </div>
   </div>
 </div>

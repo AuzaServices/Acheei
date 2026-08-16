@@ -120,6 +120,7 @@ CREATE TABLE IF NOT EXISTS clientes (
   email VARCHAR(100) NOT NULL UNIQUE,
   senha VARCHAR(255) NOT NULL,
   telefone VARCHAR(20),
+  foto_perfil VARCHAR(255),
   push_subscription LONGTEXT,
   data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

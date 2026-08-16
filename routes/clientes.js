@@ -6,8 +6,16 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'acheei_secret_key_2024_admin';
+
+cloudinary.config({
+  cloud_name: 'dzwkr47ib',
+  api_key: '553561859359519',
+  api_secret: 'IYJBytc-xlGnFW87Taguno77LDw',
+  secure: true
+});
 
 // Número do WhatsApp comercial da Acheei (formato internacional, só dígitos)
 // Para onde o cliente envia a mensagem com o código de confirmação (link wa.me)
@@ -339,11 +347,136 @@ res.status(201).json({
     if (!dbConnected()) {
       return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
     }
-    db.query('SELECT id, nome, email, telefone, data_cadastro FROM clientes WHERE id = ?', [req.cliente.id], (err, results) => {
+    db.query('SELECT id, nome, email, telefone, foto_perfil, data_cadastro FROM clientes WHERE id = ?', [req.cliente.id], (err, results) => {
       if (err || results.length === 0) {
         return res.status(404).json({ success: false, message: 'Cliente não encontrado' });
       }
       res.json({ success: true, data: results[0] });
+    });
+  });
+
+  // ============================================
+  // PUT /api/clientes/me
+  // Cliente atualiza os próprios dados
+  // (nome, e-mail e foto de perfil; o número de
+  // WhatsApp não é editável)
+  // ============================================
+  router.put('/me', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+
+    const { nome, email, foto_perfil } = req.body;
+
+    const campos = [];
+    const params = [];
+
+    if (nome !== undefined) { campos.push('nome = ?'); params.push(nome); }
+    if (email !== undefined) { campos.push('email = ?'); params.push(email); }
+    if (foto_perfil !== undefined) { campos.push('foto_perfil = ?'); params.push(foto_perfil); }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
+    }
+
+    params.push(decoded.id);
+    const sql = 'UPDATE clientes SET ' + campos.join(', ') + ' WHERE id = ?';
+
+    db.query(sql, params, (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Este e-mail já está em uso por outro cliente.' });
+        }
+        console.error('Erro ao atualizar cliente:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar cliente' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Cliente não encontrado' });
+      }
+      res.json({ success: true, message: 'Dados atualizados com sucesso!' });
+    });
+  });
+
+  // ============================================
+  // DELETE /api/clientes/me
+  // Autoexclusão de conta pelo próprio cliente
+  // Remove a foto do Cloudinary, solicitações e o cliente
+  // ============================================
+  router.delete('/me', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível. Tente novamente mais tarde.' });
+    }
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Token não fornecido' });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ success: false, message: 'Token inválido ou expirado' });
+    }
+
+    db.query('SELECT * FROM clientes WHERE id = ?', [decoded.id], async (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar cliente:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao buscar cliente' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Cliente não encontrado' });
+      }
+
+      const cliente = results[0];
+      const erros = [];
+
+      // Remover foto de perfil do Cloudinary se existir
+      const publicIds = [];
+      if (cliente.foto_perfil && cliente.foto_perfil.includes('cloudinary')) {
+        const parts = cliente.foto_perfil.split('/');
+        const filename = parts[parts.length - 1].split('.')[0];
+        const folder = cliente.foto_perfil.includes('/perfis/') ? 'acheei/perfis/' : 'acheei/';
+        publicIds.push(folder + filename);
+      }
+
+      const deletePromises = publicIds.map(publicId =>
+        cloudinary.uploader.destroy(publicId).catch(e => {
+          erros.push('Cloudinary: ' + e.message);
+        })
+      );
+      await Promise.all(deletePromises);
+
+      // Deletar solicitações relacionadas
+      db.query('DELETE FROM solicitacoes WHERE cliente_id = ?', [cliente.id], (err) => {
+        if (err) console.error('Erro ao deletar solicitacoes do cliente:', err);
+      });
+
+      // Deletar cliente do banco (cascateia avaliacoes via cliente_id)
+      db.query('DELETE FROM clientes WHERE id = ?', [cliente.id], (err) => {
+        if (err) {
+          console.error('Erro ao deletar cliente:', err);
+          return res.status(500).json({ success: false, message: 'Erro ao excluir conta' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Conta excluída permanentemente.',
+          erros: erros.length > 0 ? erros : undefined
+        });
+      });
     });
   });
 
