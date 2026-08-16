@@ -208,6 +208,11 @@
       background: radial-gradient(circle at 20% 20%, rgba(255,0,0,0.25) 0%, transparent 50%),
                   radial-gradient(circle at 80% 80%, rgba(255,0,0,0.15) 0%, transparent 50%);
     }
+    .sobre-hero::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.25));
+      pointer-events: none;
+    }
     .sobre-hero .container { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
     .sobre-hero .badge {
       display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12);
@@ -236,6 +241,96 @@
     .sobre-section .sec-head .eyebrow { color: var(--red-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 13px; margin-bottom: 10px; }
     .sobre-section .sec-head h2 { font-size: 36px; font-weight: 800; margin-bottom: 14px; }
     .sobre-section .sec-head p { color: var(--gray-medium); font-size: 16px; line-height: 1.7; }
+
+    /* Nossa História (foto + texto) */
+    .historia-grid {
+      display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 56px; align-items: center;
+    }
+    .historia-foto-wrap { position: relative; }
+    .historia-foto-wrap .frame {
+      position: relative; border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-lg); aspect-ratio: 4/5;
+    }
+    .historia-foto-wrap .frame img {
+      width: 100%; height: 100%; object-fit: cover; display: block; transition: var(--transition);
+    }
+    .historia-foto-wrap:hover .frame img { transform: scale(1.04); }
+    .historia-foto-wrap .frame::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.55) 100%);
+    }
+    .historia-foto-wrap .caption {
+      position: absolute; left: 24px; right: 24px; bottom: 20px; z-index: 2; color: #fff;
+    }
+    .historia-foto-wrap .caption strong { display: block; font-size: 17px; font-weight: 700; }
+    .historia-foto-wrap .caption span { font-size: 13px; color: rgba(255,255,255,0.85); }
+    .historia-foto-wrap .float-badge {
+      position: absolute; top: -18px; right: -18px; background: var(--red-primary); color: #fff;
+      border-radius: 16px; padding: 16px 20px; box-shadow: var(--shadow-lg); text-align: center; z-index: 3;
+    }
+    .historia-foto-wrap .float-badge .n { font-size: 26px; font-weight: 800; line-height: 1; }
+    .historia-foto-wrap .float-badge .t { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.9; }
+
+    .historia-texto .eyebrow { color: var(--red-primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 13px; margin-bottom: 10px; }
+    .historia-texto h2 { font-size: 34px; font-weight: 800; margin-bottom: 20px; line-height: 1.25; }
+    .historia-texto p { color: var(--gray-medium); font-size: 16px; line-height: 1.8; margin-bottom: 16px; }
+    .historia-texto p strong { color: var(--black-primary); }
+    .historia-texto .quote {
+      margin-top: 24px; padding: 18px 22px; border-left: 4px solid var(--red-primary);
+      background: var(--gray-bg); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      font-style: italic; color: var(--black-primary); font-size: 15px;
+    }
+
+    /* Timeline / Linha do tempo */
+    .timeline { position: relative; max-width: 900px; margin: 0 auto; }
+    .timeline::before {
+      content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, var(--red-primary), var(--gray-lighter));
+    }
+    .timeline-item { position: relative; padding-left: 68px; margin-bottom: 40px; }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-item .tl-dot {
+      position: absolute; left: 8px; top: 0; width: 34px; height: 34px; border-radius: 50%;
+      background: var(--red-primary); color: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 0 6px #fff, var(--shadow-md); font-weight: 800; font-size: 13px; z-index: 2;
+    }
+    .timeline-item .tl-year { color: var(--red-primary); font-weight: 800; font-size: 14px; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .timeline-item h4 { font-size: 19px; font-weight: 700; margin-bottom: 8px; }
+    .timeline-item p { color: var(--gray-medium); font-size: 15px; line-height: 1.7; }
+
+    /* Depoimentos */
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .testimonial-card {
+      background: #fff; border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-lighter); transition: var(--transition);
+    }
+    .testimonial-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--red-primary); }
+    .testimonial-card .stars { color: var(--red-primary); margin-bottom: 14px; font-size: 15px; letter-spacing: 2px; }
+    .testimonial-card p.txt { color: var(--gray-medium); font-size: 15px; line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+    .testimonial-card .author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-card .avatar {
+      width: 44px; height: 44px; border-radius: 50%; background: var(--red-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0;
+    }
+    .testimonial-card .author strong { display: block; font-size: 14px; }
+    .testimonial-card .author span { font-size: 13px; color: var(--gray-medium); }
+
+    /* Compromissos / diferenciais com número */
+    .compromisso-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .compromisso-card { text-align: center; padding: 10px; }
+    .compromisso-card .n {
+      width: 70px; height: 70px; border-radius: 50%; background: rgba(255,0,0,0.08); color: var(--red-primary);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 28px; font-weight: 800;
+      border: 2px solid rgba(255,0,0,0.2);
+    }
+    .compromisso-card h4 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .compromisso-card p { color: var(--gray-medium); font-size: 14px; line-height: 1.7; }
+
+    @media (max-width: 900px) {
+      .historia-grid { grid-template-columns: 1fr; gap: 40px; }
+      .historia-foto-wrap .frame { aspect-ratio: 16/10; max-width: 480px; margin: 0 auto; }
+      .testimonials-grid, .compromisso-grid { grid-template-columns: 1fr; }
+    }
 
     /* Missão / Visão / Valores */
     .mvv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -321,6 +416,74 @@
     </div>
   </section>
 
+  <!-- Nossa História -->
+  <section class="sobre-section">
+    <div class="historia-grid">
+      <div class="historia-foto-wrap">
+        <div class="frame">
+          <img src="icons/foto1.jpeg" alt="A história da Acheei">
+          <div class="caption">
+            <strong>Onde tudo começou</strong>
+            <span>Uma ideia simples, feita para conectar pessoas</span>
+          </div>
+        </div>
+        <div class="float-badge">
+          <div class="n">100%</div>
+          <div class="t">Feito de<br>propósito</div>
+        </div>
+      </div>
+      <div class="historia-texto">
+        <div class="eyebrow">De onde viemos</div>
+        <h2>Uma história que começou <span style="color:var(--red-primary);">pequena</span>, mas com um propósito grande</h2>
+        <p>A Acheei começou com algo bem simples: <strong>pequenas intermediações de serviços</strong>, feitas quase que artesanalmente, para ajudar clientes a encontrarem profissionais de confiança na sua região. No início, tudo era feito de forma manual, indicação por indicação, um pedreiro aqui, uma diarista lá — sempre com um único objetivo: aproximar quem precisa de um serviço de quem sabe fazer bem.</p>
+        <p>Com o tempo, essas pequenas intermediações começaram a ganhar forma, confiança e volume. Percebemos que o problema que resolvíamos não era só nosso: milhares de pessoas enfrentavam a mesma dificuldade de encontrar um profissional sério, rápido e perto de casa. Foi esse aprendizado que nos motivou a transformar uma ideia simples em algo maior.</p>
+        <p>Hoje, a Acheei é um <strong>sistema completo</strong>: plataforma web, cadastro verificado de profissionais, chat integrado, pagamentos seguros, avaliações reais e notificações em tempo real — tudo pensado para que a experiência de contratar (ou ser contratado) seja simples, segura e sem burocracia.</p>
+        <div class="quote">"Continuamos com a mesma essência do primeiro dia: gente ajudando gente a resolver problemas reais, agora com a força da tecnologia."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline / Nossa Evolução -->
+  <section class="sobre-section" style="background:#fff;">
+    <div class="sec-head">
+      <div class="eyebrow">Nossa Evolução</div>
+      <h2>Da primeira intermediação ao sistema completo</h2>
+      <p>Cada etapa da nossa jornada foi construída ouvindo clientes e profissionais.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="tl-dot" data-icon="lightbulb"></span>
+        <div class="tl-year">O começo</div>
+        <h4>Pequenas intermediações, feitas na base da confiança</h4>
+        <p>Tudo começou de forma simples: indicações diretas conectando clientes a profissionais próximos, sem plataforma, sem automação — só o compromisso de resolver o problema de alguém.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="tl-dot" data-icon="users"></span>
+        <div class="tl-year">Crescimento</div>
+        <h4>A demanda cresceu, e a rede de profissionais também</h4>
+        <p>Com mais pessoas buscando ajuda, organizamos um cadastro de profissionais por categoria e região, tornando a busca mais rápida e as indicações mais assertivas.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="tl-dot" data-icon="laptop"></span>
+        <div class="tl-year">Digitalização</div>
+        <h4>Nasce a plataforma Acheei</h4>
+        <p>Criamos um sistema completo: cadastro verificado, busca por categoria e cidade, chat integrado e pagamentos com segurança, eliminando a burocracia do processo antigo.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="tl-dot" data-icon="shield"></span>
+        <div class="tl-year">Confiança em escala</div>
+        <h4>Avaliações reais e profissionais verificados</h4>
+        <p>Implementamos avaliações independentes e verificação de cadastro, para que cada contratação seja feita com segurança e transparência para os dois lados.</p>
+      </div>
+      <div class="timeline-item">
+        <span class="tl-dot" data-icon="rocket"></span>
+        <div class="tl-year">Hoje</div>
+        <h4>Um sistema completo, em constante evolução</h4>
+        <p>Hoje somos uma plataforma completa de intermediação de serviços, presente em diversas regiões do país, sempre evoluindo para aproximar ainda mais clientes e profissionais.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Missão / Visão / Valores -->
   <section class="sobre-section">
     <div class="sec-head">
@@ -395,6 +558,67 @@
       <div class="value-item"><div class="v-icon"><span data-icon="star"></span></div><div><h5>Qualidade</h5><p>Filtramos e acompanhamos a qualidade dos serviços prestados por nossos profissionais.</p></div></div>
       <div class="value-item"><div class="v-icon"><span data-icon="chat"></span></div><div><h5>Comunicação</h5><p>Chat direto e integrado para você conversar com o profissional sem complicação.</p></div></div>
       <div class="value-item"><div class="v-icon"><span data-icon="globe"></span></div><div><h5>Proximidade</h5><p>Focamos em profissionais da sua região, garantindo atendimento perto de você.</p></div></div>
+    </div>
+  </section>
+
+  <!-- Nossos Compromissos -->
+  <section class="sobre-section" style="background:#fff;">
+    <div class="sec-head">
+      <div class="eyebrow">Nosso Compromisso</div>
+      <h2>O que você pode esperar da Acheei</h2>
+      <p>Independente do tamanho do serviço, tratamos cada solicitação com o mesmo cuidado.</p>
+    </div>
+    <div class="compromisso-grid">
+      <div class="compromisso-card">
+        <div class="n">1</div>
+        <h4>Cadastro verificado</h4>
+        <p>Todo profissional passa por análise de cadastro antes de aparecer na plataforma para os clientes.</p>
+      </div>
+      <div class="compromisso-card">
+        <div class="n">2</div>
+        <h4>Suporte de verdade</h4>
+        <p>Nosso time acompanha as solicitações e está disponível para ajudar sempre que for necessário.</p>
+      </div>
+      <div class="compromisso-card">
+        <div class="n">3</div>
+        <h4>Melhoria contínua</h4>
+        <p>Ouvimos o feedback de clientes e profissionais para evoluir a plataforma todos os dias.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Depoimentos -->
+  <section class="sobre-section">
+    <div class="sec-head">
+      <div class="eyebrow">Quem já usou</div>
+      <h2>O que dizem sobre a Acheei</h2>
+      <p>A confiança de quem já contratou e de quem já trabalhou pela plataforma é o que nos motiva a seguir evoluindo.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="txt">"Precisava de um eletricista com urgência e em poucos minutos já estava conversando com um profissional aqui perto de casa. Muito mais fácil do que ficar pedindo indicação."</p>
+        <div class="author">
+          <div class="avatar">R</div>
+          <div><strong>Renata Souza</strong><span>Cliente</span></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="txt">"A Acheei organizou minha rotina de trabalho. Hoje recebo solicitações direto no chat e consigo negociar o orçamento sem complicação nenhuma."</p>
+        <div class="author">
+          <div class="avatar">M</div>
+          <div><strong>Marcelo Gomes</strong><span>Profissional parceiro</span></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <p class="txt">"O que mais me deu segurança foi ver as avaliações reais de outros clientes antes de contratar. Hoje já indico a plataforma para todo mundo."</p>
+        <div class="author">
+          <div class="avatar">D</div>
+          <div><strong>Daniela Fernandes</strong><span>Cliente</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
