@@ -195,7 +195,7 @@ async function handleNextFromStep1() {
 
     ultimoEmailVerificado = email;
     if (destino) destino.textContent = email;
-    if (box) box.style.display = 'block';
+    if (box) box.classList.add('show');
     if (msgEl) { msgEl.classList.remove('show'); msgEl.textContent = ''; }
     const codigoInput = document.getElementById('codigoVerificacaoInput');
     if (codigoInput) { codigoInput.value = ''; codigoInput.focus(); }
@@ -247,7 +247,7 @@ async function confirmarCodigoVerificacao() {
       emailConfirmadoStep1 = true;
       ultimoEmailVerificado = email;
       const box = document.getElementById('emailVerificacaoBox');
-      if (box) box.style.display = 'none';
+      if (box) box.classList.remove('show');
       showToast('E-mail confirmado com sucesso!', 'success');
       showStep(2);
     } else if (msgEl) {
@@ -289,13 +289,13 @@ async function verificarStatusEmailInicial(silencioso) {
       emailConfirmadoStep1 = true;
       ultimoEmailVerificado = email;
       const box = document.getElementById('emailVerificacaoBox');
-      if (box) box.style.display = 'none';
+      if (box) box.classList.remove('show');
       showToast('E-mail confirmado com sucesso!', 'success');
       showStep(2);
     } else if (!silencioso) {
       if (msgEl) {
         msgEl.classList.add('show');
-        msgEl.style.color = '#856404';
+        msgEl.style.color = 'var(--gray-medium)';
         msgEl.textContent = 'Ainda não identificamos a confirmação. Verifique se clicou no link recebido por e-mail.';
       }
     }
@@ -638,9 +638,6 @@ const data = {
     const result = await response.json();
 
     if (result.success) {
-      const email = document.getElementById('email').value.trim();
-      const emailEl = document.getElementById('emailEnviado');
-      if (emailEl) emailEl.textContent = email;
       document.getElementById('cadastroForm').style.display = 'none';
       document.getElementById('successScreen').classList.add('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -653,48 +650,6 @@ const data = {
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = '✅ Cadastrar';
-  }
-}
-
-// ============================================
-// Reenvio do e-mail de confirmação
-// ============================================
-async function reenviarEmail() {
-  const email = document.getElementById('email').value.trim();
-  const msgEl = document.getElementById('reenviarEmailMsg');
-  const btn = document.getElementById('reenviarEmailBtn');
-  if (!email) {
-    if (msgEl) { msgEl.textContent = 'E-mail nao encontrado. Recarregue a pagina e tente novamente.'; msgEl.classList.add('show'); }
-    return;
-  }
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Enviando...';
-  }
-  try {
-    const response = await fetch(`${API_BASE}/profissionais/reenviar-email`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-    const result = await response.json();
-    if (msgEl) {
-      msgEl.classList.add('show');
-      msgEl.style.color = result.success ? '#155724' : '#dc3545';
-      msgEl.textContent = result.message || 'Erro ao reenviar e-mail';
-    }
-  } catch (error) {
-    console.error('Erro ao reenviar e-mail:', error);
-    if (msgEl) {
-      msgEl.classList.add('show');
-      msgEl.style.color = '#dc3545';
-      msgEl.textContent = 'Erro ao conectar com o servidor. Tente novamente.';
-    }
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = 'Reenviar e-mail de confirmacao';
-    }
   }
 }
 
@@ -723,7 +678,7 @@ document.getElementById('email').addEventListener('input', function() {
     emailConfirmadoStep1 = false;
     pararPollingStatusEmail();
     const box = document.getElementById('emailVerificacaoBox');
-    if (box) box.style.display = 'none';
+    if (box) box.classList.remove('show');
   }
 });
 

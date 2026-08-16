@@ -58,6 +58,25 @@
     .success-screen .success-icon { font-size: 80px; margin-bottom: 20px; display: block; }
     .success-screen h2 { font-size: 28px; color: #28a745; margin-bottom: 12px; }
     .success-screen p { color: var(--gray-medium); font-size: 16px; max-width: 400px; margin: 0 auto 8px; }
+
+    /* Verificação de e-mail (passo 1) */
+    .email-verif-box { display: none; margin-top: 24px; padding: 28px; background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-md); border: 1px solid var(--gray-lighter); text-align: center; }
+    .email-verif-box.show { display: block; animation: fadeIn 0.35s ease; }
+    .email-verif-box .email-verif-icon { width: 52px; height: 52px; border-radius: var(--radius-full); background: rgba(255,0,0,0.08); color: var(--red-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; }
+    .email-verif-box h4 { font-size: 17px; font-weight: 700; color: var(--black-primary); margin-bottom: 6px; }
+    .email-verif-box p { font-size: 13.5px; color: var(--gray-medium); line-height: 1.5; margin: 0; }
+    .email-verif-box .email-verif-destino { color: var(--black-primary); font-weight: 600; }
+    .email-verif-code { display: flex; justify-content: center; gap: 10px; margin: 22px 0 6px; }
+    .email-verif-code input { width: 220px; text-align: center; letter-spacing: 8px; font-size: 22px; font-weight: 700; padding: 12px 8px; border: 2px solid var(--gray-lighter); border-radius: var(--radius-sm); color: var(--black-primary); transition: var(--transition); background: var(--gray-bg); }
+    .email-verif-code input:focus { outline: none; border-color: var(--red-primary); background: var(--white); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); }
+    .email-verif-box .btn-confirmar-codigo { width: 220px; margin: 0 auto 20px; display: flex; }
+    .email-verif-divider { display: flex; align-items: center; gap: 10px; color: var(--gray-light); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin: 18px 0; }
+    .email-verif-divider::before, .email-verif-divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-lighter); }
+    .email-verif-links { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .email-verif-links button { background: none; border: none; color: var(--gray-medium); font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px; transition: var(--transition); }
+    .email-verif-links button:hover { color: var(--red-primary); }
+    .email-verif-links button .spinner { margin-right: 4px; }
+    #verifInicialMsg { margin-top: 14px; text-align: center; }
     @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .fotos-grid { grid-template-columns: 1fr 1fr; } .progress-step .step-label { display: none !important; } .progress-line { width: 30px; } .cadastro-header h1 { font-size: 22px; } }
   </style>
 </head>
@@ -127,20 +146,22 @@
             <div class="error-message" id="senhaConfirmError">As senhas não conferem</div>
           </div>
 
-          <div id="emailVerificacaoBox" style="display:none;margin-top:8px;padding:16px;background:#fff3cd;border-radius:8px;border:1px solid #ffeeba;color:#856404;text-align:left;font-size:14px;">
-            <strong>Confirme seu e-mail para continuar</strong>
-            <p style="margin:8px 0 0;">Enviamos um código e um link de confirmação para <strong id="emailVerifDestino"></strong>.</p>
-            <p style="margin:8px 0 0;">Digite o código de 6 dígitos recebido:</p>
-            <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;align-items:center;">
-              <input type="text" id="codigoVerificacaoInput" maxlength="6" inputmode="numeric" placeholder="000000" style="width:120px;letter-spacing:4px;text-align:center;font-size:18px;padding:8px;border:1px solid #ffeeba;border-radius:6px;">
-              <button type="button" class="btn btn-primary btn-sm" id="confirmarCodigoBtn">Confirmar código</button>
+          <div id="emailVerificacaoBox" class="email-verif-box">
+            <div class="email-verif-icon" data-icon="mail"></div>
+            <h4>Confirme seu e-mail</h4>
+            <p>Enviamos um código de 6 dígitos para <span class="email-verif-destino" id="emailVerifDestino"></span></p>
+
+            <div class="email-verif-code">
+              <input type="text" id="codigoVerificacaoInput" maxlength="6" inputmode="numeric" placeholder="••••••">
             </div>
-            <p style="margin:12px 0 0;">Ou clique no link recebido por e-mail e depois volte aqui:</p>
-            <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
-              <button type="button" class="btn btn-outline btn-sm" id="jaConfirmeiBtn">Já cliquei no link, verificar</button>
-              <button type="button" class="btn btn-outline btn-sm" id="reenviarInicialBtn">Reenviar e-mail</button>
+            <button type="button" class="btn btn-primary btn-confirmar-codigo" id="confirmarCodigoBtn">Confirmar código</button>
+
+            <div class="email-verif-divider">ou</div>
+            <div class="email-verif-links">
+              <button type="button" id="jaConfirmeiBtn">Já cliquei no link do e-mail</button>
+              <button type="button" id="reenviarInicialBtn">Reenviar código</button>
             </div>
-            <p class="error-message" id="verifInicialMsg" style="margin-top:10px;"></p>
+            <p class="error-message" id="verifInicialMsg"></p>
           </div>
         </div>
 
@@ -280,13 +301,7 @@
         <h2>Cadastro Realizado!</h2>
         <p>Seu perfil foi enviado para analise do administrador.</p>
         <p>Assim que aprovado, voce aparecera nas buscas dos clientes.</p>
-        <div style="margin:24px auto;max-width:420px;padding:16px;background:#fff3cd;border-radius:8px;border:1px solid #ffeeba;color:#856404;text-align:left;font-size:14px;">
-          <strong>Confirme seu e-mail</strong>
-          <p style="margin:8px 0 0;">Enviamos um link de confirmação para <strong id="emailEnviado"></strong>. Clique no link para validar sua conta antes de fazer login. Se nao encontrar, verifique a caixa de spam.</p>
-        </div>
-        <button type="button" class="btn btn-outline" id="reenviarEmailBtn" onclick="reenviarEmail()">Reenviar e-mail de confirmacao</button>
-        <p class="error-message" id="reenviarEmailMsg" style="text-align:center;margin-top:12px;"></p>
-        <a href="/" class="btn btn-primary btn-lg" style="margin-top:12px;">Voltar para Home</a>
+        <a href="/" class="btn btn-primary btn-lg" style="margin-top:24px;">Voltar para Home</a>
       </div>
     </div>
   </div>
