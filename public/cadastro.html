@@ -264,7 +264,13 @@
         <h2>Cadastro Realizado!</h2>
         <p>Seu perfil foi enviado para analise do administrador.</p>
         <p>Assim que aprovado, voce aparecera nas buscas dos clientes.</p>
-        <a href="/" class="btn btn-primary btn-lg">Voltar para Home</a>
+        <div style="margin:24px auto;max-width:420px;padding:16px;background:#fff3cd;border-radius:8px;border:1px solid #ffeeba;color:#856404;text-align:left;font-size:14px;">
+          <strong>Confirme seu e-mail</strong>
+          <p style="margin:8px 0 0;">Enviamos um link de confirmação para <strong id="emailEnviado"></strong>. Clique no link para validar sua conta antes de fazer login. Se nao encontrar, verifique a caixa de spam.</p>
+        </div>
+        <button type="button" class="btn btn-outline" id="reenviarEmailBtn" onclick="reenviarEmail()">Reenviar e-mail de confirmacao</button>
+        <p class="error-message" id="reenviarEmailMsg" style="text-align:center;margin-top:12px;"></p>
+        <a href="/" class="btn btn-primary btn-lg" style="margin-top:12px;">Voltar para Home</a>
       </div>
     </div>
   </div>

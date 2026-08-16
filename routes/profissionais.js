@@ -5,7 +5,9 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const cloudinary = require('cloudinary').v2;
+const { sendEmail } = require('../config/email');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'acheei_secret_key_2024_admin';
 
@@ -147,6 +149,9 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
       const prof = results[0];
       if (prof.status_aprovacao !== 'aprovado') {
         return res.status(401).json({ success: false, message: 'Seu cadastro ainda não foi aprovado pelo administrador' });
+      }
+      if (!prof.email_verificado) {
+        return res.status(403).json({ success: false, message: 'Confirme seu e-mail antes de fazer login. Verifique sua caixa de entrada (ou spam).' });
       }
       try {
         const senhaValida = await bcrypt.compare(senha, prof.senha);
@@ -343,6 +348,42 @@ var sql = `SELECT p.*, COALESCE(a.total_avaliacoes, 0) AS total_avaliacoes,
   });
 
   // ============================================
+  // GET /api/profissionais/confirmar-email?token=...
+  // Confirma o e-mail do profissional (público)
+  // IMPORTANTE: registrada antes de /:id para não conflitar
+  // ============================================
+  router.get('/confirmar-email', (req, res) => {
+    const token = req.query.token;
+    if (!token) {
+      return res.status(400).send(htmlConfirmacao(false, 'Token de confirmação não fornecido.'));
+    }
+    if (!dbConnected()) {
+      return res.status(503).send(htmlConfirmacao(false, 'Banco de dados indisponível. Tente novamente mais tarde.'));
+    }
+    db.query('SELECT id, nome_perfil, email, token_verificacao, email_verificado FROM profissionais WHERE token_verificacao = ?', [token], (err, results) => {
+      if (err) {
+        console.error('Erro ao confirmar e-mail:', err);
+        return res.status(500).send(htmlConfirmacao(false, 'Erro ao confirmar e-mail. Tente novamente.'));
+      }
+      if (results.length === 0) {
+        return res.status(400).send(htmlConfirmacao(false, 'Link de confirmação inválido ou expirado.'));
+      }
+      const prof = results[0];
+      if (prof.email_verificado) {
+        return res.send(htmlConfirmacao(true, 'Seu e-mail já foi confirmado anteriormente. Você já pode fazer login.'));
+      }
+      // Marca como verificado e limpa o token
+      db.query('UPDATE profissionais SET email_verificado = 1, token_verificacao = NULL WHERE id = ?', [prof.id], (err2) => {
+        if (err2) {
+          console.error('Erro ao atualizar confirmação:', err2);
+          return res.status(500).send(htmlConfirmacao(false, 'Erro ao confirmar e-mail. Tente novamente.'));
+        }
+        res.send(htmlConfirmacao(true, 'E-mail confirmado com sucesso! Você já pode fazer login quando seu perfil for aprovado.'));
+      });
+    });
+  });
+
+  // ============================================
   // GET /api/profissionais/:id
   // Buscar profissional por ID
   // ============================================
@@ -435,22 +476,50 @@ if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !c
             return res.status(500).json({ success: false, message: 'Erro ao processar senha' });
           }
 
+          // Gera token de verificação de e-mail (válido por 24h)
+          const tokenVerificacao = crypto.randomBytes(32).toString('hex');
+          const dataExpiracao = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
           const fotosServicosStr = fotos_servicos ? JSON.stringify(fotos_servicos) : '[]';
 
           db.query(
             `INSERT INTO profissionais 
-            (cpf, data_nascimento, endereco, numero, bairro, cidade, estado, cep, nome_perfil, foto_perfil, profissao, fotos_servicos, status_aprovacao, email, senha) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?)`,
-            [cpf, data_nascimento, endereco, numero || '', bairro, cidade, estado.toUpperCase(), cep, nome_perfil, foto_perfil || '', profissao, fotosServicosStr, email, senhaHash],
+            (cpf, data_nascimento, endereco, numero, bairro, cidade, estado, cep, nome_perfil, foto_perfil, profissao, fotos_servicos, status_aprovacao, email, senha, email_verificado, token_verificacao) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?, 0, ?)`,
+            [cpf, data_nascimento, endereco, numero || '', bairro, cidade, estado.toUpperCase(), cep, nome_perfil, foto_perfil || '', profissao, fotosServicosStr, email, senhaHash, tokenVerificacao],
             (err, result) => {
               if (err) {
                 console.error('Erro ao cadastrar profissional:', err);
                 return res.status(500).json({ success: false, message: 'Erro ao cadastrar profissional' });
               }
+              // Envia e-mail de confirmação (não bloqueia o cadastro se falhar)
+              const link = (process.env.APP_URL || '') + '/api/profissionais/confirmar-email?token=' + tokenVerificacao;
+              const html = `
+                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+                  <h2 style="color:#e60000;">Confirme seu e-mail - Acheei</h2>
+                  <p>Olá, <strong>${nome_perfil}</strong>!</p>
+                  <p>Para concluir seu cadastro na Acheei, confirme seu endereço de e-mail clicando no botão abaixo:</p>
+                  <p style="text-align:center;margin:30px 0;">
+                    <a href="${link}" style="background:#e60000;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Confirmar E-mail</a>
+                  </p>
+                  <p>Se o botão não funcionar, copie e cole este link no navegador:</p>
+                  <p style="word-break:break-all;color:#555;font-size:13px;">${link}</p>
+                  <p style="color:#999;font-size:12px;">Este link expira em 24 horas.</p>
+                </div>`;
+              sendEmail({
+                toEmail: email,
+                toName: nome_perfil,
+                subject: 'Confirme seu e-mail - Acheei',
+                htmlContent: html,
+                textContent: 'Olá, ' + nome_perfil + '! Confirme seu e-mail na Acheei acessando: ' + link
+              }).catch(e => {
+                console.error('Erro ao enviar e-mail de confirmação:', e.message);
+              });
+
               res.status(201).json({
                 success: true,
-                message: 'Cadastro realizado com sucesso! Seu perfil será analisado pelo administrador.',
-                data: { id: result.insertId }
+                message: 'Cadastro realizado com sucesso! Verifique seu e-mail para confirmar sua conta antes de fazer login.',
+                data: { id: result.insertId, emailVerificado: false }
               });
             }
           );
@@ -551,5 +620,95 @@ if (!cpf || !data_nascimento || !endereco || !bairro || !cidade || !estado || !c
     });
   });
 
+  // ============================================
+  // POST /api/profissionais/reenviar-email
+  // Reenvia o e-mail de confirmação para o profissional
+  // ============================================
+  router.post('/reenviar-email', (req, res) => {
+    if (!dbConnected()) {
+      return res.status(503).json({ success: false, message: 'Banco de dados indisponível' });
+    }
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Informe seu e-mail para reenviar a confirmação' });
+    }
+    db.query('SELECT id, nome_perfil, email_verificado FROM profissionais WHERE email = ?', [email], (err, results) => {
+      if (err) {
+        console.error('Erro ao buscar profissional para reenvio:', err);
+        return res.status(500).json({ success: false, message: 'Erro ao processar reenvio' });
+      }
+      if (results.length === 0) {
+        // Não revela se o e-mail existe (evita enumeração), mas retorna sucesso para não dar dica
+        return res.json({ success: true, message: 'Se o e-mail estiver cadastrado e não confirmado, enviaremos um novo link.' });
+      }
+      const prof = results[0];
+      if (prof.email_verificado) {
+        return res.json({ success: true, message: 'Este e-mail já está confirmado.' });
+      }
+      // Gera novo token e envia
+      const novoToken = crypto.randomBytes(32).toString('hex');
+      db.query('UPDATE profissionais SET token_verificacao = ? WHERE id = ?', [novoToken, prof.id], (err2) => {
+        if (err2) {
+          console.error('Erro ao gerar novo token:', err2);
+          return res.status(500).json({ success: false, message: 'Erro ao processar reenvio' });
+        }
+        const link = (process.env.APP_URL || '') + '/api/profissionais/confirmar-email?token=' + novoToken;
+        const html = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <h2 style="color:#e60000;">Confirme seu e-mail - Acheei</h2>
+            <p>Olá, <strong>${prof.nome_perfil}</strong>!</p>
+            <p>Para concluir seu cadastro na Acheei, confirme seu endereço de e-mail clicando no botão abaixo:</p>
+            <p style="text-align:center;margin:30px 0;">
+              <a href="${link}" style="background:#e60000;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Confirmar E-mail</a>
+            </p>
+            <p style="color:#999;font-size:12px;">Este link expira em 24 horas.</p>
+          </div>`;
+        sendEmail({
+          toEmail: email,
+          toName: prof.nome_perfil,
+          subject: 'Confirme seu e-mail - Acheei',
+          htmlContent: html,
+          textContent: 'Olá, ' + prof.nome_perfil + '! Confirme seu e-mail na Acheei acessando: ' + link
+        }).then(() => {
+          res.json({ success: true, message: 'Novo link de confirmação enviado para seu e-mail.' });
+        }).catch(e => {
+          console.error('Erro ao reenviar e-mail:', e.message);
+          res.status(500).json({ success: false, message: 'Erro ao enviar o e-mail. Tente novamente mais tarde.' });
+        });
+      });
+    });
+  });
+
   return router;
 };
+
+// Página HTML simples exibida após a confirmação do e-mail
+function htmlConfirmacao(sucesso, mensagem) {
+  const titulo = sucesso ? 'E-mail confirmado' : 'Falha na confirmação';
+  const cor = sucesso ? '#155724' : '#721c24';
+  const fundo = sucesso ? '#d4edda' : '#f8d7da';
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${titulo} - Acheei</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { background: #fff; border-radius: 12px; padding: 40px; max-width: 480px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .badge { display: inline-block; padding: 12px 24px; border-radius: 8px; font-weight: bold; color: ${cor}; background: ${fundo}; margin-bottom: 16px; }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    p { color: #555; line-height: 1.5; }
+    a.btn { display: inline-block; margin-top: 20px; background: #e60000; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">${titulo}</div>
+    <h1>${sucesso ? 'Obrigado!' : 'Atenção'}</h1>
+    <p>${mensagem}</p>
+    <a class="btn" href="${process.env.APP_URL || '/'}">Voltar para o site</a>
+  </div>
+</body>
+</html>`;
+}
