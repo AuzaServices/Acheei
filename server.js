@@ -208,6 +208,24 @@ app.get('/cadastro/:profissao', function(req, res) {
       '$1<script>window.CADASTRO_PROFISSAO=' + JSON.stringify(slug) + ';</script>'
     );
 
+    // Normaliza caminhos relativos para absolutos.
+    // Em /cadastro/:profissao o navegador resolve "css/style.css" como
+    // "/cadastro/css/style.css" (404). Com a barra inicial, resolve corretamente
+    // a partir da raiz, mantendo CSS, JS, ícones e a navegação funcionando.
+    html = html
+      .replace(/href="css\//g, 'href="/css/')
+      .replace(/src="js\//g, 'src="/js/')
+      .replace(/src="icons\//g, 'src="/icons/')
+      .replace(/href="icons\//g, 'href="/icons/')
+      .replace(/href="categorias"/g, 'href="/categorias"')
+      .replace(/href="sobre"/g, 'href="/sobre"')
+      .replace(/href="contato"/g, 'href="/contato"')
+      .replace(/href="cliente"/g, 'href="/cliente"')
+      .replace(/href="profissional"/g, 'href="/profissional"')
+      .replace(/href="cadastro"/g, 'href="/cadastro"')
+      .replace(/href="termos"/g, 'href="/termos"')
+      .replace(/href="politica"/g, 'href="/politica"');
+
     res.send(html);
   });
 });
