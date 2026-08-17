@@ -21,12 +21,12 @@ const PROFISSOES = {
   'Eletricista': {
     titulo: 'Acheei - Cadastro para Eletricistas',
     descricao: 'Divulgue seu trabalho como eletricista na Acheei e seja encontrado por quem precisa dos seus serviços na sua região. Cadastro gratuito.',
-    imagem: IMAGEM_PADRAO
+    imagem: 'https://i.imgur.com/1vgL9W8.jpeg'
   },
   'Pedreiro': {
     titulo: 'Acheei - Cadastro para Pedreiros',
     descricao: 'Divulgue seu trabalho como pedreiro na Acheei e seja encontrado por quem precisa dos seus serviços na sua região. Cadastro gratuito.',
-    imagem: IMAGEM_PADRAO
+    imagem: 'https://i.imgur.com/DPbDL1T.jpeg'
   },
   'Encanador': {
     titulo: 'Acheei - Cadastro para Encanadores',
