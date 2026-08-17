@@ -3,16 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acheei - Cadastro Profissional</title>
-  <meta name="description" content="Cadastre-se como profissional na Acheei e encontre novos clientes.">
+  <title>Acheei - Cadastre-se como Profissional</title>
+  <meta name="description" content="Cadastre-se gratuitamente como profissional na Acheei e encontre novos clientes na sua região.">
+  <meta property="og:title" content="Acheei - Cadastre-se como Profissional">
+  <meta property="og:description" content="Cadastre-se gratuitamente como profissional na Acheei e encontre novos clientes na sua região.">
+  <meta property="og:type" content="website">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="icons/icon.png" type="image/png">
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="js/reveal.js" defer></script>
+  <script src="js/icons.js" defer></script>
+  <script src="js/push.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/notification.js" defer></script>
   <style>
-    .cadastro-container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    .cadastro-container { max-width: 760px; margin: 40px auto; padding: 0 20px; }
     .cadastro-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
-    .cadastro-header { background: linear-gradient(135deg, var(--black-primary), var(--red-dark)); color: var(--white); padding: 40px 32px; text-align: center; }
-    .cadastro-header h1 { font-size: 28px; margin-bottom: 8px; }
-    .cadastro-header p { color: rgba(255,255,255,0.8); font-size: 15px; }
+
+    /* Hero do card de cadastro */
+    .cadastro-header { background: linear-gradient(135deg, #000 0%, #1a1a1a 45%, #CC0000 100%); color: var(--white); padding: 48px 32px 42px; text-align: center; position: relative; overflow: hidden; }
+    .cadastro-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% -20%, rgba(204,0,0,0.55), transparent 50%); pointer-events: none; }
+    .cadastro-header .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; padding: 7px 14px; border-radius: 999px; margin-bottom: 16px; }
+    .cadastro-header h1 { font-size: 30px; margin-bottom: 10px; position: relative; }
+    .cadastro-header p { color: rgba(255,255,255,0.85); font-size: 15.5px; max-width: 460px; margin: 0 auto; position: relative; }
+    .cadastro-header .hero-stats { display: flex; justify-content: center; gap: 28px; margin-top: 22px; position: relative; flex-wrap: wrap; }
+    .cadastro-header .hero-stat { text-align: center; }
+    .cadastro-header .hero-stat strong { display: block; font-size: 20px; color: #fff; }
+    .cadastro-header .hero-stat span { font-size: 12px; color: rgba(255,255,255,0.7); }
+
+    /* Barra de confiança */
+    .trust-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; padding: 16px 20px; background: var(--white); border-bottom: 1px solid var(--gray-lighter); }
+    .trust-item { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--gray-dark); }
+    .trust-item .icon-svg { width: 18px; height: 18px; color: #28a745; }
+
     .progress-container { display: flex; align-items: center; justify-content: center; padding: 32px 40px; background: var(--gray-bg); border-bottom: 1px solid var(--gray-lighter); }
     .progress-step { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--gray-light); }
     .progress-step .step-number { width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--gray-lighter); color: var(--gray-medium); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; transition: var(--transition); }
@@ -77,26 +100,226 @@
     .email-verif-links button:hover { color: var(--red-primary); }
     .email-verif-links button .spinner { margin-right: 4px; }
     #verifInicialMsg { margin-top: 14px; text-align: center; }
-    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .fotos-grid { grid-template-columns: 1fr 1fr; } .progress-step .step-label { display: none !important; } .progress-line { width: 30px; } .cadastro-header h1 { font-size: 22px; } }
+
+    /* Benefícios abaixo do card */
+    .benefits-section { max-width: 760px; margin: 40px auto; padding: 0 20px; }
+    .benefits-section h2 { text-align: center; font-size: 24px; font-weight: 800; color: var(--black-primary); margin-bottom: 6px; }
+    .benefits-section .benefits-sub { text-align: center; color: var(--gray-medium); font-size: 14.5px; margin-bottom: 28px; }
+    .benefits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .benefit-card { background: var(--white); border: 1px solid var(--gray-lighter); border-radius: var(--radius-md); padding: 24px; text-align: center; transition: var(--transition); box-shadow: var(--shadow-sm); }
+    .benefit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--red-primary); }
+    .benefit-card .benefit-icon { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: var(--radius-full); background: rgba(255,0,0,0.08); color: var(--red-primary); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .benefit-card h3 { font-size: 16px; font-weight: 700; color: var(--black-primary); margin-bottom: 8px; }
+    .benefit-card p { font-size: 13.5px; color: var(--gray-medium); line-height: 1.5; margin: 0; }
+
+    /* CTA de compartilhar */
+    .share-cta { max-width: 760px; margin: 24px auto 48px; padding: 0 20px; }
+    .share-box { background: linear-gradient(135deg, #128C7E, #25D366); color: #fff; border-radius: var(--radius-lg); padding: 32px; text-align: center; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+    .share-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 10% 120%, rgba(255,255,255,0.25), transparent 50%); pointer-events: none; }
+    .share-box h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .share-box p { color: rgba(255,255,255,0.92); font-size: 14.5px; max-width: 480px; margin: 0 auto 20px; }
+    .share-box .btn-share { background: #fff; color: #128C7E; border: none; font-weight: 700; min-height: 48px; padding: 0 28px; border-radius: var(--radius-sm); cursor: pointer; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+    .share-box .btn-share:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,0.2); }
+    .share-box .btn-share .icon-svg { width: 20px; height: 20px; }
+
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .fotos-grid { grid-template-columns: 1fr 1fr; } .progress-step .step-label { display: none !important; } .progress-line { width: 30px; } .cadastro-header h1 { font-size: 24px; } .benefits-grid { grid-template-columns: 1fr; } .cadastro-header .hero-stats { gap: 18px; } }
   </style>
 </head>
-<body>
+<body class="page-enter">
   <header class="header">
     <nav class="navbar">
-      <a href="/" class="logo"><span>Acheei</span></a>
+      <a href="/" class="logo" aria-label="Acheei início">
+        <img src="icons/logo2.png" alt="Acheei logo">
+      </a>
       <div class="nav-links">
-        <a href="/">Inicio</a>
+        <a href="/">Início</a>
         <a href="categorias">Categorias</a>
-        <a href="cadastro" class="btn btn-primary"><span data-icon="hard-hat"></span> Cadastre-se como Profissional</a>
+        <a href="sobre">Sobre Nós</a>
+        <a href="contato">Contato</a>
+        <div class="user-area" id="userArea" style="display: none;">
+          <div class="user-dropdown" id="userDropdown">
+            <button type="button" class="user-info user-dropdown-trigger" id="userDropdownTrigger" aria-haspopup="true" aria-expanded="false">
+              <span class="user-avatar" id="userAvatar">👤</span>
+              <span class="user-name" id="userName">Cliente</span>
+              <span class="user-caret" data-icon="chevron-down"></span>
+            </button>
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+              <a href="cliente" class="user-dropdown-item" id="userAreaLink">
+                <span data-icon="user"></span> <span id="userAreaLinkText">Minha Área</span>
+              </a>
+              <button type="button" class="user-dropdown-item" onclick="sairUsuarioHome()">
+                <span data-icon="log-out"></span> Sair
+              </button>
+            </div>
+          </div>
+        </div>
+        <a href="cliente" class="btn btn-primary" id="btnAreaCliente">
+          <span data-icon="user"></span> Área do Cliente
+        </a>
+        <a href="profissional" class="btn btn-outline" id="btnAreaProfissional">
+          <span data-icon="hard-hat"></span> Área do Profissional
+        </a>
+      </div>
+      <div class="nav-actions">
+        <div class="notif-icon" id="notifIcon" style="display:none;">
+          <button id="notifButton" class="notif-button" aria-label="Notificações">
+            <img src="icons/notification-bell.svg" alt="Notificações" style="width:22px;height:22px;display:block;">
+            <span class="notif-badge" id="notifBadge">0</span>
+          </button>
+        </div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
     </nav>
   </header>
 
+  <script>
+    (function() {
+      function aplicarUsuarioLogado(cache, ehProfissional) {
+        var userArea = document.getElementById('userArea');
+        var btnAreaCliente = document.getElementById('btnAreaCliente');
+        var mobileUserArea = document.getElementById('mobileUserArea');
+        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+        var userAreaLink = document.getElementById('userAreaLink');
+        var userAreaLinkText = document.getElementById('userAreaLinkText');
+        var mobileUserAreaLink = document.getElementById('mobileUserAreaLink');
+        var mobileUserAreaLinkText = document.getElementById('mobileUserAreaLinkText');
+
+        var mine = ehProfissional ? '' : '';
+        var label = ehProfissional ? 'Minha Área' : 'Minha Área';
+
+        if (userArea) userArea.style.display = 'flex';
+        if (btnAreaCliente) btnAreaCliente.style.display = 'none';
+        if (mobileUserArea) mobileUserArea.style.display = 'flex';
+        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = 'none';
+        if (btnAreaProfissional) btnAreaProfissional.style.display = 'none';
+        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = 'none';
+
+        if (userAreaLink) userAreaLink.href = mine;
+        if (userAreaLinkText) userAreaLinkText.textContent = label;
+        if (mobileUserAreaLink) mobileUserAreaLink.href = mine;
+        if (mobileUserAreaLinkText) mobileUserAreaLinkText.textContent = label;
+
+        if (document.getElementById('userName')) document.getElementById('userName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
+        if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = cache.nome || (ehProfissional ? 'Profissional' : 'Cliente');
+        var avatarHtml = cache.foto ? '<img src="' + cache.foto + '" alt="Foto">' : '👤';
+        if (document.getElementById('userAvatar')) document.getElementById('userAvatar').innerHTML = avatarHtml;
+        if (document.getElementById('mobileUserAvatar')) document.getElementById('mobileUserAvatar').innerHTML = avatarHtml;
+      }
+
+      function aplicarDeslogado() {
+        var userArea = document.getElementById('userArea');
+        var btnAreaCliente = document.getElementById('btnAreaCliente');
+        var mobileUserArea = document.getElementById('mobileUserArea');
+        var mobileBtnAreaCliente = document.getElementById('mobileBtnAreaCliente');
+        var btnAreaProfissional = document.getElementById('btnAreaProfissional');
+        var mobileBtnAreaProfissional = document.getElementById('mobileBtnAreaProfissional');
+
+        if (userArea) userArea.style.display = 'none';
+        if (btnAreaCliente) btnAreaCliente.style.display = '';
+        if (mobileUserArea) mobileUserArea.style.display = 'none';
+        if (mobileBtnAreaCliente) mobileBtnAreaCliente.style.display = '';
+        if (btnAreaProfissional) btnAreaProfissional.style.display = '';
+        if (mobileBtnAreaProfissional) mobileBtnAreaProfissional.style.display = '';
+      }
+
+      try {
+        var clienteCache = JSON.parse(localStorage.getItem('acheei_cliente_cache') || 'null');
+        var clienteToken = localStorage.getItem('acheei_cliente_token');
+        var profCache = JSON.parse(localStorage.getItem('acheei_prof_cache') || 'null');
+        var profToken = localStorage.getItem('acheei_prof_token');
+
+        if (clienteCache && clienteToken) {
+          aplicarUsuarioLogado(clienteCache, false);
+        } else if (profCache && profToken) {
+          aplicarUsuarioLogado(profCache, true);
+        } else {
+          aplicarDeslogado();
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Mobile overlay + menu -->
+  <div class="mobile-menu-overlay" id="menuOverlay"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="menu-items">
+      <div class="mobile-user-area" id="mobileUserArea" style="display: none;">
+        <div class="user-info">
+          <span class="user-avatar" id="mobileUserAvatar">👤</span>
+          <span class="user-name" id="mobileUserName">Cliente</span>
+        </div>
+        <a href="cliente" class="btn btn-primary btn-sm" id="mobileUserAreaLink" style="justify-content:center;">
+          <span data-icon="user"></span> <span id="mobileUserAreaLinkText">Minha Área</span>
+        </a>
+        <button type="button" class="btn btn-outline btn-sm" onclick="sairUsuarioHome()" style="justify-content:center;">
+          Sair
+        </button>
+      </div>
+      <a href="/" class="menu-item">
+        <span class="item-icon" data-icon="home"></span>
+        <span class="item-text">Início</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="categorias" class="menu-item" onclick="fecharMenuMobile()">
+        <span class="item-icon" data-icon="grid"></span>
+        <span class="item-text">Categorias</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="sobre" class="menu-item">
+        <span class="item-icon" data-icon="user"></span>
+        <span class="item-text">Sobre Nós</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="contato" class="menu-item">
+        <span class="item-icon" data-icon="send"></span>
+        <span class="item-text">Contato</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <div class="menu-divider"></div>
+      <a href="cliente" class="menu-item" id="mobileBtnAreaCliente">
+        <span class="item-icon" data-icon="user"></span>
+        <span class="item-text">Área do Cliente</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="profissional" class="menu-item" id="mobileBtnAreaProfissional">
+        <span class="item-icon" data-icon="hard-hat"></span>
+        <span class="item-text">Área do Profissional</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+      <a href="cadastro" class="menu-item">
+        <span class="item-icon" data-icon="edit"></span>
+        <span class="item-text">Cadastre-se como Profissional</span>
+        <span class="item-arrow" data-icon="arrow-right"></span>
+      </a>
+    </div>
+    <div class="menu-footer">
+      <p>&copy; 2026 Acheei. Todos os direitos reservados.</p>
+    </div>
+  </div>
+
   <div class="cadastro-container">
     <div class="cadastro-card">
       <div class="cadastro-header">
+        <span class="hero-badge"><span class="icon-svg" data-icon="zap"></span> 100% Gratuito</span>
         <h1>Cadastre-se como Profissional</h1>
-        <p>Encontre novos clientes e faça seu negocio crescer</p>
+        <p>Conecte-se com milhares de clientes na sua região e faça seu negócio crescer. Sem mensalidade, sem burocracia.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><strong>+2 min</strong><span>para se cadastrar</span></div>
+          <div class="hero-stat"><strong>0 R$</strong><span>taxa de cadastro</span></div>
+          <div class="hero-stat"><strong>24h</strong><span>aprovação rápida</span></div>
+        </div>
+      </div>
+
+      <div class="trust-bar">
+        <span class="trust-item"><span class="icon-svg" data-icon="check-circle"></span> Cadastro grátis</span>
+        <span class="trust-item"><span class="icon-svg" data-icon="check-circle"></span> Sem mensalidade</span>
+        <span class="trust-item"><span class="icon-svg" data-icon="check-circle"></span> Receba pedidos da sua região</span>
       </div>
 
       <div class="progress-container">
@@ -120,7 +343,7 @@
         <div class="form-step active" id="step1">
           <h3>Dados Pessoais</h3>
           <p class="step-description">Informe seus dados basicos para comecar o cadastro</p>
-<div class="form-group">
+          <div class="form-group">
             <label for="cpf">CPF <span class="required">*</span></label>
             <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" required maxlength="14">
             <div class="error-message" id="cpfError">CPF inválido</div>
@@ -218,7 +441,7 @@
             <label for="nome_perfil">Nome de Perfil <span class="required">*</span></label>
             <input type="text" id="nome_perfil" name="nome_perfil" placeholder="Como voce quer ser chamado" required>
           </div>
-<div class="form-group">
+          <div class="form-group">
             <label for="foto_perfil">Foto de Perfil <span class="required">*</span></label>
             <div class="photo-upload" id="fotoPerfilUpload">
               <img class="photo-preview" id="fotoPerfilPreview" alt="Preview">
@@ -306,8 +529,111 @@
     </div>
   </div>
 
-  <script src="js/icons.js"></script>
+  <!-- Benefícios -->
+  <div class="benefits-section">
+    <h2>Por que se cadastrar na Acheei?</h2>
+    <p class="benefits-sub">Tudo o que você precisa para conquistar mais clientes</p>
+    <div class="benefits-grid">
+      <div class="benefit-card">
+        <div class="benefit-icon" data-icon="users"></div>
+        <h3>Mais clientes</h3>
+        <p>Apareça nas buscas de quem procura exatamente pelo seu serviço na sua região.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" data-icon="zap"></div>
+        <h3>Divulgação grátis</h3>
+        <p>Monte um perfil completo com fotos do seu trabalho e aumente sua visibilidade.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon" data-icon="rocket"></div>
+        <h3>Cresça sem custo</h3>
+        <p>Sem mensalidade nem taxas escondidas. Pague apenas quando fizer negócio.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA de compartilhar -->
+  <div class="share-cta">
+    <div class="share-box">
+      <h3>Conhece um profissional que merece mais clientes?</h3>
+      <p>Indique a Acheei para um amigo que trabalha com serviços e ajude-o a crescer. É rápido e gratuito.</p>
+      <button type="button" class="btn-share" onclick="compartilharAcheei()">
+        <span class="icon-svg" data-icon="whatsapp"></span> Compartilhar no WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-accent"></div>
+    <div class="footer-content">
+      <div class="footer-section footer-brand">
+        <a href="/" class="brand-logo">
+          <img src="icons/logo3.png" alt="Acheei" style="height:44px;max-height:60px;display:inline-block;vertical-align:middle;">
+        </a>
+        <p>Plataforma de intermediação de serviços que conecta clientes aos melhores profissionais da sua região.</p>
+        <div class="footer-social-title">Siga a Acheei</div>
+        <div class="footer-social">
+          <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><span data-icon="instagram"></span></a>
+          <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><span data-icon="facebook"></span></a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn"><span data-icon="linkedin"></span></a>
+          <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><span data-icon="youtube"></span></a>
+          <a href="https://x.com" target="_blank" rel="noopener" aria-label="X (Twitter)"><span data-icon="x-social"></span></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h4>Navegação</h4>
+        <ul>
+          <li><a href="/">Início</a></li>
+          <li><a href="sobre">Sobre Nós</a></li>
+          <li><a href="contato">Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Acesso</h4>
+        <ul>
+          <li><a href="cliente">Área do Cliente</a></li>
+          <li><a href="profissional">Área do Profissional</a></li>
+          <li><a href="cadastro">Cadastre-se</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="termos">Termos de Responsabilidade</a></li>
+          <li><a href="politica">Política de Privacidade</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Acheei. Todos os direitos reservados.</p>
+      <ul class="footer-bottom-links">
+        <li><a href="termos">Termos</a></li>
+        <li><a href="politica">Privacidade</a></li>
+        <li><a href="contato">Contato</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    function compartilharAcheei() {
+      var texto = 'Olá! Encontrei a Acheei, uma plataforma gratuita para profissionais de serviços encontrarem mais clientes. Cadastre-se: ' + window.location.origin + '/cadastro';
+      var url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+      window.open(url, '_blank');
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var hamburger = document.getElementById('hamburgerBtn');
+      var menu = document.getElementById('mobileMenu');
+      var overlay = document.getElementById('menuOverlay');
+      function toggleMenu() {
+        hamburger.classList.toggle('active');
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+      }
+      hamburger.addEventListener('click', toggleMenu);
+      overlay.addEventListener('click', toggleMenu);
+    });
+  </script>
   <script src="js/cadastro.js"></script>
 </body>
 </html>
-
