@@ -8,8 +8,10 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
+const profissoes = require('./config/profissoes');
 
 const app = express();
 
@@ -161,6 +163,54 @@ const PAGINAS = {
   '/painel': 'painel.html',
   '/categorias': 'categorias.html'
 };
+
+// ============================================
+// Rota dinâmica: /cadastro/:profissao
+// Serve o cadastro com metatags (og/twitter) específicas
+// da profissão, para prévia personalizada ao compartilhar o link.
+// O nome da profissão é normalizado e passado ao front-end
+// via parâmetro de URL (?profissao=...) para pré-seleção no formulário.
+// ============================================
+app.get('/cadastro/:profissao', function(req, res) {
+  var slug = decodeURIComponent(req.params.profissao).trim();
+  var dados = profissoes.obterProfissao(slug);
+  var urlCompleta = profissoes.URL_BASE + '/' + encodeURIComponent(slug);
+
+  fs.readFile(path.join(__dirname, 'public', 'cadastro.html'), 'utf8', function(err, html) {
+    if (err) {
+      return res.sendFile(path.join(__dirname, 'public', 'cadastro.html'));
+    }
+
+    var titulo = dados.titulo;
+    var descricao = dados.descricao;
+    var imagem = dados.imagem;
+
+    // Substitui as metatags dinâmicas (escapa para evitar quebra de HTML)
+    function esc(attr) {
+      return String(attr).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    html = html
+      .replace(/<title>.*?<\/title>/, '<title>' + esc(titulo) + '</title>')
+      .replace(/<meta name="description" content="[^"]*">/, '<meta name="description" content="' + esc(descricao) + '">')
+      .replace(/<meta property="og:title" content="[^"]*">/, '<meta property="og:title" content="' + esc(titulo) + '">')
+      .replace(/<meta property="og:description" content="[^"]*">/, '<meta property="og:description" content="' + esc(descricao) + '">')
+      .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="' + esc(urlCompleta) + '">')
+      .replace(/<meta property="og:image" content="[^"]*">/, '<meta property="og:image" content="' + esc(imagem) + '">')
+      .replace(/<meta property="og:image:alt" content="[^"]*">/, '<meta property="og:image:alt" content="' + esc(titulo) + '">')
+      .replace(/<meta name="twitter:title" content="[^"]*">/, '<meta name="twitter:title" content="' + esc(titulo) + '">')
+      .replace(/<meta name="twitter:description" content="[^"]*">/, '<meta name="twitter:description" content="' + esc(descricao) + '">')
+      .replace(/<meta name="twitter:image" content="[^"]*">/, '<meta name="twitter:image" content="' + esc(imagem) + '">');
+
+    // Adiciona a profissão como parâmetro de URL para pré-seleção no cadastro
+    html = html.replace(
+      /(src="js\/cadastro\.js"[^>]*>)/,
+      '$1<script>window.CADASTRO_PROFISSAO=' + JSON.stringify(slug) + ';</script>'
+    );
+
+    res.send(html);
+  });
+});
 
 // Rota de fallback
 app.get('*', function(req, res, next) {

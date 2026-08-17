@@ -765,6 +765,18 @@ document.querySelectorAll('.form-step input, .form-step select').forEach(el => {
 // Initialize
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
+  // Pré-seleciona a profissão vinda do link de compartilhamento (/cadastro/:profissao ou ?profissao=)
+  const selectProfissao = document.getElementById('profissao');
+  if (selectProfissao) {
+    const profissaoInicial = (window.CADASTRO_PROFISSAO || new URLSearchParams(window.location.search).get('profissao') || '').trim();
+    if (profissaoInicial) {
+      const opcao = Array.from(selectProfissao.options).find(o => o.value.toLowerCase() === profissaoInicial.toLowerCase());
+      if (opcao) {
+        selectProfissao.value = opcao.value;
+      }
+    }
+  }
+
   showStep(1);
   setupPhotoUpload();
   setupServicoPhotos();
